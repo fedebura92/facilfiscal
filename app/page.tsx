@@ -201,7 +201,7 @@ export default function Home() {
                     <div style={{fontSize:13,fontWeight:700,color:V.ink2}}>{fmtL(v.fecha)}</div>
                     <div style={{fontSize:13,fontWeight:900,color:c.diasColor}}>{c.diasTxt}</div>
                   </div>
-                  <button onClick={()=>window.open('https://www.afip.gob.ar','_blank')} style={{width:'100%',border:'none',borderRadius:8,padding:10,fontSize:13,fontWeight:800,background:c.btnDanger?V.red:V.bg,color:c.btnDanger?'white':V.ink2,border:c.btnDanger?`1.5px solid ${V.red}`:`1.5px solid ${V.border}`}}>
+                  <button onClick={()=>window.open('https://www.afip.gob.ar','_blank')} style={{width:'100%',borderRadius:8,padding:10,fontSize:13,fontWeight:800,background:c.btnDanger?V.red:V.bg,color:c.btnDanger?'white':V.ink2,border:c.btnDanger?`1.5px solid ${V.red}`:`1.5px solid ${V.border}`}}>
                     {d===0?'Pagar ahora →':d===1?'Ver cómo pagar':'Ver detalles'}
                   </button>
                 </div>

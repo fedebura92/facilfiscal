@@ -97,7 +97,6 @@ export default function VencimientoCard({ venc, index }: Props) {
           fontSize: 13, fontWeight: 800, cursor: 'pointer',
           background: config.btnDanger ? 'var(--red)' : 'var(--bg)',
           color: config.btnDanger ? 'white' : 'var(--ink2)',
-          border: config.btnDanger ? '1.5px solid var(--red)' : '1.5px solid var(--border)',
           transition: 'all .15s',
         } as React.CSSProperties}
       >

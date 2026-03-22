@@ -40,8 +40,8 @@ export async function GET(req: NextRequest) {
     })
 
     const toSend = [
-      ...(vencHoy || []).map(v => ({ ...v, cuando: 'hoy' })),
-      ...(venc3d  || []).map(v => ({ ...v, cuando: 'en 3 días' })),
+      ...(vencHoy || []).map((v: any) => ({ ...v, cuando: 'hoy' })),
+      ...(venc3d  || []).map((v: any) => ({ ...v, cuando: 'en 3 días' })),
     ]
 
     for (const venc of toSend) {
