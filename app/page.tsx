@@ -138,6 +138,7 @@ export default function Home() {
         button{font-family:'Nunito',sans-serif;cursor:pointer}
         input,select{font-family:'Nunito',sans-serif}
         select{appearance:none}
+input::placeholder{color:rgba(255,255,255,.9)!important}
       `}}/>
 
       {/* HEADER */}
