@@ -352,7 +352,7 @@ export default function Home() {
               ?<div style={{color:V.gold,fontSize:16,fontWeight:800}}>✓ ¡Listo! Te vamos a avisar.</div>
               :<div style={{display:'flex',gap:8}}>
                 <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&suscribir()}
-                  style={{background:'rgba(255,255,255,.12)',border:'1.5px solid rgba(255,255,255,.2)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',width:220}}/>
+                  style={{background:'rgba(255,255,255,.25)',border:'1.5px solid rgba(255,255,255,.6)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',width:220}}/>
                 <button onClick={suscribir} style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'11px 20px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',boxShadow:`0 2px 10px rgba(245,166,35,.4)`}}>
                   Activar alertas →
                 </button>
