@@ -65,6 +65,8 @@ export default function Home() {
   const [aiLoading,setAiLoading]=useState(false)
   const [email,setEmail]=useState('')
   const [emailOk,setEmailOk]=useState(false)
+  const [tiposSel,setTiposSel]=useState<string[]>(['mono'])
+  const [suscError,setSuscError]=useState('')
   const [toast,setToast]=useState('')
   const [mounted,setMounted]=useState(false)
   const capturaRef=useRef<HTMLInputElement>(null)
@@ -78,16 +80,38 @@ export default function Home() {
   },[tipo])
 
   function showToast(msg:string){setToast(msg);clearTimeout(toastTimer);toastTimer=setTimeout(()=>setToast(''),2800)}
+
+  function toggleTipo(t:string){
+    setSuscError('')
+    setTiposSel(prev=>{
+      if(prev.includes(t)) return prev.filter(x=>x!==t)
+      return [...prev,t]
+    })
+  }
+
+  function tipoDisabled(t:string):boolean{
+    if(t==='mono') return tiposSel.includes('ri')
+    if(t==='ri')   return tiposSel.includes('mono')
+    return false
+  }
+
   async function askAI(q?:string){
     const query=q||aiQuery; if(!query.trim())return; if(q)setAiQuery(q)
     setAiLoading(true);setAiResp('')
     try{const r=await fetch('/api/fiscal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});const d=await r.json();setAiResp(d.response||'Sin respuesta.')}
     catch{setAiResp('Error de conexión.')}finally{setAiLoading(false)}
   }
+
   async function suscribir(){
     if(!email||!email.includes('@')){showToast('Ingresá un email válido');return}
-    try{await fetch('/api/suscribir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,tipo_contribuyente:tipo})});setEmailOk(true);showToast('✓ ¡Alertas activadas!')}
-    catch{showToast('Error al guardar.')}
+    if(tiposSel.length===0){showToast('Seleccioná al menos una categoría');return}
+    setSuscError('')
+    try{
+      const res=await fetch('/api/suscribir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,tipos:tiposSel})})
+      const data=await res.json()
+      if(!res.ok){setSuscError(data.error||'Error al guardar');return}
+      setEmailOk(true);showToast('✓ ¡Suscripción activada!')
+    }catch{setSuscError('Error de conexión.')}
   }
 
   const vencOrd=[...venc].filter(v=>diff(v.fecha)>=0).sort((a,b)=>diff(a.fecha)-diff(b.fecha))
@@ -109,10 +133,10 @@ export default function Home() {
   }
 
   const cardCfg=(d:number)=>d===0
-    ?{bg:`linear-gradient(150deg,#fff 65%,${V.redBg})`,   border:V.redRing,   iconBg:V.redBg,    pill:{bg:V.redBg,   color:V.red,      border:V.redRing},   txt:'🔴 Vence HOY',    diasColor:V.red,      diasTxt:'¡HOY!',          btnDanger:true}
+    ?{bg:`linear-gradient(150deg,#fff 65%,${V.redBg})`,border:V.redRing,iconBg:V.redBg,pill:{bg:V.redBg,color:V.red,border:V.redRing},txt:'🔴 Vence HOY',diasColor:V.red,diasTxt:'¡HOY!',btnDanger:true}
     :d===1
-    ?{bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,  iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,    border:V.goldRing},  txt:'🟡 Vence mañana', diasColor:V.amber,    diasTxt:'Mañana',         btnDanger:false}
-    :{bg:`linear-gradient(150deg,#fff 65%,${V.tealLight})`,border:V.tealRing,  iconBg:V.tealLight,pill:{bg:V.tealLight,color:V.tealDark, border:V.tealRing},  txt:`🟢 En ${d} días`,  diasColor:V.teal,     diasTxt:`En ${d} días`,  btnDanger:false}
+    ?{bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,border:V.goldRing},txt:'🟡 Vence mañana',diasColor:V.amber,diasTxt:'Mañana',btnDanger:false}
+    :{bg:`linear-gradient(150deg,#fff 65%,${V.tealLight})`,border:V.tealRing,iconBg:V.tealLight,pill:{bg:V.tealLight,color:V.tealDark,border:V.tealRing},txt:`🟢 En ${d} días`,diasColor:V.teal,diasTxt:`En ${d} días`,btnDanger:false}
 
   const s={
     header:{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky' as const,top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`},
@@ -138,10 +162,9 @@ export default function Home() {
         button{font-family:'Nunito',sans-serif;cursor:pointer}
         input,select{font-family:'Nunito',sans-serif}
         select{appearance:none}
-input::placeholder{color:rgba(255,255,255,.9)!important}
+        input::placeholder{color:rgba(255,255,255,.9)!important}
       `}}/>
 
-      {/* HEADER */}
       <header style={s.header}>
         <div style={s.headerInner}>
           <a href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',flexShrink:0}}>
@@ -173,7 +196,6 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
       </header>
 
       <main style={s.main}>
-        {/* DATE STRIP */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
           <div style={{fontSize:13,color:V.ink3,fontWeight:600}}>Hoy es <strong style={{color:V.ink2}}>{fechaHoy}</strong></div>
           <div style={{display:'inline-flex',alignItems:'center',gap:7,background:V.tealLight,border:`1.5px solid ${V.tealRing}`,borderRadius:20,padding:'5px 14px 5px 10px',fontSize:12,fontWeight:800,color:V.tealDark}}>
@@ -181,7 +203,6 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
           </div>
         </div>
 
-        {/* 2. VENCIMIENTOS */}
         <div style={s.sectionLabel}>📅 Vencimientos de hoy</div>
         <div style={s.cardsGrid}>
           {cards.length===0
@@ -211,7 +232,6 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
           }
         </div>
 
-        {/* 3. PRÓXIMOS */}
         <div style={s.card}>
           <div style={s.cardHead}>
             <div style={s.cardTitle}>📋 Próximos vencimientos</div>
@@ -243,7 +263,6 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
           </div>
         </div>
 
-        {/* 4+5. ALERTAS + CALCULADORA */}
         <div style={s.twoCol}>
           <div style={{...s.card,marginBottom:0}}>
             <div style={s.cardHead}><div style={s.cardTitle}>⚠️ Alertas importantes</div></div>
@@ -294,7 +313,6 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
           </div>
         </div>
 
-        {/* 6. ACCIONES */}
         <div style={s.sectionLabel}>Acciones rápidas</div>
         <div style={s.accionGrid}>
           {[
@@ -313,7 +331,6 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
           ))}
         </div>
 
-        {/* AI */}
         <div style={{...s.card,marginBottom:24}}>
           <div style={{background:'#0a0a1a',color:'white',padding:'10px 16px',display:'flex',alignItems:'center',gap:8,fontSize:11,letterSpacing:'1.5px',textTransform:'uppercase',fontWeight:700}}>
             <div style={{width:7,height:7,borderRadius:'50%',background:'#4caf50',boxShadow:'0 0 0 3px rgba(76,175,80,.2)'}}/>
@@ -340,7 +357,7 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
           </div>
         </div>
 
-        {/* 7. CAPTURA */}
+        {/* 7. CAPTURA CON CHECKBOXES */}
         <div style={s.captura}>
           <div style={{position:'absolute',right:-50,top:-50,width:220,height:220,borderRadius:'50%',background:'rgba(255,255,255,.05)'}}/>
           <div style={{position:'relative',zIndex:1}}>
@@ -348,15 +365,42 @@ input::placeholder{color:rgba(255,255,255,.9)!important}
             <div style={{fontSize:22,fontWeight:900,color:'white',letterSpacing:'-0.3px',lineHeight:1.2,marginBottom:5}}>Recibí alertas antes<br/>de cada vencimiento</div>
             <div style={{fontSize:13,color:'rgba(255,255,255,.6)',fontWeight:600}}>Sin spam. Solo cuando importa.</div>
           </div>
-          <div style={{position:'relative',zIndex:1,flexShrink:0}}>
+          <div style={{position:'relative',zIndex:1,flexShrink:0,minWidth:300}}>
             {emailOk
-              ?<div style={{color:V.gold,fontSize:16,fontWeight:800}}>✓ ¡Listo! Te vamos a avisar.</div>
-              :<div style={{display:'flex',gap:8}}>
-                <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&suscribir()}
-                  style={{background:'rgba(255,255,255,.12)',border:'1.5px solid rgba(255,255,255,.2)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',width:220}}/>
-                <button onClick={suscribir} style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'11px 20px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',boxShadow:`0 2px 10px rgba(245,166,35,.4)`}}>
-                  Activar alertas →
-                </button>
+              ?<div style={{color:V.gold,fontSize:16,fontWeight:800}}>✓ ¡Listo! Revisá tu email para confirmar.</div>
+              :<div>
+                {/* CHECKBOXES */}
+                <div style={{display:'flex',gap:16,marginBottom:12}}>
+                  {[
+                    {key:'mono',label:'Monotributista'},
+                    {key:'ri',  label:'Resp. Inscripto'},
+                    {key:'aut', label:'Autónomo'},
+                  ].map(op=>(
+                    <label key={op.key} style={{display:'flex',alignItems:'center',gap:6,cursor:tipoDisabled(op.key)?'not-allowed':'pointer',opacity:tipoDisabled(op.key)?.4:1}}>
+                      <input
+                        type="checkbox"
+                        checked={tiposSel.includes(op.key)}
+                        disabled={tipoDisabled(op.key)}
+                        onChange={()=>toggleTipo(op.key)}
+                        style={{width:16,height:16,accentColor:V.gold,cursor:'pointer'}}
+                      />
+                      <span style={{fontSize:12,fontWeight:700,color:'white'}}>{op.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {/* ERROR */}
+                {suscError&&<div style={{fontSize:12,color:'#fca5a5',fontWeight:600,marginBottom:8}}>{suscError}</div>}
+                {/* INPUT + BOTÓN */}
+                <div style={{display:'flex',gap:8}}>
+                  <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email}
+                    onChange={e=>{setEmail(e.target.value);setSuscError('')}}
+                    onKeyDown={e=>e.key==='Enter'&&suscribir()}
+                    style={{background:'rgba(255,255,255,.25)',border:'1.5px solid rgba(255,255,255,.6)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',flex:1}}
+                  />
+                  <button onClick={suscribir} style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'11px 20px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',boxShadow:`0 2px 10px rgba(245,166,35,.4)`}}>
+                    Activar →
+                  </button>
+                </div>
               </div>
             }
           </div>
