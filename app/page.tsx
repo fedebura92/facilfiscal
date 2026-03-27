@@ -317,8 +317,8 @@ export default function Home() {
         <div style={s.accionGrid}>
           {[
             {icon:'🏦',bg:V.tealLight,br:V.tealRing,label:'Pagar en AFIP',desc:'Generá tu VEP y pagá desde home banking',link:'Ir a AFIP →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
-            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Ver cómo facturar',desc:'Guía Factura C electrónica paso a paso',link:'Ver guía →',fn:()=>showToast('Guía próximamente')},
-            {icon:'📊',bg:V.bg,br:V.border,label:'Ver mi categoría',desc:'Comprobá si debés recategorizarte',link:'Verificar →',fn:()=>showToast('Verificador próximamente')},
+            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Ver cómo facturar',desc:'Guía Factura C electrónica paso a paso',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
+            {icon:'📊',bg:V.bg,br:V.border,label:'Ver mi categoría',desc:'Comprobá si debés recategorizarte',link:'Verificar →',fn:()=>window.location.href='/mi-categoria'},
           ].map(a=>(
             <button key={a.label} onClick={a.fn} style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,padding:'20px 18px',display:'flex',flexDirection:'column',gap:10,textAlign:'left',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
               <div style={{width:44,height:44,borderRadius:12,background:a.bg,border:`1.5px solid ${a.br}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21}}>{a.icon}</div>
