@@ -215,7 +215,7 @@ export default function Home() {
             boxShadow:'0 4px 16px rgba(245,166,35,.4)',
             letterSpacing:'-0.2px',
           }}>
-            🧮 Calculá tu categoría GRATIS →
+            Calculá tu categoría GRATIS →
           </a>
           <div style={{marginTop:12,fontSize:12,color:'rgba(255,255,255,.55)',fontWeight:600}}>
             Sin registro · Sin tarjeta · Gratis
