@@ -83,12 +83,8 @@ export default function Home() {
 
   function toggleTipo(t:string){
     setSuscError('')
-    setTiposSel(prev=>{
-      if(prev.includes(t)) return prev.filter(x=>x!==t)
-      return [...prev,t]
-    })
+    setTiposSel(prev=>prev.includes(t)?prev.filter(x=>x!==t):[...prev,t])
   }
-
   function tipoDisabled(t:string):boolean{
     if(t==='mono') return tiposSel.includes('ri')
     if(t==='ri')   return tiposSel.includes('mono')
@@ -128,6 +124,7 @@ export default function Home() {
     gold:'#f5a623',goldDark:'#e8920a',goldLight:'#fff8ec',goldRing:'#fde4a0',
     red:'#e53535',redBg:'#fff1f1',redRing:'#ffc8c8',
     amber:'#d97706',amberBg:'#fffbeb',amberRing:'#fde68a',
+    green:'#16a34a',greenBg:'#f0fdf4',greenRing:'#bbf7d0',
     bg:'#f4f7f9',surface:'#fff',border:'#e2e8ed',
     ink:'#0f2733',ink2:'#3d5a6b',ink3:'#7a9aaa',ink4:'#b8cdd6',
   }
@@ -141,7 +138,7 @@ export default function Home() {
   const s={
     header:{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky' as const,top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`},
     headerInner:{maxWidth:1120,margin:'0 auto',padding:'0 24px',height:64,display:'flex',alignItems:'center',justifyContent:'space-between',gap:16},
-    main:{maxWidth:1120,margin:'0 auto',padding:'28px 24px 80px'},
+    main:{maxWidth:1120,margin:'0 auto',padding:'0 24px 80px'},
     twoCol:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:24},
     accionGrid:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24},
     cardsGrid:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14,marginBottom:28},
@@ -159,12 +156,14 @@ export default function Home() {
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Nunito',sans-serif;background:#f4f7f9;color:#0f2733;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
         @keyframes cardUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         button{font-family:'Nunito',sans-serif;cursor:pointer}
         input,select{font-family:'Nunito',sans-serif}
         select{appearance:none}
         input::placeholder{color:rgba(255,255,255,.9)!important}
       `}}/>
 
+      {/* HEADER */}
       <header style={s.header}>
         <div style={s.headerInner}>
           <a href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',flexShrink:0}}>
@@ -195,7 +194,67 @@ export default function Home() {
         </div>
       </header>
 
+      {/* ══ HERO ══ */}
+      <div style={{background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`,padding:'52px 24px 48px',textAlign:'center',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',left:'50%',top:-80,transform:'translateX(-50%)',width:600,height:300,borderRadius:'50%',background:'rgba(255,255,255,.04)'}}/>
+        <div style={{maxWidth:680,margin:'0 auto',position:'relative',zIndex:1}}>
+          {/* PRUEBA SOCIAL */}
+          <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(255,255,255,.12)',border:'1px solid rgba(255,255,255,.2)',borderRadius:20,padding:'6px 16px',marginBottom:20,fontSize:12,fontWeight:700,color:'rgba(255,255,255,.9)'}}>
+            <span style={{fontSize:16}}>👥</span> Más de 500 monotributistas ya usan Fácil Fiscal
+          </div>
+          <h1 style={{fontSize:38,fontWeight:900,color:'white',lineHeight:1.15,letterSpacing:'-0.5px',marginBottom:14}}>
+            Controlá tu monotributo<br/>sin errores ni multas
+          </h1>
+          <p style={{fontSize:16,color:'rgba(255,255,255,.8)',fontWeight:600,marginBottom:28,lineHeight:1.6}}>
+            Calculá tu categoría, aprendé a facturar y recibí<br/>recordatorios automáticos antes de cada vencimiento.
+          </p>
+          <a href="/mi-categoria" style={{
+            display:'inline-block',background:V.gold,color:V.ink,
+            borderRadius:10,padding:'14px 32px',
+            fontSize:16,fontWeight:900,textDecoration:'none',
+            boxShadow:'0 4px 16px rgba(245,166,35,.4)',
+            letterSpacing:'-0.2px',
+          }}>
+            🧮 Calculá tu categoría GRATIS →
+          </a>
+          <div style={{marginTop:12,fontSize:12,color:'rgba(255,255,255,.55)',fontWeight:600}}>
+            Sin registro · Sin tarjeta · Gratis
+          </div>
+        </div>
+      </div>
+
+      {/* ══ SECCIÓN DE DOLOR ══ */}
+      <div style={{background:V.surface,borderBottom:`1px solid ${V.border}`}}>
+        <div style={{maxWidth:1120,margin:'0 auto',padding:'28px 24px'}}>
+          <div style={{textAlign:'center',marginBottom:20}}>
+            <div style={{fontSize:13,fontWeight:800,color:V.red,marginBottom:4}}>⚠️ Evitá problemas con AFIP</div>
+            <div style={{fontSize:18,fontWeight:900,color:V.ink,letterSpacing:'-0.3px'}}>Muchos monotributistas cometen estos errores sin saberlo</div>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12}}>
+            {[
+              {icon:'❌',txt:'Pagan la categoría incorrecta y acumulan deuda'},
+              {icon:'❌',txt:'No saben cuándo recategorizarse y reciben multas'},
+              {icon:'❌',txt:'Emiten facturas con errores que generan problemas'},
+              {icon:'❌',txt:'Se enteran del vencimiento cuando ya es tarde'},
+            ].map(e=>(
+              <div key={e.txt} style={{display:'flex',gap:10,alignItems:'flex-start',background:V.redBg,border:`1px solid ${V.redRing}`,borderRadius:10,padding:'12px 14px'}}>
+                <span style={{fontSize:14,flexShrink:0}}>{e.icon}</span>
+                <span style={{fontSize:12,fontWeight:700,color:'#7a2020',lineHeight:1.5}}>{e.txt}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{textAlign:'center',marginTop:16}}>
+            <a href="/mi-categoria" style={{fontSize:13,fontWeight:800,color:V.teal,textDecoration:'none'}}>
+              Fácil Fiscal te ayuda a evitar todo esto →
+            </a>
+          </div>
+        </div>
+      </div>
+
       <main style={s.main}>
+        <div style={{paddingTop:28}}>
+
+        {/* DATE STRIP */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
           <div style={{fontSize:13,color:V.ink3,fontWeight:600}}>Hoy es <strong style={{color:V.ink2}}>{fechaHoy}</strong></div>
           <div style={{display:'inline-flex',alignItems:'center',gap:7,background:V.tealLight,border:`1.5px solid ${V.tealRing}`,borderRadius:20,padding:'5px 14px 5px 10px',fontSize:12,fontWeight:800,color:V.tealDark}}>
@@ -203,6 +262,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* 2. VENCIMIENTOS */}
         <div style={s.sectionLabel}>📅 Vencimientos de hoy</div>
         <div style={s.cardsGrid}>
           {cards.length===0
@@ -232,6 +292,7 @@ export default function Home() {
           }
         </div>
 
+        {/* 3. PRÓXIMOS */}
         <div style={s.card}>
           <div style={s.cardHead}>
             <div style={s.cardTitle}>📋 Próximos vencimientos</div>
@@ -263,6 +324,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* 4+5. ALERTAS + CALCULADORA */}
         <div style={s.twoCol}>
           <div style={{...s.card,marginBottom:0}}>
             <div style={s.cardHead}><div style={s.cardTitle}>⚠️ Alertas importantes</div></div>
@@ -307,20 +369,21 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                </>:<div style={{fontSize:16,fontWeight:700,color:'rgba(255,255,255,.4)'}}>Seleccioná una categoría</div>}
+                </>:<div style={{fontSize:15,fontWeight:700,color:'rgba(255,255,255,.4)'}}>Seleccioná una categoría</div>}
               </div>
             </div>
           </div>
         </div>
 
+        {/* 6. ACCIONES MEJORADAS */}
         <div style={s.sectionLabel}>Acciones rápidas</div>
         <div style={s.accionGrid}>
           {[
-            {icon:'🏦',bg:V.tealLight,br:V.tealRing,label:'Pagar en AFIP',desc:'Generá tu VEP y pagá desde home banking',link:'Ir a AFIP →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
-            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Ver cómo facturar',desc:'Guía Factura C electrónica paso a paso',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
-            {icon:'📊',bg:V.bg,br:V.border,label:'Ver mi categoría',desc:'Comprobá si debés recategorizarte',link:'Verificar →',fn:()=>window.location.href='/mi-categoria'},
+            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Facturá sin errores',desc:'Guía paso a paso para hacer Factura C correctamente',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
+            {icon:'📊',bg:V.tealLight,br:V.tealRing,label:'Calculá tu categoría',desc:'Evitá pagar de más o recategorizarte mal',link:'Calcular →',fn:()=>window.location.href='/mi-categoria'},
+            {icon:'🏦',bg:V.bg,br:V.border,label:'Pagar en AFIP',desc:'Generá tu VEP y pagá desde home banking',link:'Ir a AFIP →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
           ].map(a=>(
-            <button key={a.label} onClick={a.fn} style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,padding:'20px 18px',display:'flex',flexDirection:'column',gap:10,textAlign:'left',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+            <button key={a.label} onClick={a.fn} style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,padding:'20px 18px',display:'flex',flexDirection:'column',gap:10,textAlign:'left',boxShadow:`0 1px 4px rgba(13,92,120,.07)`,transition:'all .15s'}}>
               <div style={{width:44,height:44,borderRadius:12,background:a.bg,border:`1.5px solid ${a.br}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21}}>{a.icon}</div>
               <div>
                 <div style={{fontSize:14,fontWeight:800,color:V.ink,lineHeight:1.2}}>{a.label}</div>
@@ -331,6 +394,7 @@ export default function Home() {
           ))}
         </div>
 
+        {/* AI */}
         <div style={{...s.card,marginBottom:24}}>
           <div style={{background:'#0a0a1a',color:'white',padding:'10px 16px',display:'flex',alignItems:'center',gap:8,fontSize:11,letterSpacing:'1.5px',textTransform:'uppercase',fontWeight:700}}>
             <div style={{width:7,height:7,borderRadius:'50%',background:'#4caf50',boxShadow:'0 0 0 3px rgba(76,175,80,.2)'}}/>
@@ -357,7 +421,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 7. CAPTURA CON CHECKBOXES */}
+        {/* 7. CAPTURA */}
         <div style={s.captura}>
           <div style={{position:'absolute',right:-50,top:-50,width:220,height:220,borderRadius:'50%',background:'rgba(255,255,255,.05)'}}/>
           <div style={{position:'relative',zIndex:1}}>
@@ -369,34 +433,20 @@ export default function Home() {
             {emailOk
               ?<div style={{color:V.gold,fontSize:16,fontWeight:800}}>✓ ¡Listo! Revisá tu email para confirmar.</div>
               :<div>
-                {/* CHECKBOXES */}
                 <div style={{display:'flex',gap:16,marginBottom:12}}>
-                  {[
-                    {key:'mono',label:'Monotributista'},
-                    {key:'ri',  label:'Resp. Inscripto'},
-                    {key:'aut', label:'Autónomo'},
-                  ].map(op=>(
+                  {[{key:'mono',label:'Monotributista'},{key:'ri',label:'Resp. Inscripto'},{key:'aut',label:'Autónomo'}].map(op=>(
                     <label key={op.key} style={{display:'flex',alignItems:'center',gap:6,cursor:tipoDisabled(op.key)?'not-allowed':'pointer',opacity:tipoDisabled(op.key)?.4:1}}>
-                      <input
-                        type="checkbox"
-                        checked={tiposSel.includes(op.key)}
-                        disabled={tipoDisabled(op.key)}
-                        onChange={()=>toggleTipo(op.key)}
-                        style={{width:16,height:16,accentColor:V.gold,cursor:'pointer'}}
-                      />
+                      <input type="checkbox" checked={tiposSel.includes(op.key)} disabled={tipoDisabled(op.key)} onChange={()=>toggleTipo(op.key)} style={{width:16,height:16,accentColor:V.gold}}/>
                       <span style={{fontSize:12,fontWeight:700,color:'white'}}>{op.label}</span>
                     </label>
                   ))}
                 </div>
-                {/* ERROR */}
                 {suscError&&<div style={{fontSize:12,color:'#fca5a5',fontWeight:600,marginBottom:8}}>{suscError}</div>}
-                {/* INPUT + BOTÓN */}
                 <div style={{display:'flex',gap:8}}>
                   <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email}
                     onChange={e=>{setEmail(e.target.value);setSuscError('')}}
                     onKeyDown={e=>e.key==='Enter'&&suscribir()}
-                    style={{background:'rgba(255,255,255,.25)',border:'1.5px solid rgba(255,255,255,.6)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',flex:1}}
-                  />
+                    style={{background:'rgba(255,255,255,.25)',border:'1.5px solid rgba(255,255,255,.6)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',flex:1}}/>
                   <button onClick={suscribir} style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'11px 20px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',boxShadow:`0 2px 10px rgba(245,166,35,.4)`}}>
                     Activar →
                   </button>
@@ -404,6 +454,7 @@ export default function Home() {
               </div>
             }
           </div>
+        </div>
         </div>
       </main>
 
