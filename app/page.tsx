@@ -219,7 +219,7 @@ export default function Home() {
             </div>
           </a>
 
-          <div className="ff-switcher">
+          <div className="ff-switcher" style={{flexBasis:'100%'}}>
             {(['mono','ri','aut'] as Tipo[]).map((t,i)=>(
               <button key={t} onClick={()=>setTipo(t)} className="ff-tipo-btn"
                 style={{background:tipo===t?V.teal:'none',color:tipo===t?'white':V.ink3}}>
