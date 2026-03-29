@@ -80,11 +80,7 @@ export default function Home() {
   },[tipo])
 
   function showToast(msg:string){setToast(msg);clearTimeout(toastTimer);toastTimer=setTimeout(()=>setToast(''),2800)}
-
-  function toggleTipo(t:string){
-    setSuscError('')
-    setTiposSel(prev=>prev.includes(t)?prev.filter(x=>x!==t):[...prev,t])
-  }
+  function toggleTipo(t:string){setSuscError('');setTiposSel(prev=>prev.includes(t)?prev.filter(x=>x!==t):[...prev,t])}
   function tipoDisabled(t:string):boolean{
     if(t==='mono') return tiposSel.includes('ri')
     if(t==='ri')   return tiposSel.includes('mono')
@@ -126,28 +122,14 @@ export default function Home() {
     amber:'#d97706',amberBg:'#fffbeb',amberRing:'#fde68a',
     green:'#16a34a',greenBg:'#f0fdf4',greenRing:'#bbf7d0',
     bg:'#f4f7f9',surface:'#fff',border:'#e2e8ed',
-    ink:'#0f2733',ink2:'#3d5a6b',ink3:'#7a9aaa',ink4:'#b8cdd6',
+    ink:'#0f2733',ink2:'#3d5a6b',ink3:'#7a9aaa',
   }
 
   const cardCfg=(d:number)=>d===0
     ?{bg:`linear-gradient(150deg,#fff 65%,${V.redBg})`,border:V.redRing,iconBg:V.redBg,pill:{bg:V.redBg,color:V.red,border:V.redRing},txt:'🔴 Vence HOY',diasColor:V.red,diasTxt:'¡HOY!',btnDanger:true}
     :d===1
-    ?{bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,border:V.goldRing},txt:'🟡 Vence mañana',diasColor:V.amber,diasTxt:'Mañana',btnDanger:false}
+    ?{bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,border:V.goldRing},txt:'🟡 Mañana',diasColor:V.amber,diasTxt:'Mañana',btnDanger:false}
     :{bg:`linear-gradient(150deg,#fff 65%,${V.tealLight})`,border:V.tealRing,iconBg:V.tealLight,pill:{bg:V.tealLight,color:V.tealDark,border:V.tealRing},txt:`🟢 En ${d} días`,diasColor:V.teal,diasTxt:`En ${d} días`,btnDanger:false}
-
-  const s={
-    header:{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky' as const,top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`},
-    headerInner:{maxWidth:1120,margin:'0 auto',padding:'0 24px',height:64,display:'flex',alignItems:'center',justifyContent:'space-between',gap:16},
-    main:{maxWidth:1120,margin:'0 auto',padding:'0 24px 80px'},
-    twoCol:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:24},
-    accionGrid:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24},
-    cardsGrid:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14,marginBottom:28},
-    card:{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,overflow:'hidden',marginBottom:24,boxShadow:`0 1px 4px rgba(13,92,120,.07)`},
-    cardHead:{padding:'15px 20px',borderBottom:`1px solid ${V.border}`,display:'flex',alignItems:'center',justifyContent:'space-between'},
-    cardTitle:{fontSize:15,fontWeight:800,color:V.ink},
-    sectionLabel:{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase' as const,color:V.ink3,marginBottom:13},
-    captura:{background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`,borderRadius:20,padding:'36px 40px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:28,position:'relative' as const,overflow:'hidden',boxShadow:`0 8px 32px rgba(13,92,120,.25)`},
-  }
 
   return (
     <>
@@ -156,18 +138,66 @@ export default function Home() {
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Nunito',sans-serif;background:#f4f7f9;color:#0f2733;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
         @keyframes cardUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         button{font-family:'Nunito',sans-serif;cursor:pointer}
         input,select{font-family:'Nunito',sans-serif}
         select{appearance:none}
-        input::placeholder{color:rgba(255,255,255,.9)!important}
+        input::placeholder{color:rgba(255,255,255,.85)!important}
+
+        /* ── RESPONSIVE ── */
+        .ff-header-inner{max-width:1120px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+        .ff-logo-tag{display:block}
+        .ff-switcher{display:flex;background:#f4f7f9;border:1.5px solid #e2e8ed;border-radius:10px;padding:3px;gap:2px}
+        .ff-tipo-btn{padding:7px 12px;border-radius:7px;border:none;background:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s}
+        .ff-cta{display:block}
+        .ff-hero{padding:40px 16px 36px;text-align:center}
+        .ff-hero h1{font-size:26px;font-weight:900;color:white;line-height:1.2;letter-spacing:-0.3px;margin-bottom:12px}
+        .ff-hero p{font-size:14px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:24px;line-height:1.6}
+        .ff-hero-btn{display:inline-block;background:#f5a623;color:#0f2733;border-radius:10px;padding:13px 24px;font-size:15px;font-weight:900;text-decoration:none;box-shadow:0 4px 16px rgba(245,166,35,.4)}
+        .ff-social-proof{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;margin-bottom:16px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9)}
+        .ff-dolor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .ff-main{max-width:1120px;margin:0 auto;padding:20px 16px 80px}
+        .ff-cards-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:24px}
+        .ff-two-col{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:24px}
+        .ff-accion-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:24px}
+        .ff-captura{border-radius:16px;padding:28px 20px;display:flex;flex-direction:column;gap:20px}
+        .ff-cap-form{display:flex;flex-direction:column;gap:10px;width:100%}
+        .ff-cap-input-row{display:flex;gap:8px}
+        .ff-calc-break{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+        @media(min-width:600px){
+          .ff-cards-grid{grid-template-columns:repeat(2,1fr)}
+          .ff-accion-grid{grid-template-columns:repeat(3,1fr)}
+          .ff-dolor-grid{grid-template-columns:repeat(4,1fr)}
+        }
+        @media(min-width:768px){
+          .ff-header-inner{padding:0 24px;height:64px}
+          .ff-logo-tag{display:block}
+          .ff-tipo-btn{padding:8px 16px;font-size:13px}
+          .ff-cta{display:block}
+          .ff-hero{padding:52px 24px 48px}
+          .ff-hero h1{font-size:36px}
+          .ff-hero p{font-size:16px}
+          .ff-main{padding:28px 24px 80px}
+          .ff-cards-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+          .ff-two-col{grid-template-columns:1fr 1fr}
+          .ff-captura{flex-direction:row;align-items:center;justify-content:space-between;padding:36px 40px}
+          .ff-cap-form{width:auto;min-width:300px}
+          .ff-cap-input-row{flex-direction:row}
+        }
+        @media(max-width:480px){
+          .ff-switcher{padding:2px;gap:1px}
+          .ff-tipo-btn{padding:6px 8px;font-size:11px}
+          .ff-cta{font-size:11px;padding:7px 12px}
+          .ff-dolor-grid{grid-template-columns:1fr 1fr}
+          .ff-calc-break{grid-template-columns:1fr 1fr}
+        }
       `}}/>
 
       {/* HEADER */}
-      <header style={s.header}>
-        <div style={s.headerInner}>
-          <a href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none',flexShrink:0}}>
-            <svg viewBox="0 0 44 44" fill="none" width={44} height={44}>
+      <header style={{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky',top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+        <div className="ff-header-inner">
+          <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
+            <svg viewBox="0 0 44 44" fill="none" width={38} height={38}>
               <rect x="6" y="4" width="24" height="30" rx="4" fill="#1a7fa8"/>
               <rect x="10" y="11" width="12" height="2.5" rx="1.25" fill="rgba(255,255,255,.5)"/>
               <rect x="10" y="16" width="16" height="2.5" rx="1.25" fill="rgba(255,255,255,.4)"/>
@@ -175,111 +205,96 @@ export default function Home() {
               <path d="M24 4 L30 10 L24 10 Z" fill="rgba(255,255,255,.25)"/>
               <path d="M10 24 L17 31 L32 15" stroke="#f5a623" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <div style={{display:'flex',flexDirection:'column',lineHeight:1}}>
-              <div><span style={{fontSize:19,fontWeight:900,color:V.tealDark}}>Fácil</span><span style={{fontSize:19,fontWeight:900,color:V.teal}}> Fiscal</span></div>
-              <span style={{fontSize:9,fontWeight:600,color:V.ink3,marginTop:3}}>Tu solución contable y fiscal simplificada</span>
+            <div style={{lineHeight:1}}>
+              <div><span style={{fontSize:17,fontWeight:900,color:V.tealDark}}>Fácil</span><span style={{fontSize:17,fontWeight:900,color:V.teal}}> Fiscal</span></div>
             </div>
           </a>
-          <div style={{display:'flex',background:V.bg,border:`1.5px solid ${V.border}`,borderRadius:12,padding:3,gap:2}}>
+
+          <div className="ff-switcher">
             {(['mono','ri','aut'] as Tipo[]).map((t,i)=>(
-              <button key={t} onClick={()=>setTipo(t)} style={{padding:'8px 18px',borderRadius:8,border:'none',background:tipo===t?V.teal:'none',color:tipo===t?'white':V.ink3,fontSize:13,fontWeight:700,whiteSpace:'nowrap'}}>
+              <button key={t} onClick={()=>setTipo(t)} className="ff-tipo-btn"
+                style={{background:tipo===t?V.teal:'none',color:tipo===t?'white':V.ink3}}>
                 {['Monotributo','Resp. Inscripto','Autónomo'][i]}
               </button>
             ))}
           </div>
-          <button onClick={()=>{capturaRef.current?.scrollIntoView({behavior:'smooth'});setTimeout(()=>capturaRef.current?.focus(),600)}}
-            style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'9px 20px',fontSize:13,fontWeight:800,whiteSpace:'nowrap',boxShadow:`0 2px 8px rgba(245,166,35,.35)`}}>
-            🔔 Activar alertas
+
+          <button className="ff-cta"
+            onClick={()=>{capturaRef.current?.scrollIntoView({behavior:'smooth'});setTimeout(()=>capturaRef.current?.focus(),600)}}
+            style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'8px 16px',fontSize:12,fontWeight:800,whiteSpace:'nowrap',boxShadow:`0 2px 8px rgba(245,166,35,.35)`}}>
+            🔔 Alertas
           </button>
         </div>
       </header>
 
-      {/* ══ HERO ══ */}
-      <div style={{background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`,padding:'52px 24px 48px',textAlign:'center',position:'relative',overflow:'hidden'}}>
-        <div style={{position:'absolute',left:'50%',top:-80,transform:'translateX(-50%)',width:600,height:300,borderRadius:'50%',background:'rgba(255,255,255,.04)'}}/>
+      {/* HERO */}
+      <div className="ff-hero" style={{background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',left:'50%',top:-80,transform:'translateX(-50%)',width:500,height:300,borderRadius:'50%',background:'rgba(255,255,255,.04)'}}/>
         <div style={{maxWidth:680,margin:'0 auto',position:'relative',zIndex:1}}>
-          {/* PRUEBA SOCIAL */}
-          <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(255,255,255,.12)',border:'1px solid rgba(255,255,255,.2)',borderRadius:20,padding:'6px 16px',marginBottom:20,fontSize:12,fontWeight:700,color:'rgba(255,255,255,.9)'}}>
-            <span style={{fontSize:16}}>👥</span> Más de 500 monotributistas ya usan Fácil Fiscal
+          <div className="ff-social-proof">
+            <span>👥</span> Más de 500 monotributistas ya usan Fácil Fiscal
           </div>
-          <h1 style={{fontSize:38,fontWeight:900,color:'white',lineHeight:1.15,letterSpacing:'-0.5px',marginBottom:14}}>
-            Controlá tu monotributo<br/>sin errores ni multas
-          </h1>
-          <p style={{fontSize:16,color:'rgba(255,255,255,.8)',fontWeight:600,marginBottom:28,lineHeight:1.6}}>
-            Calculá tu categoría, aprendé a facturar y recibí<br/>recordatorios automáticos antes de cada vencimiento.
-          </p>
-          <a href="/mi-categoria" style={{
-            display:'inline-block',background:V.gold,color:V.ink,
-            borderRadius:10,padding:'14px 32px',
-            fontSize:16,fontWeight:900,textDecoration:'none',
-            boxShadow:'0 4px 16px rgba(245,166,35,.4)',
-            letterSpacing:'-0.2px',
-          }}>
-            Calculá tu categoría GRATIS →
-          </a>
-          <div style={{marginTop:12,fontSize:12,color:'rgba(255,255,255,.55)',fontWeight:600}}>
-            Sin registro · Sin tarjeta · Gratis
-          </div>
+          <h1>Controlá tu monotributo<br/>sin errores ni multas</h1>
+          <p>Calculá tu categoría, aprendé a facturar y recibí<br/>recordatorios automáticos antes de cada vencimiento.</p>
+          <a href="/mi-categoria" className="ff-hero-btn">🧮 Calculá tu categoría GRATIS →</a>
+          <div style={{marginTop:10,fontSize:11,color:'rgba(255,255,255,.5)',fontWeight:600}}>Sin registro · Sin tarjeta · Gratis</div>
         </div>
       </div>
 
-      {/* ══ SECCIÓN DE DOLOR ══ */}
+      {/* DOLOR */}
       <div style={{background:V.surface,borderBottom:`1px solid ${V.border}`}}>
-        <div style={{maxWidth:1120,margin:'0 auto',padding:'28px 24px'}}>
-          <div style={{textAlign:'center',marginBottom:20}}>
+        <div style={{maxWidth:1120,margin:'0 auto',padding:'24px 16px'}}>
+          <div style={{textAlign:'center',marginBottom:16}}>
             <div style={{fontSize:13,fontWeight:800,color:V.red,marginBottom:4}}>⚠️ Evitá problemas con AFIP</div>
-            <div style={{fontSize:18,fontWeight:900,color:V.ink,letterSpacing:'-0.3px'}}>Muchos monotributistas cometen estos errores sin saberlo</div>
+            <div style={{fontSize:16,fontWeight:900,color:V.ink,letterSpacing:'-0.2px'}}>Errores comunes que te pueden costar caro</div>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12}}>
+          <div className="ff-dolor-grid">
             {[
-              {icon:'❌',txt:'Pagan la categoría incorrecta y acumulan deuda'},
-              {icon:'❌',txt:'No saben cuándo recategorizarse y reciben multas'},
-              {icon:'❌',txt:'Emiten facturas con errores que generan problemas'},
-              {icon:'❌',txt:'Se enteran del vencimiento cuando ya es tarde'},
+              {icon:'❌',txt:'Pagan la categoría incorrecta'},
+              {icon:'❌',txt:'No saben cuándo recategorizarse'},
+              {icon:'❌',txt:'Emiten facturas con errores'},
+              {icon:'❌',txt:'Se enteran del vencimiento tarde'},
             ].map(e=>(
-              <div key={e.txt} style={{display:'flex',gap:10,alignItems:'flex-start',background:V.redBg,border:`1px solid ${V.redRing}`,borderRadius:10,padding:'12px 14px'}}>
-                <span style={{fontSize:14,flexShrink:0}}>{e.icon}</span>
-                <span style={{fontSize:12,fontWeight:700,color:'#7a2020',lineHeight:1.5}}>{e.txt}</span>
+              <div key={e.txt} style={{display:'flex',gap:8,alignItems:'flex-start',background:V.redBg,border:`1px solid ${V.redRing}`,borderRadius:10,padding:'10px 12px'}}>
+                <span style={{fontSize:13,flexShrink:0}}>{e.icon}</span>
+                <span style={{fontSize:12,fontWeight:700,color:'#7a2020',lineHeight:1.4}}>{e.txt}</span>
               </div>
             ))}
           </div>
-          <div style={{textAlign:'center',marginTop:16}}>
-            <a href="/mi-categoria" style={{fontSize:13,fontWeight:800,color:V.teal,textDecoration:'none'}}>
-              Fácil Fiscal te ayuda a evitar todo esto →
-            </a>
+          <div style={{textAlign:'center',marginTop:14}}>
+            <a href="/mi-categoria" style={{fontSize:13,fontWeight:800,color:V.teal,textDecoration:'none'}}>Fácil Fiscal te ayuda a evitar todo esto →</a>
           </div>
         </div>
       </div>
 
-      <main style={s.main}>
-        <div style={{paddingTop:28}}>
+      <main className="ff-main">
 
         {/* DATE STRIP */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:22}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
           <div style={{fontSize:13,color:V.ink3,fontWeight:600}}>Hoy es <strong style={{color:V.ink2}}>{fechaHoy}</strong></div>
-          <div style={{display:'inline-flex',alignItems:'center',gap:7,background:V.tealLight,border:`1.5px solid ${V.tealRing}`,borderRadius:20,padding:'5px 14px 5px 10px',fontSize:12,fontWeight:800,color:V.tealDark}}>
-            <div style={{width:8,height:8,borderRadius:'50%',background:V.teal}}/>{tipoNombre[tipo]}
+          <div style={{display:'inline-flex',alignItems:'center',gap:6,background:V.tealLight,border:`1.5px solid ${V.tealRing}`,borderRadius:20,padding:'4px 12px 4px 8px',fontSize:12,fontWeight:800,color:V.tealDark}}>
+            <div style={{width:7,height:7,borderRadius:'50%',background:V.teal,flexShrink:0}}/>{tipoNombre[tipo]}
           </div>
         </div>
 
-        {/* 2. VENCIMIENTOS */}
-        <div style={s.sectionLabel}>📅 Vencimientos de hoy</div>
-        <div style={s.cardsGrid}>
+        {/* VENCIMIENTOS HOY */}
+        <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:V.ink3,marginBottom:12}}>📅 Vencimientos de hoy</div>
+        <div className="ff-cards-grid">
           {cards.length===0
-            ?<div style={{padding:'24px 0',color:V.ink3,fontSize:13,fontWeight:600,gridColumn:'1/-1'}}>✅ Sin vencimientos próximos inmediatos.</div>
+            ?<div style={{padding:'20px 0',color:V.ink3,fontSize:13,fontWeight:600}}>✅ Sin vencimientos próximos inmediatos.</div>
             :cards.map((v,i)=>{
               const d=diff(v.fecha); const c=cardCfg(d)
               return(
-                <div key={v.id} style={{background:c.bg,border:`1.5px solid ${c.border}`,borderRadius:20,padding:'22px 22px 18px',display:'flex',flexDirection:'column',gap:13,boxShadow:`0 1px 4px rgba(13,92,120,.07)`,animation:`cardUp .35s ease ${i*.09}s both`}}>
+                <div key={v.id} style={{background:c.bg,border:`1.5px solid ${c.border}`,borderRadius:16,padding:'18px 18px 14px',display:'flex',flexDirection:'column',gap:12,boxShadow:`0 1px 4px rgba(13,92,120,.07)`,animation:`cardUp .35s ease ${i*.09}s both`}}>
                   <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:8}}>
-                    <div style={{width:42,height:42,borderRadius:12,background:c.iconBg,border:`1.5px solid ${c.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>{v.emoji}</div>
-                    <div style={{background:c.pill.bg,color:c.pill.color,border:`1.5px solid ${c.pill.border}`,display:'inline-flex',alignItems:'center',borderRadius:20,padding:'5px 11px',fontSize:11,fontWeight:800,flexShrink:0}}>{c.txt}</div>
+                    <div style={{width:40,height:40,borderRadius:11,background:c.iconBg,border:`1.5px solid ${c.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19,flexShrink:0}}>{v.emoji}</div>
+                    <div style={{background:c.pill.bg,color:c.pill.color,border:`1.5px solid ${c.pill.border}`,display:'inline-flex',alignItems:'center',borderRadius:20,padding:'4px 10px',fontSize:11,fontWeight:800,flexShrink:0}}>{c.txt}</div>
                   </div>
                   <div>
-                    <div style={{fontSize:17,fontWeight:900,color:V.ink,letterSpacing:'-0.3px',lineHeight:1.2,marginTop:8}}>{v.nombre}</div>
+                    <div style={{fontSize:15,fontWeight:900,color:V.ink,letterSpacing:'-0.2px',lineHeight:1.2,marginTop:6}}>{v.nombre}</div>
                     <div style={{fontSize:12,color:V.ink3,fontWeight:600,marginTop:2}}>{v.detalle}</div>
                   </div>
-                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderTop:`1px solid ${V.border}`,paddingTop:11}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderTop:`1px solid ${V.border}`,paddingTop:10}}>
                     <div style={{fontSize:13,fontWeight:700,color:V.ink2}}>{fmtL(v.fecha)}</div>
                     <div style={{fontSize:13,fontWeight:900,color:c.diasColor}}>{c.diasTxt}</div>
                   </div>
@@ -292,31 +307,31 @@ export default function Home() {
           }
         </div>
 
-        {/* 3. PRÓXIMOS */}
-        <div style={s.card}>
-          <div style={s.cardHead}>
-            <div style={s.cardTitle}>📋 Próximos vencimientos</div>
-            <div style={{fontSize:11,fontWeight:700,background:V.tealLight,color:V.tealDark,border:`1px solid ${V.tealRing}`,borderRadius:20,padding:'3px 10px'}}>{proximos.length} vencimiento{proximos.length!==1?'s':''}</div>
+        {/* PRÓXIMOS */}
+        <div style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,overflow:'hidden',marginBottom:20,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+          <div style={{padding:'13px 16px',borderBottom:`1px solid ${V.border}`,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{fontSize:14,fontWeight:800,color:V.ink}}>📋 Próximos vencimientos</div>
+            <div style={{fontSize:11,fontWeight:700,background:V.tealLight,color:V.tealDark,border:`1px solid ${V.tealRing}`,borderRadius:20,padding:'2px 9px'}}>{proximos.length} vto{proximos.length!==1?'s':''}</div>
           </div>
           <div>
             {proximos.length===0
-              ?<div style={{padding:'16px 20px',color:V.ink3,fontSize:13,fontWeight:600}}>Sin vencimientos en los próximos 10 días.</div>
+              ?<div style={{padding:'14px 16px',color:V.ink3,fontSize:13,fontWeight:600}}>Sin vencimientos en los próximos 10 días.</div>
               :proximos.map((v,i)=>{
                 const d=diff(v.fecha)
                 const dot=d===0?V.red:d<=3?V.gold:V.teal
                 const mb=d===0?{bg:V.redBg,color:V.red,border:`1px solid ${V.redRing}`,txt:'HOY'}
                   :d===1?{bg:V.amberBg,color:V.amber,border:`1px solid ${V.amberRing}`,txt:'Mañana'}
-                  :d<=4?{bg:V.amberBg,color:V.amber,border:`1px solid ${V.amberRing}`,txt:`${d} días`}
-                  :{bg:V.tealLight,color:V.tealDark,border:`1px solid ${V.tealRing}`,txt:`${d} días`}
+                  :d<=4?{bg:V.amberBg,color:V.amber,border:`1px solid ${V.amberRing}`,txt:`${d}d`}
+                  :{bg:V.tealLight,color:V.tealDark,border:`1px solid ${V.tealRing}`,txt:`${d}d`}
                 return(
-                  <div key={v.id} style={{display:'flex',alignItems:'center',gap:14,padding:'11px 20px',borderBottom:`1px solid ${V.border}`,animation:`cardUp .3s ease ${i*.05}s both`}}>
-                    <div style={{width:10,height:10,borderRadius:'50%',background:dot,flexShrink:0}}/>
-                    <div style={{fontSize:12,fontWeight:800,color:V.ink3,minWidth:72}}>{fmtS(v.fecha)}</div>
-                    <div style={{flex:1}}>
-                      <div style={{fontSize:13,fontWeight:700,color:V.ink}}>{v.emoji} {v.nombre}</div>
+                  <div key={v.id} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 16px',borderBottom:`1px solid ${V.border}`}}>
+                    <div style={{width:9,height:9,borderRadius:'50%',background:dot,flexShrink:0}}/>
+                    <div style={{fontSize:12,fontWeight:800,color:V.ink3,minWidth:60}}>{fmtS(v.fecha)}</div>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:13,fontWeight:700,color:V.ink,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.emoji} {v.nombre}</div>
                       <div style={{fontSize:11,color:V.ink3,fontWeight:600}}>{v.detalle}</div>
                     </div>
-                    <div style={{fontSize:10,fontWeight:800,padding:'3px 9px',borderRadius:20,background:mb.bg,color:mb.color,border:mb.border,flexShrink:0}}>{mb.txt}</div>
+                    <div style={{fontSize:10,fontWeight:800,padding:'2px 8px',borderRadius:20,background:mb.bg,color:mb.color,border:mb.border,flexShrink:0}}>{mb.txt}</div>
                   </div>
                 )
               })
@@ -324,15 +339,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 4+5. ALERTAS + CALCULADORA */}
-        <div style={s.twoCol}>
-          <div style={{...s.card,marginBottom:0}}>
-            <div style={s.cardHead}><div style={s.cardTitle}>⚠️ Alertas importantes</div></div>
+        {/* ALERTAS + CALCULADORA */}
+        <div className="ff-two-col">
+          <div style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,overflow:'hidden',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+            <div style={{padding:'13px 16px',borderBottom:`1px solid ${V.border}`,fontSize:14,fontWeight:800,color:V.ink}}>⚠️ Alertas importantes</div>
             {alertas.map(a=>{
               const ib=a.tipo==='danger'?{bg:V.redBg,border:`1.5px solid ${V.redRing}`}:a.tipo==='info'?{bg:V.tealLight,border:`1.5px solid ${V.tealRing}`}:{bg:V.goldLight,border:`1.5px solid ${V.goldRing}`}
               return(
-                <div key={a.id} style={{display:'flex',alignItems:'flex-start',gap:12,padding:'13px 18px',borderBottom:`1px solid ${V.border}`}}>
-                  <div style={{width:32,height:32,borderRadius:9,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,...ib}}>{a.icon}</div>
+                <div key={a.id} style={{display:'flex',alignItems:'flex-start',gap:10,padding:'11px 16px',borderBottom:`1px solid ${V.border}`}}>
+                  <div style={{width:30,height:30,borderRadius:8,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,...ib}}>{a.icon}</div>
                   <div>
                     <div style={{fontSize:12,fontWeight:800,color:V.ink,marginBottom:2}}>{a.title}</div>
                     <div style={{fontSize:11,color:V.ink3,fontWeight:600,lineHeight:1.5}}>{a.description}</div>
@@ -342,123 +357,121 @@ export default function Home() {
             })}
           </div>
 
-          <div style={{...s.card,marginBottom:0}}>
-            <div style={s.cardHead}><div style={s.cardTitle}>🧮 ¿Cuánto tengo que pagar?</div></div>
-            <div style={{padding:'16px 18px'}}>
-              <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:6}}>Tu categoría</div>
-              <select value={catIdx} onChange={e=>setCatIdx(e.target.value)} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'10px 12px',fontSize:14,fontWeight:600,color:V.ink,background:V.bg,outline:'none',marginBottom:12}}>
+          <div style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,overflow:'hidden',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+            <div style={{padding:'13px 16px',borderBottom:`1px solid ${V.border}`,fontSize:14,fontWeight:800,color:V.ink}}>🧮 ¿Cuánto tengo que pagar?</div>
+            <div style={{padding:'14px 16px'}}>
+              <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:5}}>Tu categoría</div>
+              <select value={catIdx} onChange={e=>setCatIdx(e.target.value)} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'9px 10px',fontSize:13,fontWeight:600,color:V.ink,background:V.bg,outline:'none',marginBottom:10}}>
                 <option value="" disabled>— Elegí tu categoría —</option>
-                {MONTOS[tipo].cats.map((c,i)=><option key={i} value={i}>{c} — hasta {MONTOS[tipo].limites[i]}/año</option>)}
+                {MONTOS[tipo].cats.map((c,i)=><option key={i} value={i}>{c} — {MONTOS[tipo].limites[i]}/año</option>)}
               </select>
               {tipo==='mono'&&<>
-                <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:6}}>Obra social</div>
-                <select value={conOS?'si':'no'} onChange={e=>setConOS(e.target.value==='si')} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'10px 12px',fontSize:14,fontWeight:600,color:V.ink,background:V.bg,outline:'none',marginBottom:12}}>
+                <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:5}}>Obra social</div>
+                <select value={conOS?'si':'no'} onChange={e=>setConOS(e.target.value==='si')} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'9px 10px',fontSize:13,fontWeight:600,color:V.ink,background:V.bg,outline:'none',marginBottom:10}}>
                   <option value="si">Incluir obra social</option>
                   <option value="no">Sin obra social</option>
                 </select>
               </>}
-              <div style={{background:`linear-gradient(135deg,${V.tealDark},${V.tealMid})`,borderRadius:8,padding:'18px 16px',textAlign:'center',minHeight:90,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+              <div style={{background:`linear-gradient(135deg,${V.tealDark},${V.tealMid})`,borderRadius:8,padding:'16px',textAlign:'center',minHeight:80,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
                 {catIdx!==''?<>
-                  <div style={{fontSize:32,fontWeight:900,color:'white',letterSpacing:'-0.5px',lineHeight:1,marginBottom:5}}>{money(total)}</div>
-                  <div style={{fontSize:11,color:'rgba(255,255,255,.65)',fontWeight:600,marginBottom:10}}>por mes · valores estimados 2026</div>
-                  <div style={{display:'flex',gap:10,width:'100%'}}>
-                    {[['Impositivo',MONTOS[tipo].imp[idx]],['Previsional',MONTOS[tipo].prev[idx]],...(os?[['Obra social',os]]:[])].map(([l,val])=>(
-                      <div key={l as string} style={{flex:1,background:'rgba(255,255,255,.1)',borderRadius:7,padding:'7px 8px',textAlign:'center'}}>
-                        <div style={{fontSize:9,color:'rgba(255,255,255,.55)',fontWeight:700,textTransform:'uppercase'}}>{l}</div>
-                        <div style={{fontSize:14,fontWeight:900,color:'white',marginTop:2}}>{money(val as number)}</div>
+                  <div style={{fontSize:28,fontWeight:900,color:'white',letterSpacing:'-0.5px',lineHeight:1,marginBottom:4}}>{money(total)}</div>
+                  <div style={{fontSize:10,color:'rgba(255,255,255,.65)',fontWeight:600,marginBottom:8}}>por mes · estimado 2026</div>
+                  <div className="ff-calc-break" style={{width:'100%'}}>
+                    {[['Imp.',MONTOS[tipo].imp[idx]],['Prev.',MONTOS[tipo].prev[idx]],...(os?[['OS',os]]:[])].map(([l,val])=>(
+                      <div key={l as string} style={{background:'rgba(255,255,255,.1)',borderRadius:6,padding:'5px 6px',textAlign:'center'}}>
+                        <div style={{fontSize:8,color:'rgba(255,255,255,.55)',fontWeight:700,textTransform:'uppercase'}}>{l}</div>
+                        <div style={{fontSize:12,fontWeight:900,color:'white',marginTop:1}}>{money(val as number)}</div>
                       </div>
                     ))}
                   </div>
-                </>:<div style={{fontSize:15,fontWeight:700,color:'rgba(255,255,255,.4)'}}>Seleccioná una categoría</div>}
+                </>:<div style={{fontSize:14,fontWeight:700,color:'rgba(255,255,255,.4)'}}>Seleccioná una categoría</div>}
               </div>
             </div>
           </div>
         </div>
 
-        {/* 6. ACCIONES MEJORADAS */}
-        <div style={s.sectionLabel}>Acciones rápidas</div>
-        <div style={s.accionGrid}>
+        {/* ACCIONES */}
+        <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:V.ink3,marginBottom:12}}>Acciones rápidas</div>
+        <div className="ff-accion-grid">
           {[
-            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Facturá sin errores',desc:'Guía paso a paso para hacer Factura C correctamente',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
+            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Facturá sin errores',desc:'Guía Factura C paso a paso',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
             {icon:'📊',bg:V.tealLight,br:V.tealRing,label:'Calculá tu categoría',desc:'Evitá pagar de más o recategorizarte mal',link:'Calcular →',fn:()=>window.location.href='/mi-categoria'},
             {icon:'🏦',bg:V.bg,br:V.border,label:'Pagar en AFIP',desc:'Generá tu VEP y pagá desde home banking',link:'Ir a AFIP →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
           ].map(a=>(
-            <button key={a.label} onClick={a.fn} style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,padding:'20px 18px',display:'flex',flexDirection:'column',gap:10,textAlign:'left',boxShadow:`0 1px 4px rgba(13,92,120,.07)`,transition:'all .15s'}}>
-              <div style={{width:44,height:44,borderRadius:12,background:a.bg,border:`1.5px solid ${a.br}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:21}}>{a.icon}</div>
-              <div>
-                <div style={{fontSize:14,fontWeight:800,color:V.ink,lineHeight:1.2}}>{a.label}</div>
-                <div style={{fontSize:11,color:V.ink3,fontWeight:600,marginTop:1}}>{a.desc}</div>
+            <button key={a.label} onClick={a.fn} style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,padding:'16px',display:'flex',gap:12,alignItems:'center',textAlign:'left',boxShadow:`0 1px 4px rgba(13,92,120,.07)`,width:'100%'}}>
+              <div style={{width:40,height:40,borderRadius:10,background:a.bg,border:`1.5px solid ${a.br}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:19,flexShrink:0}}>{a.icon}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:13,fontWeight:800,color:V.ink}}>{a.label}</div>
+                <div style={{fontSize:11,color:V.ink3,fontWeight:600}}>{a.desc}</div>
               </div>
-              <div style={{marginTop:'auto',fontSize:12,fontWeight:800,color:V.teal}}>{a.link}</div>
+              <div style={{fontSize:13,fontWeight:800,color:V.teal,flexShrink:0}}>{a.link}</div>
             </button>
           ))}
         </div>
 
         {/* AI */}
-        <div style={{...s.card,marginBottom:24}}>
-          <div style={{background:'#0a0a1a',color:'white',padding:'10px 16px',display:'flex',alignItems:'center',gap:8,fontSize:11,letterSpacing:'1.5px',textTransform:'uppercase',fontWeight:700}}>
-            <div style={{width:7,height:7,borderRadius:'50%',background:'#4caf50',boxShadow:'0 0 0 3px rgba(76,175,80,.2)'}}/>
-            Asistente Fiscal IA · Datos de ARCA/AFIP en tiempo real
+        <div style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,overflow:'hidden',marginBottom:20,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+          <div style={{background:'#0a0a1a',color:'white',padding:'9px 14px',display:'flex',alignItems:'center',gap:7,fontSize:11,letterSpacing:'1.2px',textTransform:'uppercase',fontWeight:700}}>
+            <div style={{width:7,height:7,borderRadius:'50%',background:'#4caf50',boxShadow:'0 0 0 3px rgba(76,175,80,.2)',flexShrink:0}}/>
+            Asistente IA · Consultas fiscales
           </div>
-          <div style={{padding:'14px 16px'}}>
+          <div style={{padding:'12px 14px'}}>
             <div style={{display:'flex',gap:8,marginBottom:10}}>
-              <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&askAI()} placeholder="Ej: ¿Cuándo vence el monotributo este mes?"
-                style={{flex:1,border:`1.5px solid ${V.border}`,borderRadius:8,padding:'10px 12px',fontSize:13,fontWeight:600,color:V.ink,background:V.bg,outline:'none'}}/>
-              <button onClick={()=>askAI()} disabled={aiLoading} style={{background:V.teal,color:'white',border:'none',borderRadius:8,padding:'10px 18px',fontSize:13,fontWeight:800,opacity:aiLoading?.6:1,whiteSpace:'nowrap'}}>
+              <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&askAI()} placeholder="¿Cuándo vence el monotributo este mes?"
+                style={{flex:1,border:`1.5px solid ${V.border}`,borderRadius:8,padding:'9px 10px',fontSize:13,fontWeight:600,color:V.ink,background:V.bg,outline:'none'}}/>
+              <button onClick={()=>askAI()} disabled={aiLoading} style={{background:V.teal,color:'white',border:'none',borderRadius:8,padding:'9px 14px',fontSize:13,fontWeight:800,opacity:aiLoading?.6:1,whiteSpace:'nowrap'}}>
                 {aiLoading?'…':'Consultar →'}
               </button>
             </div>
             <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-              {['Vencimientos esta semana','Cuánto pago','Pagar home banking','Novedades ARCA','Ver deuda AFIP'].map(c=>(
-                <button key={c} onClick={()=>askAI(c)} style={{background:V.bg,border:`1px solid ${V.border}`,borderRadius:20,padding:'4px 12px',fontSize:11,fontWeight:700,color:V.ink3}}>
-                  {c}
-                </button>
+              {['Vencimientos esta semana','Cuánto pago','Novedades ARCA','Ver deuda AFIP'].map(c=>(
+                <button key={c} onClick={()=>askAI(c)} style={{background:V.bg,border:`1px solid ${V.border}`,borderRadius:20,padding:'4px 10px',fontSize:11,fontWeight:700,color:V.ink3}}>{c}</button>
               ))}
             </div>
-            {(aiLoading||aiResp)&&<div style={{marginTop:12,padding:'12px 14px',background:V.bg,borderRadius:8,borderLeft:`3px solid ${V.teal}`,fontSize:13,color:V.ink2,fontWeight:600,lineHeight:1.75,whiteSpace:'pre-wrap'}}>
+            {(aiLoading||aiResp)&&<div style={{marginTop:10,padding:'10px 12px',background:V.bg,borderRadius:8,borderLeft:`3px solid ${V.teal}`,fontSize:13,color:V.ink2,fontWeight:600,lineHeight:1.75,whiteSpace:'pre-wrap'}}>
               {aiLoading?<span style={{color:V.ink3}}>Consultando ARCA/AFIP…</span>:aiResp}
             </div>}
           </div>
         </div>
 
-        {/* 7. CAPTURA */}
-        <div style={s.captura}>
-          <div style={{position:'absolute',right:-50,top:-50,width:220,height:220,borderRadius:'50%',background:'rgba(255,255,255,.05)'}}/>
+        {/* CAPTURA */}
+        <div className="ff-captura" style={{background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`,position:'relative',overflow:'hidden',boxShadow:`0 8px 32px rgba(13,92,120,.25)`}}>
+          <div style={{position:'absolute',right:-50,top:-50,width:200,height:200,borderRadius:'50%',background:'rgba(255,255,255,.05)'}}/>
           <div style={{position:'relative',zIndex:1}}>
-            <div style={{fontSize:10,fontWeight:800,letterSpacing:'2px',textTransform:'uppercase',color:V.gold,marginBottom:6}}>Recordatorios gratis</div>
-            <div style={{fontSize:22,fontWeight:900,color:'white',letterSpacing:'-0.3px',lineHeight:1.2,marginBottom:5}}>Recibí alertas antes<br/>de cada vencimiento</div>
+            <div style={{fontSize:10,fontWeight:800,letterSpacing:'2px',textTransform:'uppercase',color:V.gold,marginBottom:5}}>Recordatorios gratis</div>
+            <div style={{fontSize:20,fontWeight:900,color:'white',letterSpacing:'-0.3px',lineHeight:1.2,marginBottom:5}}>Recibí alertas antes<br/>de cada vencimiento</div>
             <div style={{fontSize:13,color:'rgba(255,255,255,.6)',fontWeight:600}}>Sin spam. Solo cuando importa.</div>
           </div>
-          <div style={{position:'relative',zIndex:1,flexShrink:0,minWidth:300}}>
+          <div className="ff-cap-form" style={{position:'relative',zIndex:1}}>
             {emailOk
-              ?<div style={{color:V.gold,fontSize:16,fontWeight:800}}>✓ ¡Listo! Revisá tu email para confirmar.</div>
-              :<div>
-                <div style={{display:'flex',gap:16,marginBottom:12}}>
+              ?<div style={{color:V.gold,fontSize:15,fontWeight:800}}>✓ ¡Listo! Revisá tu email.</div>
+              :<>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   {[{key:'mono',label:'Monotributista'},{key:'ri',label:'Resp. Inscripto'},{key:'aut',label:'Autónomo'}].map(op=>(
-                    <label key={op.key} style={{display:'flex',alignItems:'center',gap:6,cursor:tipoDisabled(op.key)?'not-allowed':'pointer',opacity:tipoDisabled(op.key)?.4:1}}>
-                      <input type="checkbox" checked={tiposSel.includes(op.key)} disabled={tipoDisabled(op.key)} onChange={()=>toggleTipo(op.key)} style={{width:16,height:16,accentColor:V.gold}}/>
+                    <label key={op.key} style={{display:'flex',alignItems:'center',gap:5,cursor:tipoDisabled(op.key)?'not-allowed':'pointer',opacity:tipoDisabled(op.key)?.4:1}}>
+                      <input type="checkbox" checked={tiposSel.includes(op.key)} disabled={tipoDisabled(op.key)} onChange={()=>toggleTipo(op.key)} style={{width:15,height:15,accentColor:V.gold}}/>
                       <span style={{fontSize:12,fontWeight:700,color:'white'}}>{op.label}</span>
                     </label>
                   ))}
                 </div>
-                {suscError&&<div style={{fontSize:12,color:'#fca5a5',fontWeight:600,marginBottom:8}}>{suscError}</div>}
-                <div style={{display:'flex',gap:8}}>
+                {suscError&&<div style={{fontSize:12,color:'#fca5a5',fontWeight:600}}>{suscError}</div>}
+                <div className="ff-cap-input-row">
                   <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email}
                     onChange={e=>{setEmail(e.target.value);setSuscError('')}}
                     onKeyDown={e=>e.key==='Enter'&&suscribir()}
-                    style={{background:'rgba(255,255,255,.25)',border:'1.5px solid rgba(255,255,255,.6)',borderRadius:8,padding:'11px 16px',fontSize:13,fontWeight:600,color:'white',outline:'none',flex:1}}/>
-                  <button onClick={suscribir} style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'11px 20px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',boxShadow:`0 2px 10px rgba(245,166,35,.4)`}}>
+                    style={{background:'rgba(255,255,255,.25)',border:'1.5px solid rgba(255,255,255,.6)',borderRadius:8,padding:'10px 14px',fontSize:13,fontWeight:600,color:'white',outline:'none',flex:1,minWidth:0}}/>
+                  <button onClick={suscribir} style={{background:V.gold,color:V.ink,border:'none',borderRadius:8,padding:'10px 16px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',boxShadow:`0 2px 8px rgba(245,166,35,.4)`,flexShrink:0}}>
                     Activar →
                   </button>
                 </div>
-              </div>
+              </>
             }
           </div>
         </div>
-        </div>
+
       </main>
 
-      {toast&&<div style={{position:'fixed',bottom:24,right:24,background:V.ink,color:'white',borderRadius:8,padding:'12px 20px',fontSize:13,fontWeight:700,boxShadow:`0 4px 16px rgba(13,92,120,.1)`,zIndex:999,animation:'cardUp .3s ease'}}>{toast}</div>}
+      {toast&&<div style={{position:'fixed',bottom:16,right:16,left:16,background:V.ink,color:'white',borderRadius:10,padding:'12px 16px',fontSize:13,fontWeight:700,boxShadow:`0 4px 16px rgba(13,92,120,.2)`,zIndex:999,textAlign:'center',animation:'cardUp .3s ease'}}>{toast}</div>}
     </>
   )
 }
