@@ -195,7 +195,16 @@ export default function Home() {
 
       {/* HEADER */}
       <header style={{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky',top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
-        <div className="ff-header-inner">
+        <div 
+  className="ff-header-inner" 
+  style={{
+    display:'flex',
+    flexWrap:'wrap',
+    alignItems:'center',
+    justifyContent:'space-between',
+    gap:6
+  }}
+>
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
             <svg viewBox="0 0 44 44" fill="none" width={38} height={38}>
               <rect x="6" y="4" width="24" height="30" rx="4" fill="#1a7fa8"/>
