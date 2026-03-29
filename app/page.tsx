@@ -236,7 +236,7 @@ export default function Home() {
           </div>
           <h1>Controlá tu monotributo<br/>sin errores ni multas</h1>
           <p>Calculá tu categoría, aprendé a facturar y recibí<br/>recordatorios automáticos antes de cada vencimiento.</p>
-          <a href="/mi-categoria" className="ff-hero-btn">🧮 Calculá tu categoría GRATIS →</a>
+          <a href="/mi-categoria" className="ff-hero-btn"> Calculá tu categoría GRATIS →</a>
           <div style={{marginTop:10,fontSize:11,color:'rgba(255,255,255,.5)',fontWeight:600}}>Sin registro · Sin tarjeta · Gratis</div>
         </div>
       </div>
