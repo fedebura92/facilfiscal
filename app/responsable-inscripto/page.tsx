@@ -1,93 +1,156 @@
 'use client'
+import Link from 'next/link'
 
 export default function ResponsableInscriptoPage() {
-
-  const V={
-    tealDark:'#0d5c78',teal:'#1a7fa8',tealMid:'#2490bc',tealLight:'#e8f6fb',tealRing:'#a8ddf0',
-    gold:'#f5a623',goldLight:'#fff8ec',goldRing:'#fde4a0',
-    red:'#e53535',redBg:'#fff1f1',redRing:'#ffc8c8',
-    bg:'#f4f7f9',surface:'#fff',border:'#e2e8ed',
-    ink:'#0f2733',ink2:'#3d5a6b',ink3:'#7a9aaa',
-  }
-
   return (
-    <main style={{background:V.bg,minHeight:'100vh'}}>
+    <>
+      {/* HEADER */}
+      <header className="ff-header">
+        <div className="ff-header-inner">
 
-      {/* HEADER SIMPLE */}
-      <div style={{
-        background:V.surface,
-        borderBottom:`1px solid ${V.border}`,
-        padding:'14px 20px',
-        fontWeight:900,
-        color:V.tealDark
+          {/* LOGO */}
+          <div style={{fontWeight: 800, color: 'var(--teal)'}}>
+            📊 Fácil Fiscal
+          </div>
+
+          {/* SWITCHER */}
+          <div className="ff-switcher">
+            <Link href="/">
+              <button className="ff-tipo-btn">Monotributo</button>
+            </Link>
+
+            <Link href="/responsable-inscripto">
+              <button
+                className="ff-tipo-btn"
+                style={{background: 'var(--teal)', color: 'white'}}
+              >
+                Resp. Inscripto
+              </button>
+            </Link>
+
+            <button className="ff-tipo-btn">Autónomo</button>
+          </div>
+
+          {/* CTA */}
+          <button
+            className="ff-cta"
+            style={{
+              background: 'var(--gold)',
+              border: 'none',
+              padding: '8px 14px',
+              borderRadius: 'var(--r-sm)',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            🔔 Alertas
+          </button>
+
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section style={{
+        background: 'linear-gradient(135deg,var(--teal),var(--teal-mid))',
+        color: 'white',
+        textAlign: 'center',
+        padding: '60px 20px'
       }}>
-        Fácil Fiscal
-      </div>
-
-      {/* CONTENIDO */}
-      <div style={{
-        maxWidth:900,
-        margin:'0 auto',
-        padding:'30px 20px'
-      }}>
-
-        <h1 style={{fontSize:28,fontWeight:900,color:V.ink,marginBottom:10}}>
-          Responsable Inscripto: qué tenés que pagar y cuándo
+        <h1 style={{fontSize: '28px', marginBottom: '10px'}}>
+          Responsable Inscripto sin errores ni multas
         </h1>
 
-        <p style={{color:V.ink3,fontWeight:600,marginBottom:20}}>
-          Si no sabés cuánto pagar de IVA, Ganancias o cuándo vence cada cosa, es normal.
-          Acá te lo explicamos simple y además te avisamos antes de cada vencimiento.
+        <p style={{opacity: 0.9}}>
+          Te avisamos antes de cada vencimiento de IVA, Ganancias y más.
         </p>
 
-        {/* CTA */}
         <button style={{
-          background:V.gold,
-          border:'none',
-          padding:'12px 20px',
-          borderRadius:8,
-          fontWeight:800,
-          cursor:'pointer',
-          marginBottom:25
+          marginTop: '20px',
+          background: 'var(--gold)',
+          border: 'none',
+          padding: '12px 18px',
+          borderRadius: 'var(--r)',
+          fontWeight: 700,
+          cursor: 'pointer'
         }}>
-          🔔 Recibir alertas de vencimientos
+          Activar alertas GRATIS
         </button>
+      </section>
 
-        {/* BLOQUE */}
-        <div style={{
-          background:V.surface,
-          border:`1px solid ${V.border}`,
-          borderRadius:12,
-          padding:20,
-          marginBottom:20
-        }}>
-          <h2 style={{fontWeight:800,marginBottom:10}}>¿Te pasa esto?</h2>
-          <ul style={{color:V.ink2,fontWeight:600,lineHeight:1.6}}>
-            <li>No sabés cuánto pagar de IVA cada mes</li>
-            <li>Tenés miedo de olvidarte una declaración</li>
-            <li>No entendés qué impuestos te corresponden</li>
-            <li>Dependés siempre del contador</li>
+      {/* CONTENIDO */}
+      <main style={{
+        maxWidth: '900px',
+        margin: '0 auto',
+        padding: '30px 20px'
+      }}>
+
+        {/* CARD */}
+        <div style={card}>
+          <h2>¿Te pasa esto?</h2>
+          <ul>
+            <li>No sabés cuánto pagar de IVA</li>
+            <li>Te olvidás de presentar declaraciones</li>
+            <li>No sabés qué impuestos te corresponden</li>
+            <li>Dependés del contador para todo</li>
           </ul>
         </div>
 
-        {/* BLOQUE */}
-        <div style={{
-          background:V.surface,
-          border:`1px solid ${V.border}`,
-          borderRadius:12,
-          padding:20,
-          marginBottom:20
-        }}>
-          <h2 style={{fontWeight:800,marginBottom:10}}>¿Qué tenés que pagar?</h2>
-          <ul style={{color:V.ink2,fontWeight:600,lineHeight:1.6}}>
+        <div style={card}>
+          <h2>¿Qué tenés que pagar?</h2>
+          <ul>
             <li><strong>IVA:</strong> mensual</li>
             <li><strong>Ganancias:</strong> anual</li>
-            <li><strong>Ingresos Brutos:</strong> según provincia</li>
-            <li><strong>Autónomos:</strong> si corresponde</li>
+            <li><strong>Ingresos Brutos:</strong> provincial</li>
+            <li><strong>Autónomos:</strong> si aplica</li>
           </ul>
         </div>
 
-      </div>
-    </main>
+        <div style={card}>
+          <h2>Errores comunes</h2>
+          <ul>
+            <li>Presentar fuera de término</li>
+            <li>No pagar a tiempo</li>
+            <li>Confundir vencimientos</li>
+          </ul>
+        </div>
+
+        <div style={{...card, textAlign: 'center'}}>
+          <h2>Activá alertas gratis</h2>
+
+          <div style={{marginTop: '15px'}}>
+            <input
+              type="email"
+              placeholder="tu@email.com"
+              style={{
+                padding: '10px',
+                width: '60%',
+                marginRight: '10px',
+                borderRadius: 'var(--r-sm)',
+                border: '1px solid var(--border)'
+              }}
+            />
+
+            <button style={{
+              background: 'var(--gold)',
+              border: 'none',
+              padding: '10px 14px',
+              borderRadius: 'var(--r-sm)',
+              fontWeight: 700
+            }}>
+              🔔 Activar
+            </button>
+          </div>
+        </div>
+
+      </main>
+    </>
   )
+}
+
+const card = {
+  background: 'white',
+  padding: '20px',
+  borderRadius: '12px',
+  marginBottom: '20px',
+  boxShadow: 'var(--sh)'
 }
