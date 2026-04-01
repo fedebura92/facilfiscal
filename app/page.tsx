@@ -235,13 +235,26 @@ const total = useMemo(() => {
             </div>
           </a>
 
-          <div className="ff-switcher">
-            {(['mono','ri','aut'] as Tipo[]).map((t,i)=>(
-              <button key={t} onClick={()=>setTipo(t)} className="ff-tipo-btn"
-                style={{background:tipo===t?V.teal:'none',color:tipo===t?'white':V.ink3}}>
-                {['Monotributo','Resp. Inscripto','Autónomo'][i]}
-              </button>
-            ))}
+         <div className="ff-switcher">
+              {(['mono','ri','aut'] as Tipo[]).map((t,i)=>(
+                <button
+                  key={t}
+                  onClick={() => {
+                    if (t === 'ri') {
+                      window.location.href = '/responsable-inscripto'
+                      return
+                    }
+                    setTipo(t)
+                  }}
+                  className="ff-tipo-btn"
+                  style={{
+                    background: tipo === t ? V.teal : 'none',
+                    color: tipo === t ? 'white' : V.ink3
+                  }}
+                >
+                  {['Monotributo','Resp. Inscripto','Autónomo'][i]}
+                </button>
+              ))}
           </div>
 
           <button className="ff-cta"
