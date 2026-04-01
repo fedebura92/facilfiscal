@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 
 type Tipo = 'mono' | 'ri' | 'aut'
 interface Vencimiento { id:string; nombre:string; emoji:string; detalle:string; dia_mes:number; tipo:string; fecha:string }
@@ -106,12 +106,28 @@ export default function Home() {
     }catch{setSuscError('Error de conexión.')}
   }
 
-  const vencOrd=[...venc].filter(v=>diff(v.fecha)>=0).sort((a,b)=>diff(a.fecha)-diff(b.fecha))
-  const cards=vencOrd.slice(0,3)
-  const proximos=vencOrd.filter(v=>diff(v.fecha)<=10).slice(0,8)
-  const idx=parseInt(catIdx)
-  const os=conOS&&tipo==='mono'?MONTOS.mono.os:0
-  const total=catIdx!==''?MONTOS[tipo].imp[idx]+MONTOS[tipo].prev[idx]+os:0
+  const vencOrd = useMemo(() => {
+  return [...venc]
+    .filter(v => diff(v.fecha) >= 0)
+    .sort((a, b) => diff(a.fecha) - diff(b.fecha))
+}, [venc])
+
+const cards = useMemo(() => vencOrd.slice(0, 3), [vencOrd])
+
+const proximos = useMemo(() => {
+  return vencOrd.filter(v => diff(v.fecha) <= 10).slice(0, 8)
+}, [vencOrd])
+
+const idx = useMemo(() => parseInt(catIdx), [catIdx])
+
+const os = useMemo(() => {
+  return conOS && tipo === 'mono' ? MONTOS.mono.os : 0
+}, [conOS, tipo])
+
+const total = useMemo(() => {
+  if (catIdx === '') return 0
+  return MONTOS[tipo].imp[idx] + MONTOS[tipo].prev[idx] + os
+}, [catIdx, tipo, idx, os])
   const tipoNombre:Record<Tipo,string>={mono:'Monotributo',ri:'Resp. Inscripto',aut:'Autónomo'}
   const fechaHoy=mounted?new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long'}).format(new Date()):''
 

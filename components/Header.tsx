@@ -22,11 +22,7 @@ export default function Header({ tipo, onTipoChange, onAlertasClick }: HeaderPro
       position: 'sticky', top: 0, zIndex: 100,
       boxShadow: 'var(--sh-sm)',
     }}>
-      <div style={{
-        maxWidth: 1120, margin: '0 auto', padding: '0 24px',
-        height: 64, display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between', gap: 16,
-      }}>
+      <div className="ff-header-inner">
 
         {/* LOGO */}
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
@@ -44,13 +40,7 @@ export default function Header({ tipo, onTipoChange, onAlertasClick }: HeaderPro
         </a>
 
         {/* TIPO SWITCHER */}
-        <div style={{
-          display: 'flex',
-          background: 'var(--bg)',
-          border: '1.5px solid var(--border)',
-          borderRadius: 'var(--r)',
-          padding: 3, gap: 2,
-        }}>
+        <div className="ff-switcher">
           {TIPOS.map(({ key, label }) => (
             <button
               key={key}
@@ -77,6 +67,7 @@ export default function Header({ tipo, onTipoChange, onAlertasClick }: HeaderPro
 
         {/* CTA */}
         <button
+          className="ff-cta"
           onClick={onAlertasClick}
           style={{
             background: 'var(--gold)',
@@ -88,7 +79,6 @@ export default function Header({ tipo, onTipoChange, onAlertasClick }: HeaderPro
             fontSize: 13,
             fontWeight: 800,
             cursor: 'pointer',
-            whiteSpace: 'nowrap',
             boxShadow: '0 2px 8px rgba(245,166,35,.35)',
           }}
         >

@@ -1,7 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* RESET */
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
+/* VARIABLES */
 :root {
   --teal-dark:    #0d5c78;
   --teal:         #1a7fa8;
@@ -30,6 +36,7 @@
   --surface:      #ffffff;
   --border:       #e2e8ed;
   --border2:      #ccd6de;
+
   --ink:          #0f2733;
   --ink2:         #3d5a6b;
   --ink3:         #7a9aaa;
@@ -45,7 +52,10 @@
   --sh-lg: 0 8px 28px rgba(13,92,120,.13), 0 4px 10px rgba(0,0,0,.06);
 }
 
-html { scroll-behavior: smooth; }
+/* BASE */
+html { 
+  scroll-behavior: smooth; 
+}
 
 body {
   font-family: 'Nunito', sans-serif;
@@ -56,35 +66,116 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* SCROLL */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb { 
+  background: var(--border2); 
+  border-radius: 3px; 
+}
 
-/* Animations */
+/* ANIMATIONS */
 @keyframes cardUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: none; }
 }
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-/* HEADER MOBILE FIX */
+/* ========================= */
+/* HEADER (CLAVE PARA ESCALA) */
+/* ========================= */
+
+.ff-header-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+  height: auto;
+  min-height: 56px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* Switcher */
+.ff-switcher {
+  display: flex;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 3px;
+  gap: 2px;
+}
+
+/* Botones tipo */
+.ff-tipo-btn {
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .18s;
+}
+
+/* CTA */
+.ff-cta {
+  display: block;
+}
+
+/* ========================= */
+/* MOBILE (LO MÁS IMPORTANTE) */
+/* ========================= */
+
 @media (max-width: 768px) {
-  
+
   .ff-header-inner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    padding: 8px 12px;
   }
 
+  /* El switch baja de línea */
   .ff-switcher {
     flex-basis: 100%;
     order: 3;
+
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Botón alertas arriba */
+  .ff-cta {
+    order: 2;
+  }
+
+}
+
+/* ========================= */
+/* DESKTOP */
+/* ========================= */
+
+@media (min-width: 769px) {
+
+  .ff-header-inner {
+    flex-wrap: nowrap;
+    height: 64px;
+    padding: 0 24px;
+  }
+
+  .ff-switcher {
+    width: auto;
+    order: 2;
   }
 
   .ff-cta {
-    order: 2;
+    order: 3;
   }
 
 }
