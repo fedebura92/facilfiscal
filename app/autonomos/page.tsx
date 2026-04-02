@@ -13,18 +13,14 @@ const FALLBACK_VENC: Record<Tipo, Vencimiento[]> = {
   ],
   ri:[
     {id:'4',nombre:'IVA (term. 0-1)',emoji:'🧾',detalle:'Terminación CUIT 0 o 1 — Presentación y pago',dia_mes:19,tipo:'ri',fecha:''},
-    {id:'5',nombre:'IVA (term. 2-3)',emoji:'🧾',detalle:'Terminación CUIT 2 o 3 — Presentación y pago',dia_mes:20,tipo:'ri',fecha:''},
-    {id:'6',nombre:'IVA (term. 4-5)',emoji:'🧾',detalle:'Terminación CUIT 4 o 5 — Presentación y pago',dia_mes:21,tipo:'ri',fecha:''},
-    {id:'7',nombre:'IVA (term. 6-7)',emoji:'🧾',detalle:'Terminación CUIT 6 o 7 — Presentación y pago',dia_mes:22,tipo:'ri',fecha:''},
-    {id:'8',nombre:'IVA (term. 8-9)',emoji:'🧾',detalle:'Terminación CUIT 8 o 9 — Presentación y pago',dia_mes:23,tipo:'ri',fecha:''},
-    {id:'9',nombre:'Ganancias — Anticipo',emoji:'💼',detalle:'Anticipo mensual personas jurídicas y físicas',dia_mes:25,tipo:'ri',fecha:''},
-    {id:'10',nombre:'Bienes Personales — Anticipo',emoji:'🏠',detalle:'Anticipo mensual',dia_mes:22,tipo:'ri',fecha:''},
-    {id:'11',nombre:'SUSS / Contribuciones',emoji:'👥',detalle:'Contribuciones patronales si tenés empleados',dia_mes:12,tipo:'ri',fecha:''},
+    {id:'5',nombre:'Ganancias — Anticipo',emoji:'💼',detalle:'Anticipo mensual personas jurídicas y físicas',dia_mes:25,tipo:'ri',fecha:''},
+    {id:'6',nombre:'Bienes Personales — Anticipo',emoji:'🏠',detalle:'Anticipo mensual',dia_mes:22,tipo:'ri',fecha:''},
   ],
   aut:[
-    {id:'12',nombre:'Autónomos — Aporte mensual',emoji:'⚡',detalle:'Aporte mensual categorías I-V',dia_mes:8,tipo:'aut',fecha:''},
-    {id:'13',nombre:'IVA',emoji:'🧾',detalle:'Si estás inscripto en IVA',dia_mes:19,tipo:'aut',fecha:''},
-    {id:'14',nombre:'Ganancias — Anticipo',emoji:'💼',detalle:'Anticipo mensual personas humanas',dia_mes:25,tipo:'aut',fecha:''},
+    {id:'7',nombre:'Autónomos — Aporte mensual',emoji:'⚡',detalle:'Aporte mensual según categoría (I a V)',dia_mes:8,tipo:'aut',fecha:''},
+    {id:'8',nombre:'IVA — Si estás inscripto',emoji:'🧾',detalle:'Presentación y pago mensual de IVA',dia_mes:19,tipo:'aut',fecha:''},
+    {id:'9',nombre:'Ganancias — Anticipo',emoji:'💼',detalle:'Anticipo mensual personas humanas',dia_mes:25,tipo:'aut',fecha:''},
+    {id:'10',nombre:'Bienes Personales — Anticipo',emoji:'🏠',detalle:'Anticipo mensual si corresponde',dia_mes:22,tipo:'aut',fecha:''},
   ],
 }
 
@@ -35,14 +31,14 @@ const FALLBACK_ALERTAS: Record<Tipo, Alerta[]> = {
     {id:'a3',icon:'📢',tipo:'info',title:'ARCA reemplaza a AFIP',description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.'},
   ],
   ri:[
-    {id:'a4',icon:'📅',tipo:'warn',title:'IVA según terminación de CUIT',description:'El vencimiento del IVA varía según el último dígito de tu CUIT. Revisá tu fecha exacta.'},
-    {id:'a5',icon:'💼',tipo:'danger',title:'Retenciones y percepciones',description:'Si sufriste retenciones o percepciones, descontálas de tu IVA a pagar. Verificá el F.2002.'},
-    {id:'a6',icon:'📑',tipo:'warn',title:'Factura A con CBU',description:'Para emitir factura A necesitás validar el CBU en ARCA. Sin esto, solo podés emitir B.'},
-    {id:'a7',icon:'📢',tipo:'info',title:'ARCA reemplaza a AFIP',description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.'},
+    {id:'a4',icon:'📅',tipo:'warn',title:'IVA según terminación de CUIT',description:'El vencimiento del IVA varía según el último dígito de tu CUIT.'},
+    {id:'a5',icon:'💼',tipo:'danger',title:'Retenciones y percepciones',description:'Verificá si debés presentar F.2002 o F.572 este mes.'},
+    {id:'a6',icon:'📢',tipo:'info',title:'ARCA reemplaza a AFIP',description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.'},
   ],
   aut:[
-    {id:'a8',icon:'⚡',tipo:'warn',title:'Ajuste de categorías autónomos',description:'Las categorías de autónomos se actualizan por inflación. Verificá tu categoría vigente.'},
-    {id:'a9',icon:'💰',tipo:'warn',title:'Aportes jubilatorios',description:'El importe varía según categoría (I a V). Confirmá el monto actualizado en ARCA.'},
+    {id:'a7',icon:'⚡',tipo:'warn',title:'Ajuste de categorías autónomos',description:'Las categorías de autónomos se actualizan por inflación. Verificá si tu categoría cambió en ARCA.'},
+    {id:'a8',icon:'💰',tipo:'warn',title:'Aportes jubilatorios actualizados',description:'El importe mensual varía según tu categoría (I a V). Confirmá el monto actualizado en ARCA antes de pagar.'},
+    {id:'a9',icon:'📑',tipo:'info',title:'Podés estar inscripto en IVA',description:'Si además de autónomo estás inscripto en IVA, tenés vencimientos mensuales de IVA adicionales.'},
     {id:'a10',icon:'📢',tipo:'info',title:'ARCA reemplaza a AFIP',description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.'},
   ],
 }
@@ -61,8 +57,8 @@ function fmtL(f:string){return new Intl.DateTimeFormat('es-AR',{day:'numeric',mo
 function fmtS(f:string){return new Intl.DateTimeFormat('es-AR',{day:'2-digit',month:'short'}).format(new Date(f))}
 function money(n:number){return '$'+n.toLocaleString('es-AR')}
 
-export default function ResponsableInscriptoPage() {
-  const tipo: Tipo = 'ri'
+export default function AutonomosPage() {
+  const tipo: Tipo = 'aut'
   const [venc,setVenc]=useState<Vencimiento[]>([])
   const [alertas,setAlertas]=useState<Alerta[]>([])
   const [catIdx,setCatIdx]=useState('')
@@ -71,7 +67,7 @@ export default function ResponsableInscriptoPage() {
   const [aiLoading,setAiLoading]=useState(false)
   const [email,setEmail]=useState('')
   const [emailOk,setEmailOk]=useState(false)
-  const [tiposSel,setTiposSel]=useState<string[]>(['ri'])
+  const [tiposSel,setTiposSel]=useState<string[]>(['aut'])
   const [suscError,setSuscError]=useState('')
   const [toast,setToast]=useState('')
   const [mounted,setMounted]=useState(false)
@@ -190,7 +186,7 @@ export default function ResponsableInscriptoPage() {
         }
       `}}/>
 
-      {/* HEADER — idéntico al de Monotributo */}
+      {/* HEADER — idéntico, solo cambia el botón activo */}
       <header style={{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky',top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
         <div className="ff-header-inner" style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:6}}>
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
@@ -207,7 +203,7 @@ export default function ResponsableInscriptoPage() {
             </div>
           </a>
 
-          {/* SWITCHER — mismo de siempre, cambia solo la página activa */}
+          {/* SWITCHER — 'aut' activo */}
           <div className="ff-switcher">
             {(['mono','ri','aut'] as Tipo[]).map((t,i)=>(
               <button
@@ -215,8 +211,8 @@ export default function ResponsableInscriptoPage() {
                 onClick={()=>{ window.location.href = t==='mono'?'/':t==='ri'?'/responsable-inscripto':'/autonomos' }}
                 className="ff-tipo-btn"
                 style={{
-                  background: t==='ri' ? V.teal : 'none',
-                  color: t==='ri' ? 'white' : V.ink3,
+                  background: t==='aut' ? V.teal : 'none',
+                  color: t==='aut' ? 'white' : V.ink3,
                 }}
               >
                 {['Monotributo','Resp. Inscripto','Autónomo'][i]}
@@ -232,33 +228,33 @@ export default function ResponsableInscriptoPage() {
         </div>
       </header>
 
-      {/* HERO — copy específico para RI */}
+      {/* HERO — copy específico para Autónomos */}
       <div className="ff-hero" style={{background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`,position:'relative',overflow:'hidden'}}>
         <div style={{position:'absolute',left:'50%',top:-80,transform:'translateX(-50%)',width:500,height:300,borderRadius:'50%',background:'rgba(255,255,255,.04)'}}/>
         <div style={{maxWidth:680,margin:'0 auto',position:'relative',zIndex:1}}>
           <div className="ff-social-proof">
-            <span>🏢</span> Para Responsables Inscriptos de todo el país
+            <span>⚡</span> Para Autónomos inscriptos en AFIP / ARCA
           </div>
-          <h1>Gestioná tu IVA y Ganancias<br/>sin errores ni multas</h1>
-          <p>Controlá tus vencimientos de IVA, anticipos de Ganancias y<br/>Bienes Personales. Recibí recordatorios automáticos.</p>
+          <h1>Controlá tus aportes<br/>y vencimientos como autónomo</h1>
+          <p>Seguí tus aportes jubilatorios mensuales, IVA si corresponde,<br/>y Ganancias. Sin multas, sin sorpresas.</p>
           <a href="https://www.afip.gob.ar" target="_blank" rel="noopener noreferrer" className="ff-hero-btn">Ir a AFIP / ARCA →</a>
           <div style={{marginTop:10,fontSize:11,color:'rgba(255,255,255,.5)',fontWeight:600}}>Sin registro · Sin tarjeta · Gratis</div>
         </div>
       </div>
 
-      {/* DOLOR — versión RI */}
+      {/* DOLOR — versión Autónomos */}
       <div style={{background:V.surface,borderBottom:`1px solid ${V.border}`}}>
         <div style={{maxWidth:1120,margin:'0 auto',padding:'24px 16px'}}>
           <div style={{textAlign:'center',marginBottom:16}}>
             <div style={{fontSize:13,fontWeight:800,color:V.red,marginBottom:4}}>⚠️ Evitá problemas con AFIP</div>
-            <div style={{fontSize:16,fontWeight:900,color:V.ink,letterSpacing:'-0.2px'}}>Errores comunes del Responsable Inscripto</div>
+            <div style={{fontSize:16,fontWeight:900,color:V.ink,letterSpacing:'-0.2px'}}>Errores frecuentes de los Autónomos</div>
           </div>
           <div className="ff-dolor-grid">
             {[
-              {icon:'❌',txt:'Olvidan presentar el IVA a tiempo'},
-              {icon:'❌',txt:'No compensan retenciones sufridas'},
-              {icon:'❌',txt:'Emiten facturas A sin habilitar CBU'},
-              {icon:'❌',txt:'Pagan anticipos de más por no calcularlos'},
+              {icon:'❌',txt:'Olvidan pagar el aporte mensual'},
+              {icon:'❌',txt:'No actualizan su categoría por inflación'},
+              {icon:'❌',txt:'Confunden el IVA con el aporte autónomo'},
+              {icon:'❌',txt:'Pagan el importe desactualizado'},
             ].map(e=>(
               <div key={e.txt} style={{display:'flex',gap:8,alignItems:'flex-start',background:V.redBg,border:`1px solid ${V.redRing}`,borderRadius:10,padding:'10px 12px'}}>
                 <span style={{fontSize:13,flexShrink:0}}>{e.icon}</span>
@@ -278,7 +274,7 @@ export default function ResponsableInscriptoPage() {
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
           <div style={{fontSize:13,color:V.ink3,fontWeight:600}}>Hoy es <strong style={{color:V.ink2}}>{fechaHoy}</strong></div>
           <div style={{display:'inline-flex',alignItems:'center',gap:6,background:V.tealLight,border:`1.5px solid ${V.tealRing}`,borderRadius:20,padding:'4px 12px 4px 8px',fontSize:12,fontWeight:800,color:V.tealDark}}>
-            <div style={{width:7,height:7,borderRadius:'50%',background:V.teal,flexShrink:0}}/>Resp. Inscripto
+            <div style={{width:7,height:7,borderRadius:'50%',background:V.teal,flexShrink:0}}/>Autónomo
           </div>
         </div>
 
@@ -363,29 +359,29 @@ export default function ResponsableInscriptoPage() {
           </div>
 
           <div style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,overflow:'hidden',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
-            <div style={{padding:'13px 16px',borderBottom:`1px solid ${V.border}`,fontSize:14,fontWeight:800,color:V.ink}}>🧮 ¿Cuánto tengo que pagar?</div>
+            <div style={{padding:'13px 16px',borderBottom:`1px solid ${V.border}`,fontSize:14,fontWeight:800,color:V.ink}}>🧮 ¿Cuánto tengo que aportar?</div>
             <div style={{padding:'14px 16px'}}>
-              <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:5}}>Tu escala aproximada</div>
+              <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:5}}>Tu categoría de autónomo</div>
               <select value={catIdx} onChange={e=>setCatIdx(e.target.value)} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'9px 10px',fontSize:13,fontWeight:600,color:V.ink,background:V.bg,outline:'none',marginBottom:10}}>
-                <option value="" disabled>— Elegí tu escala —</option>
+                <option value="" disabled>— Elegí tu categoría —</option>
                 {MONTOS[tipo].cats.map((c,i)=><option key={i} value={i}>{c}</option>)}
               </select>
               <div style={{fontSize:11,color:V.ink3,fontWeight:600,marginBottom:10,lineHeight:1.4}}>
-                * Estimación orientativa. El IVA a pagar depende de tus operaciones mensuales.
+                * Montos orientativos. Verificá el importe exacto actualizado en ARCA.
               </div>
               <div style={{background:`linear-gradient(135deg,${V.tealDark},${V.tealMid})`,borderRadius:8,padding:'16px',textAlign:'center',minHeight:80,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
                 {catIdx!==''?<>
                   <div style={{fontSize:28,fontWeight:900,color:'white',letterSpacing:'-0.5px',lineHeight:1,marginBottom:4}}>{money(total)}</div>
                   <div style={{fontSize:10,color:'rgba(255,255,255,.65)',fontWeight:600,marginBottom:8}}>aportes aprox. / mes · 2026</div>
                   <div className="ff-calc-break" style={{width:'100%'}}>
-                    {[['Anticipos',MONTOS[tipo].imp[idx]],['Previsional',MONTOS[tipo].prev[idx]]].map(([l,val])=>(
+                    {[['Aporte',MONTOS[tipo].imp[idx]],['Previsional',MONTOS[tipo].prev[idx]]].map(([l,val])=>(
                       <div key={l as string} style={{background:'rgba(255,255,255,.1)',borderRadius:6,padding:'5px 6px',textAlign:'center'}}>
                         <div style={{fontSize:8,color:'rgba(255,255,255,.55)',fontWeight:700,textTransform:'uppercase'}}>{l}</div>
                         <div style={{fontSize:12,fontWeight:900,color:'white',marginTop:1}}>{money(val as number)}</div>
                       </div>
                     ))}
                   </div>
-                </>:<div style={{fontSize:14,fontWeight:700,color:'rgba(255,255,255,.4)'}}>Seleccioná tu escala</div>}
+                </>:<div style={{fontSize:14,fontWeight:700,color:'rgba(255,255,255,.4)'}}>Seleccioná tu categoría</div>}
               </div>
             </div>
           </div>
@@ -395,8 +391,8 @@ export default function ResponsableInscriptoPage() {
         <div style={{fontSize:11,fontWeight:800,letterSpacing:'1.5px',textTransform:'uppercase',color:V.ink3,marginBottom:12}}>Acciones rápidas</div>
         <div className="ff-accion-grid">
           {[
-            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'Emitir Factura A / B',desc:'Diferencias, requisitos y cómo hacerlo en ARCA',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
-            {icon:'📊',bg:V.tealLight,br:V.tealRing,label:'Cronograma IVA',desc:'Fechas exactas según terminación de CUIT',link:'Ver fechas →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
+            {icon:'🧾',bg:V.goldLight,br:V.goldRing,label:'¿Cómo facturar?',desc:'Facturas C o E según si estás inscripto en IVA',link:'Ver guía →',fn:()=>window.location.href='/como-facturar'},
+            {icon:'📊',bg:V.tealLight,br:V.tealRing,label:'Categorías autónomos',desc:'Cuánto corresponde según tu actividad',link:'Ver categorías →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
             {icon:'🏦',bg:V.bg,br:V.border,label:'Pagar en AFIP',desc:'Generá tu VEP y pagá desde home banking',link:'Ir a AFIP →',fn:()=>window.open('https://www.afip.gob.ar','_blank')},
           ].map(a=>(
             <button key={a.label} onClick={a.fn} style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:14,padding:'16px',display:'flex',gap:12,alignItems:'center',textAlign:'left',boxShadow:`0 1px 4px rgba(13,92,120,.07)`,width:'100%'}}>
@@ -418,14 +414,14 @@ export default function ResponsableInscriptoPage() {
           </div>
           <div style={{padding:'12px 14px'}}>
             <div style={{display:'flex',gap:8,marginBottom:10}}>
-              <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&askAI()} placeholder="¿Cuándo vence mi IVA como RI?"
+              <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&askAI()} placeholder="¿Cuánto pago como autónomo categoría II?"
                 style={{flex:1,border:`1.5px solid ${V.border}`,borderRadius:8,padding:'9px 10px',fontSize:13,fontWeight:600,color:V.ink,background:V.bg,outline:'none'}}/>
               <button onClick={()=>askAI()} disabled={aiLoading} style={{background:V.teal,color:'white',border:'none',borderRadius:8,padding:'9px 14px',fontSize:13,fontWeight:800,opacity:aiLoading?.6:1,whiteSpace:'nowrap'}}>
                 {aiLoading?'…':'Consultar →'}
               </button>
             </div>
             <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-              {['Cuándo vence el IVA','Cómo calcular el anticipo','Retenciones de IVA','Factura A vs Factura B'].map(c=>(
+              {['Cuándo vence el aporte','Diferencia mono vs autónomo','Cómo cambiar de categoría','IVA para autónomos'].map(c=>(
                 <button key={c} onClick={()=>askAI(c)} style={{background:V.bg,border:`1px solid ${V.border}`,borderRadius:20,padding:'4px 10px',fontSize:11,fontWeight:700,color:V.ink3}}>{c}</button>
               ))}
             </div>

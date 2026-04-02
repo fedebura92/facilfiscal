@@ -239,17 +239,11 @@ const total = useMemo(() => {
               {(['mono','ri','aut'] as Tipo[]).map((t,i)=>(
                 <button
                   key={t}
-                  onClick={() => {
-                    if (t === 'ri') {
-                      window.location.href = '/responsable-inscripto'
-                      return
-                    }
-                    setTipo(t)
-                  }}
+                  onClick={()=>{ window.location.href = t==='mono'?'/':t==='ri'?'/responsable-inscripto':'/autonomos' }}
                   className="ff-tipo-btn"
                   style={{
-                    background: tipo === t ? V.teal : 'none',
-                    color: tipo === t ? 'white' : V.ink3
+                    background: t==='mono' ? V.teal : 'none',
+                    color: t==='mono' ? 'white' : V.ink3
                   }}
                 >
                   {['Monotributo','Resp. Inscripto','Autónomo'][i]}
