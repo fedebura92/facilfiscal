@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   keywords: ['monotributo argentina', 'categorias monotributo 2026', 'como facturar monotributo', 'vencimientos AFIP', 'ARCA Argentina', 'factura C', 'recategorizacion monotributo'],
   authors: [{ name: 'FacilFiscal' }],
   openGraph: {
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     type: 'website',
     locale: 'es_AR',
     url: 'https://facilfiscal.com.ar',
     siteName: 'FacilFiscal',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     title: 'FacilFiscal — Monotributo fácil en Argentina',
     description: 'Calculá tu categoría, aprendé a facturar y recibí alertas automáticas de vencimientos.',
   },
