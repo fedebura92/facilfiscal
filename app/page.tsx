@@ -222,10 +222,7 @@ const total = useMemo(() => {
   }}
 >
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
-            <img src="/logo.svg" style={{ height: 40 }} />
-            <div style={{lineHeight:1}}>
-              <div><span style={{fontSize:17,fontWeight:900,color:V.tealDark}}>Fácil</span><span style={{fontSize:17,fontWeight:900,color:V.teal}}> Fiscal</span></div>
-            </div>
+            <img src="/logo.svg" style={{ height: 48 }} />
           </a>
 
          <div className="ff-switcher">
