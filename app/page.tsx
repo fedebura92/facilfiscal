@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
-import Image from 'next/image'
 
 type Tipo = 'mono' | 'ri' | 'aut'
 interface Vencimiento { id:string; nombre:string; emoji:string; detalle:string; dia_mes:number; tipo:string; fecha:string }
@@ -223,12 +222,7 @@ const total = useMemo(() => {
   }}
 >
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
-            <Image
-              src="/logo.png"
-              width={120}
-              height={40}
-              style={{ objectFit: 'contain' }}
-            />
+            <img src="/logo.svg" style={{ height: 40 }} />
             <div style={{lineHeight:1}}>
               <div><span style={{fontSize:17,fontWeight:900,color:V.tealDark}}>Fácil</span><span style={{fontSize:17,fontWeight:900,color:V.teal}}> Fiscal</span></div>
             </div>
