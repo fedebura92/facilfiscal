@@ -36,17 +36,31 @@ export async function POST(req: NextRequest) {
   const supabase = supabaseAdmin()
 
   // 1. Desactivar todas las suscripciones previas del email
-  await supabase
-    .from('users')
-    .update({ activo: false })
-    .eq('email', email)
+const { error: updateError } = await supabase
+  .from('users')
+  .update({ activo: false })
+  .eq('email', email)
+
+if (updateError) {
+  console.error('ERROR UPDATE:', updateError)
+}
 
   // 2. Upsert de los tipos seleccionados
   for (const tipo of tipos) {
-    await supabase
-      .from('users')
-      .upsert({ email, tipo, activo: true }, { onConflict: 'email,tipo' })
+  const { data, error } = await supabase
+    .from('users')
+    .upsert(
+      { email, tipo, activo: true },
+      { onConflict: 'email,tipo' }
+    )
+    .select()
+
+  if (error) {
+    console.error('ERROR UPSERT USER:', error)
+  } else {
+    console.log('USER GUARDADO:', data)
   }
+}
 
   // 3. Enviar email de bienvenida
   try {
