@@ -225,9 +225,8 @@ const total = useMemo(() => {
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
             <Image
               src="/logo.png"
-              alt="FacilFiscal"
-              width={38}
-              height={38}
+              width={60}
+              height={40}
             />
             <div style={{lineHeight:1}}>
               <div><span style={{fontSize:17,fontWeight:900,color:V.tealDark}}>Fácil</span><span style={{fontSize:17,fontWeight:900,color:V.teal}}> Fiscal</span></div>
