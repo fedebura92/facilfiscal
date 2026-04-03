@@ -94,15 +94,7 @@ export default function ComoFacturar() {
       <header style={{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky',top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
         <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',height:56,display:'flex',alignItems:'center',gap:16}}>
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none'}}>
-            <svg viewBox="0 0 44 44" fill="none" width={36} height={36}>
-              <rect x="6" y="4" width="24" height="30" rx="4" fill="#1a7fa8"/>
-              <rect x="10" y="11" width="12" height="2.5" rx="1.25" fill="rgba(255,255,255,.5)"/>
-              <rect x="10" y="16" width="16" height="2.5" rx="1.25" fill="rgba(255,255,255,.4)"/>
-              <rect x="10" y="21" width="10" height="2.5" rx="1.25" fill="rgba(255,255,255,.3)"/>
-              <path d="M24 4 L30 10 L24 10 Z" fill="rgba(255,255,255,.25)"/>
-              <path d="M10 24 L17 31 L32 15" stroke="#f5a623" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span style={{fontSize:16,fontWeight:900,color:V.tealDark}}>Fácil<span style={{color:V.teal}}> Fiscal</span></span>
+            <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
           </a>
           <span style={{color:V.ink3,fontSize:13}}>›</span>
           <span style={{fontSize:13,fontWeight:700,color:V.ink2}}>Cómo facturar</span>
