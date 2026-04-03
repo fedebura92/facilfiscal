@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
+import Image from 'next/image'
 
 type Tipo = 'mono' | 'ri' | 'aut'
 interface Vencimiento { id:string; nombre:string; emoji:string; detalle:string; dia_mes:number; tipo:string; fecha:string }
@@ -222,14 +223,12 @@ const total = useMemo(() => {
   }}
 >
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
-            <svg viewBox="0 0 44 44" fill="none" width={38} height={38}>
-              <rect x="6" y="4" width="24" height="30" rx="4" fill="#1a7fa8"/>
-              <rect x="10" y="11" width="12" height="2.5" rx="1.25" fill="rgba(255,255,255,.5)"/>
-              <rect x="10" y="16" width="16" height="2.5" rx="1.25" fill="rgba(255,255,255,.4)"/>
-              <rect x="10" y="21" width="10" height="2.5" rx="1.25" fill="rgba(255,255,255,.3)"/>
-              <path d="M24 4 L30 10 L24 10 Z" fill="rgba(255,255,255,.25)"/>
-              <path d="M10 24 L17 31 L32 15" stroke="#f5a623" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Image
+              src="/logo.png"
+              alt="FacilFiscal"
+              width={38}
+              height={38}
+            />
             <div style={{lineHeight:1}}>
               <div><span style={{fontSize:17,fontWeight:900,color:V.tealDark}}>Fácil</span><span style={{fontSize:17,fontWeight:900,color:V.teal}}> Fiscal</span></div>
             </div>
