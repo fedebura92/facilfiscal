@@ -3,6 +3,9 @@ import './globals.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.facilfiscal.com.ar'),
+    alternates: {
+    canonical: '/',
+  },  
 
   title: {
     default: 'FacilFiscal — Monotributo fácil en Argentina',
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_AR',
-    url: 'https://www.facilfiscal.com.ar',
+    url: '/',
     siteName: 'FacilFiscal',
 
     title: 'FacilFiscal — Monotributo fácil en Argentina',

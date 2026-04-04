@@ -85,6 +85,20 @@ body {
 }
 
 /* ========================= */
+/* HOVER CARDS */
+/* ========================= */
+
+.ff-card-link {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.ff-card-link:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.09);
+}
+
+/* ========================= */
 /* HEADER (CLAVE PARA ESCALA) */
 /* ========================= */
 
@@ -129,6 +143,23 @@ body {
 /* CTA */
 .ff-cta {
   display: block;
+}
+
+.ff-card-link {
+  display: block;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--ink);
+  transition: all 0.2s ease;
+}
+
+.ff-card-link:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.09);
 }
 
 /* ========================= */

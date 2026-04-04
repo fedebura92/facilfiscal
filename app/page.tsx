@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
+import Link from 'next/link'
 
 type Tipo = 'mono' | 'ri' | 'aut'
 interface Vencimiento { id:string; nombre:string; emoji:string; detalle:string; dia_mes:number; tipo:string; fecha:string }
@@ -491,6 +492,49 @@ const total = useMemo(() => {
           </div>
         </div>
 
+<p style={{marginBottom: 12, fontSize: 13, color: '#3d5a6b'}}>
+  Calculá fácilmente IVA, Ingresos Brutos, Ganancias e impuestos en Argentina.
+</p>
+
+{/* SEO: Calculadoras */}
+<section style={{marginTop: 40}}>
+  <h2 style={{
+    fontSize: 18,
+    fontWeight: 900,
+    marginBottom: 12,
+    color: '#0f2733'
+  }}>
+    Calculadoras de impuestos
+  </h2>
+
+  <div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: 12
+  }}>
+    
+    <Link href="/iva" className="ff-card-link">
+      🧾 Calculadora de IVA
+    </Link>
+
+    <Link href="/ingresos-brutos" className="ff-card-link">
+      📊 Calculadora de Ingresos Brutos
+    </Link>
+
+    <Link href="/impuesto-ganancias" className="ff-card-link">
+      💼 Calculadora de Ganancias
+    </Link>
+
+    <Link href="/impuestos-importacion" className="ff-card-link">
+      📦 Calculadora de Importaciones
+    </Link>
+
+    <Link href="/impuestos-por-provincia" className="ff-card-link">
+      🗺️ Impuestos por Provincia
+    </Link>
+
+  </div>
+</section>
       </main>
 
       {toast&&<div style={{position:'fixed',bottom:16,right:16,left:16,background:V.ink,color:'white',borderRadius:10,padding:'12px 16px',fontSize:13,fontWeight:700,boxShadow:`0 4px 16px rgba(13,92,120,.2)`,zIndex:999,textAlign:'center',animation:'cardUp .3s ease'}}>{toast}</div>}

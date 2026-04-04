@@ -7,11 +7,11 @@ import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(req: NextRequest) {
   // Verificar que lo llama Vercel Cron (o el admin)
-  //const auth = req.headers.get('authorization') || req.headers.get('Authorization')
+const auth = req.headers.get('authorization') || req.headers.get('Authorization')
 
-//if (!auth || !auth.includes(process.env.CRON_SECRET!)) {
-//  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-//}
+if (!auth || !auth.includes(process.env.CRON_SECRET!)) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
 
   const supabase = supabaseAdmin()
   const today = new Date()
