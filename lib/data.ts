@@ -137,8 +137,10 @@ export function money(n: number): string {
   return '$' + n.toLocaleString('es-AR')
 }
 
-// Alias para compatibilidad con componentes existentes
-export const formatMoney = money
+// Aliases para compatibilidad con componentes existentes
+export const formatMoney      = money
+export const formatFechaLarga = fmtLarga
+export const formatFechaCorta = fmtCorta
 
 
 
