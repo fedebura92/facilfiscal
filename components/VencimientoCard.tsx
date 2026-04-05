@@ -1,25 +1,24 @@
 'use client'
-import { Vencimiento } from '@/lib/types'
-import { diffDias, formatFechaLarga } from '@/lib/data'
+import { diffDias, fmtLarga, type VencimientoUI } from '@/lib/data'
 
 interface Props {
-  venc: Vencimiento
+  venc: VencimientoUI
   index: number
 }
 
 export default function VencimientoCard({ venc, index }: Props) {
-  const d = diffDias(venc.fecha!)
+  const d = diffDias(venc.fecha)
 
   const config = d === 0
-    ? { card: 'urgente', icon: 'icon-red',   pill: 'sp-red',   pillTxt: '🔴 Vence HOY',      diasCls: 'dias-red',   diasTxt: '¡HOY!',          btnDanger: true,  btnTxt: 'Pagar ahora →' }
+    ? { card: 'urgente',   icon: 'icon-red',   pill: 'sp-red',   pillTxt: '🔴 Vence HOY',     diasCls: 'dias-red',   diasTxt: '¡HOY!',       btnDanger: true,  btnTxt: 'Pagar ahora →' }
     : d === 1
-    ? { card: 'proximo', icon: 'icon-amber',  pill: 'sp-amber', pillTxt: '🟡 Vence mañana',  diasCls: 'dias-amber', diasTxt: 'Mañana',          btnDanger: false, btnTxt: 'Ver cómo pagar' }
-    : { card: 'tranquilo',icon:'icon-teal',   pill: 'sp-teal',  pillTxt: `🟢 En ${d} días`,  diasCls: 'dias-teal',  diasTxt: `En ${d} días`,    btnDanger: false, btnTxt: 'Ver detalles' }
+    ? { card: 'proximo',   icon: 'icon-amber', pill: 'sp-amber', pillTxt: '🟡 Vence mañana', diasCls: 'dias-amber', diasTxt: 'Mañana',       btnDanger: false, btnTxt: 'Ver cómo pagar' }
+    : { card: 'tranquilo', icon: 'icon-teal',  pill: 'sp-teal',  pillTxt: `🟢 En ${d} días`, diasCls: 'dias-teal',  diasTxt: `En ${d} días`, btnDanger: false, btnTxt: 'Ver detalles' }
 
   const cardColors: Record<string, React.CSSProperties> = {
-    urgente:   { borderColor: 'var(--red-ring)',   background: 'linear-gradient(150deg,#fff 65%,var(--red-bg))' },
-    proximo:   { borderColor: 'var(--gold-ring)',  background: 'linear-gradient(150deg,#fff 65%,var(--gold-light))' },
-    tranquilo: { borderColor: 'var(--teal-ring)',  background: 'linear-gradient(150deg,#fff 65%,var(--teal-light))' },
+    urgente:   { borderColor: 'var(--red-ring)',  background: 'linear-gradient(150deg,#fff 65%,var(--red-bg))' },
+    proximo:   { borderColor: 'var(--gold-ring)', background: 'linear-gradient(150deg,#fff 65%,var(--gold-light))' },
+    tranquilo: { borderColor: 'var(--teal-ring)', background: 'linear-gradient(150deg,#fff 65%,var(--teal-light))' },
   }
   const iconColors: Record<string, string> = {
     'icon-red':   'var(--red-bg)',
@@ -27,9 +26,9 @@ export default function VencimientoCard({ venc, index }: Props) {
     'icon-teal':  'var(--teal-light)',
   }
   const pillStyles: Record<string, React.CSSProperties> = {
-    'sp-red':   { background: 'var(--red-bg)',    color: 'var(--red)',       border: '1.5px solid var(--red-ring)'   },
-    'sp-amber': { background: 'var(--gold-light)',color: 'var(--amber)',     border: '1.5px solid var(--gold-ring)'  },
-    'sp-teal':  { background: 'var(--teal-light)',color: 'var(--teal-dark)', border: '1.5px solid var(--teal-ring)'  },
+    'sp-red':   { background: 'var(--red-bg)',    color: 'var(--red)',       border: '1.5px solid var(--red-ring)'  },
+    'sp-amber': { background: 'var(--gold-light)', color: 'var(--amber)',    border: '1.5px solid var(--gold-ring)' },
+    'sp-teal':  { background: 'var(--teal-light)', color: 'var(--teal-dark)',border: '1.5px solid var(--teal-ring)' },
   }
   const diasColors: Record<string, string> = {
     'dias-red':   'var(--red)',
@@ -81,7 +80,7 @@ export default function VencimientoCard({ venc, index }: Props) {
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: 11 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink2)' }}>
-          {formatFechaLarga(venc.fecha!)}
+          {fmtLarga(venc.fecha)}
         </div>
         <div style={{ fontSize: 13, fontWeight: 900, color: diasColors[config.diasCls] }}>
           {config.diasTxt}
