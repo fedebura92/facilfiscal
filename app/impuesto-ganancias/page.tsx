@@ -49,13 +49,13 @@ export default function GananciasPage() {
   const anticipoMensual = impuesto / 12;
 
   return (
-    <main style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
+    <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* NAV */}
       <nav style={{
         background: "#fff",
         borderBottom: "1px solid #e2e8ed",
-        padding: "12px 24px",
+        padding: "9px 24px",
         display: "flex",
         alignItems: "center",
         gap: 16

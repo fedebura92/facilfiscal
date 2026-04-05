@@ -48,7 +48,7 @@ export default function IVAPage() {
       <nav style={{
         background: "#fff",
         borderBottom: "1px solid #e2e8ed",
-        padding: "10px 24px",
+        padding: "9px 24px",
         display: "flex",
         alignItems: "center",
         gap: 16
