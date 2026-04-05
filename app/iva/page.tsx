@@ -38,7 +38,14 @@ export default function IVAPage() {
     <main style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* NAV */}
-      <nav style={{ background: "#0f766e", padding: "12px 24px", display: "flex", alignItems: "center", gap: 16 }}>
+      <nav style={{
+        background: "#fff",
+        borderBottom: "1px solid #e2e8ed",
+        padding: "12px 24px",
+        display: "flex",
+        alignItems: "center",
+        gap: 16
+        }}>
         <Link href="/" style={{ color: "#fff", fontWeight: 700, fontSize: 18, textDecoration: "none" }}>
           🧾 FácilFiscal
         </Link>

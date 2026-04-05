@@ -58,8 +58,17 @@ export default function ImportacionesPage() {
     <main style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* NAV */}
-      <nav style={{ background: "#b45309", padding: "12px 24px", display: "flex", alignItems: "center", gap: 16 }}>
-        <Link href="/" style={{ color: "#fff", fontWeight: 700, fontSize: 18, textDecoration: "none" }}>🧾 FácilFiscal</Link>
+      <nav style={{
+        background: "#fff",
+        borderBottom: "1px solid #e2e8ed",
+        padding: "12px 24px",
+        display: "flex",
+        alignItems: "center",
+        gap: 16
+        }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
+        </Link>
         <span style={{ marginLeft: "auto", display: "flex", gap: 16 }}>
           <Link href="/iva" style={{ color: "#fde68a", textDecoration: "none", fontSize: 14 }}>IVA</Link>
           <Link href="/ingresos-brutos" style={{ color: "#fde68a", textDecoration: "none", fontSize: 14 }}>Ingresos Brutos</Link>
