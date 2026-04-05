@@ -137,6 +137,9 @@ export function money(n: number): string {
   return '$' + n.toLocaleString('es-AR')
 }
 
+// Alias para compatibilidad con componentes existentes
+export const formatMoney = money
+
 
 
 // ── Navegación del sidebar (FUENTE ÚNICA) ────────────────
