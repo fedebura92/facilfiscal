@@ -150,77 +150,75 @@ const total = useMemo(() => {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html:`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Nunito',sans-serif;background:#f4f7f9;color:#0f2733;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-        @keyframes cardUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        button{font-family:'Nunito',sans-serif;cursor:pointer}
-        input,select{font-family:'Nunito',sans-serif}
-        select{appearance:none}
-        input::placeholder{color:rgba(255,255,255,.85)!important}
+    <style dangerouslySetInnerHTML={{__html:`
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      @keyframes cardUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+      button{font-family:'Nunito',sans-serif;cursor:pointer}
+      input,select{font-family:'Nunito',sans-serif}
+      select{appearance:none}
+      input::placeholder{color:rgba(255,255,255,.85)!important}
 
-        /* ── RESPONSIVE ── */
-        .ff-header-inner{max-width:1120px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+      /* ── RESPONSIVE ── */
+      .ff-header-inner{max-width:1120px;margin:0 auto;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+      .ff-logo-tag{display:block}
+      .ff-switcher{display:flex;background:#f4f7f9;border:1.5px solid #e2e8ed;border-radius:10px;padding:3px;gap:2px}
+      .ff-tipo-btn{padding:7px 12px;border-radius:7px;border:none;background:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s}
+      .ff-cta{display:block}
+      .ff-hero{padding:40px 16px 36px;text-align:center}
+      .ff-hero h1{font-size:26px;font-weight:900;color:white;line-height:1.2;letter-spacing:-0.3px;margin-bottom:12px}
+      .ff-hero p{font-size:14px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:24px;line-height:1.6}
+      .ff-hero-btn{display:inline-block;background:#f5a623;color:#0f2733;border-radius:10px;padding:13px 24px;font-size:15px;font-weight:900;text-decoration:none;box-shadow:0 4px 16px rgba(245,166,35,.4)}
+      .ff-social-proof{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;margin-bottom:16px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9)}
+      .ff-dolor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .ff-main{max-width:1120px;margin:0 auto;padding:20px 16px 80px}
+      .ff-cards-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:24px}
+      .ff-two-col{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:24px}
+      .ff-accion-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:24px}
+      .ff-captura{border-radius:16px;padding:28px 20px;display:flex;flex-direction:column;gap:20px}
+      .ff-cap-form{display:flex;flex-direction:column;gap:10px;width:100%}
+      .ff-cap-input-row{display:flex;gap:8px}
+      .ff-calc-break{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+
+      @media(min-width:600px){
+        .ff-cards-grid{grid-template-columns:repeat(2,1fr)}
+        .ff-accion-grid{grid-template-columns:repeat(3,1fr)}
+        .ff-dolor-grid{grid-template-columns:repeat(4,1fr)}
+      }
+      @media(min-width:768px){
+        .ff-header-inner{padding:0 24px;height:64px}
         .ff-logo-tag{display:block}
-        .ff-switcher{display:flex;background:#f4f7f9;border:1.5px solid #e2e8ed;border-radius:10px;padding:3px;gap:2px}
-        .ff-tipo-btn{padding:7px 12px;border-radius:7px;border:none;background:none;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s}
+        .ff-tipo-btn{padding:8px 16px;font-size:13px}
         .ff-cta{display:block}
-        .ff-hero{padding:40px 16px 36px;text-align:center}
-        .ff-hero h1{font-size:26px;font-weight:900;color:white;line-height:1.2;letter-spacing:-0.3px;margin-bottom:12px}
-        .ff-hero p{font-size:14px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:24px;line-height:1.6}
-        .ff-hero-btn{display:inline-block;background:#f5a623;color:#0f2733;border-radius:10px;padding:13px 24px;font-size:15px;font-weight:900;text-decoration:none;box-shadow:0 4px 16px rgba(245,166,35,.4)}
-        .ff-social-proof{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;margin-bottom:16px;font-size:12px;font-weight:700;color:rgba(255,255,255,.9)}
-        .ff-dolor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-        .ff-main{max-width:1120px;margin:0 auto;padding:20px 16px 80px}
-        .ff-cards-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:24px}
-        .ff-two-col{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:24px}
-        .ff-accion-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:24px}
-        .ff-captura{border-radius:16px;padding:28px 20px;display:flex;flex-direction:column;gap:20px}
-        .ff-cap-form{display:flex;flex-direction:column;gap:10px;width:100%}
-        .ff-cap-input-row{display:flex;gap:8px}
-        .ff-calc-break{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-
-        @media(min-width:600px){
-          .ff-cards-grid{grid-template-columns:repeat(2,1fr)}
-          .ff-accion-grid{grid-template-columns:repeat(3,1fr)}
-          .ff-dolor-grid{grid-template-columns:repeat(4,1fr)}
-        }
-        @media(min-width:768px){
-          .ff-header-inner{padding:0 24px;height:64px}
-          .ff-logo-tag{display:block}
-          .ff-tipo-btn{padding:8px 16px;font-size:13px}
-          .ff-cta{display:block}
-          .ff-hero{padding:52px 24px 48px}
-          .ff-hero h1{font-size:36px}
-          .ff-hero p{font-size:16px}
-          .ff-main{padding:28px 24px 80px}
-          .ff-cards-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
-          .ff-two-col{grid-template-columns:1fr 1fr}
-          .ff-captura{flex-direction:row;align-items:center;justify-content:space-between;padding:36px 40px}
-          .ff-cap-form{width:auto;min-width:300px}
-          .ff-cap-input-row{flex-direction:row}
-        }
-        @media(max-width:480px){
-          .ff-switcher{padding:2px;gap:1px}
-          .ff-tipo-btn{padding:6px 8px;font-size:11px}
-          .ff-cta{font-size:11px;padding:7px 12px}
-          .ff-dolor-grid{grid-template-columns:1fr 1fr}
-          .ff-calc-break{grid-template-columns:1fr 1fr}
-        }
-      `}}/>
-
+        .ff-hero{padding:52px 24px 48px}
+        .ff-hero h1{font-size:36px}
+        .ff-hero p{font-size:16px}
+        .ff-main{padding:28px 24px 80px}
+        .ff-cards-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+        .ff-two-col{grid-template-columns:1fr 1fr}
+        .ff-captura{flex-direction:row;align-items:center;justify-content:space-between;padding:36px 40px}
+        .ff-cap-form{width:auto;min-width:300px}
+        .ff-cap-input-row{flex-direction:row}
+      }
+      @media(max-width:480px){
+        .ff-switcher{padding:2px;gap:1px}
+        .ff-tipo-btn{padding:6px 8px;font-size:11px}
+        .ff-cta{font-size:11px;padding:7px 12px}
+        .ff-dolor-grid{grid-template-columns:1fr 1fr}
+        .ff-calc-break{grid-template-columns:1fr 1fr}
+      }
+    `}}/>
+    
       {/* HEADER */}
       <header style={{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky',top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
         <div 
-  className="ff-header-inner" 
-  style={{
-    display:'flex',
-    flexWrap:'wrap',
-    alignItems:'center',
-    justifyContent:'space-between',
-    gap:6
-  }}
+          className="ff-header-inner" 
+          style={{
+            display:'flex',
+            flexWrap:'wrap',
+            alignItems:'center',
+            justifyContent:'space-between',
+            gap:6
+          }}
 >
           <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none',flexShrink:0}}>
             <img src="/logo.svg" style={{ height: 48 }} />

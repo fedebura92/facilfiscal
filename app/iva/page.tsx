@@ -2,13 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { Metadata } from "next";
 
-// Si querés agregar metadata estática, creá un archivo metadata.ts separado
-// export const metadata: Metadata = {
-//   title: "Calculá tu IVA gratis | FácilFiscal",
-//   description: "Calculá cuánto IVA tenés que pagar en segundos. Ingresá tus ventas y compras y te decimos cuánto pagar a AFIP.",
-// };
 
 const ALICUOTAS = [
   { label: "21% — Tasa general", value: 0.21 },
@@ -23,6 +19,8 @@ function formatARS(n: number) {
 }
 
 export default function IVAPage() {
+  const pathname = usePathname(); // 👈 agregado
+
   const [ventas, setVentas] = useState("");
   const [compras, setCompras] = useState("");
   const [alicuota, setAlicuota] = useState(0.21);
@@ -34,8 +32,17 @@ export default function IVAPage() {
   const credito = comprasNum * alicuota;
   const saldo = debito - credito;
 
+  // 👇 lógica para el header activo (IMPORTANTE)
+  const isActive = (t: "mono" | "ri" | "aut") => {
+    return (
+      (t === "mono" && pathname === "/") ||
+      (t === "ri" && pathname === "/responsable-inscripto") ||
+      (t === "aut" && pathname === "/autonomos")
+    );
+  };
+
   return (
-    <main style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
+    <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* NAV */}
       <nav style={{
