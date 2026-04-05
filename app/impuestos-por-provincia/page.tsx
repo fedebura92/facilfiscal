@@ -129,7 +129,7 @@ export default function ImpuestosPorProvinciaPage() {
         gap: 16
        }}>
         <Link href="/" style={{ display: "flex", alignItems: "center" }}>
-          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 36 }} />
+          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
         </Link>
         <span style={{ marginLeft: "auto", display: "flex", gap: 16 }}>
           <Link href="/iva" style={{ color: "#d1d5db", textDecoration: "none", fontSize: 14 }}>IVA</Link>

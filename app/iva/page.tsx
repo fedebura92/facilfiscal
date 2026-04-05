@@ -46,8 +46,8 @@ export default function IVAPage() {
         alignItems: "center",
         gap: 16
         }}>
-        <Link href="/" style={{ color: "#fff", fontWeight: 700, fontSize: 18, textDecoration: "none" }}>
-          🧾 FácilFiscal
+        <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
         </Link>
         <span style={{ color: "#99f6e4", fontSize: 14, marginLeft: "auto" }}>
           <Link href="/ingresos-brutos" style={{ color: "#99f6e4", textDecoration: "none", marginRight: 16 }}>Ingresos Brutos</Link>
