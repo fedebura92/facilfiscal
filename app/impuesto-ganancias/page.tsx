@@ -53,7 +53,9 @@ export default function GananciasPage() {
 
       {/* NAV */}
       <nav style={{ background: "#7c3aed", padding: "12px 24px", display: "flex", alignItems: "center", gap: 16 }}>
-        <Link href="/" style={{ color: "#fff", fontWeight: 700, fontSize: 18, textDecoration: "none" }}>🧾 FácilFiscal</Link>
+        <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 36 }} />
+        </Link>
         <span style={{ marginLeft: "auto", display: "flex", gap: 16 }}>
           <Link href="/iva" style={{ color: "#ddd6fe", textDecoration: "none", fontSize: 14 }}>IVA</Link>
           <Link href="/ingresos-brutos" style={{ color: "#ddd6fe", textDecoration: "none", fontSize: 14 }}>Ingresos Brutos</Link>
