@@ -55,13 +55,13 @@ export default function IngresosBrutosPage() {
   const ibAPagar = ingresosNum * alicuotaFinal;
 
   return (
-    <main style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh" }}>
+    <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* NAV */}
       <nav style={{
         background: "#fff",
         borderBottom: "1px solid #e2e8ed",
-        padding: "12px 24px",
+        padding: "10px 24px",
         display: "flex",
         alignItems: "center",
         gap: 16

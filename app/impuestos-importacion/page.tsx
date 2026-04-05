@@ -61,7 +61,7 @@ export default function ImportacionesPage() {
       <nav style={{
         background: "#fff",
         borderBottom: "1px solid #e2e8ed",
-        padding: "12px 24px",
+        padding: "10px 24px",
         display: "flex",
         alignItems: "center",
         gap: 16
