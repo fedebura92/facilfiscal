@@ -1,5 +1,7 @@
 "use client";
 
+import SiteHeader from '@/components/SiteHeader'
+
 import { useState } from "react";
 import Link from "next/link";
 
@@ -55,26 +57,10 @@ export default function IngresosBrutosPage() {
   const ibAPagar = ingresosNum * alicuotaFinal;
 
   return (
-    <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
-
-      {/* NAV */}
-      <nav style={{
-        background: "#fff",
-        borderBottom: "1px solid #e2e8ed",
-        padding: "9px 24px",
-        display: "flex",
-        alignItems: "center",
-        gap: 16
-        }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center" }}>
-          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
-        </Link>
-        <span style={{ marginLeft: "auto", display: "flex", gap: 16 }}>
-          <Link href="/iva" style={{ color: "#bfdbfe", textDecoration: "none", fontSize: 14 }}>IVA</Link>
-          <Link href="/impuesto-ganancias" style={{ color: "#bfdbfe", textDecoration: "none", fontSize: 14 }}>Ganancias</Link>
-          <Link href="/impuestos-por-provincia" style={{ color: "#bfdbfe", textDecoration: "none", fontSize: 14 }}>Por provincia</Link>
-        </span>
-      </nav>
+    <>
+      <SiteHeader currentPath="/ingresos-brutos" />
+      <div className="ff-page-content">
+      <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* HERO */}
       <section style={{
@@ -304,5 +290,7 @@ export default function IngresosBrutosPage() {
         <p style={{ margin: 0 }}>© 2025 FácilFiscal · <Link href="/" style={{ color: "#bfdbfe" }}>Volver al inicio</Link></p>
       </footer>
     </main>
+      </div>
+    </>
   );
 }

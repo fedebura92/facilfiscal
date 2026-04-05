@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/unsubscribe'],
     },
-    sitemap: 'https://facilfiscal.com.ar/sitemap.xml',
+    sitemap: 'https://www.facilfiscal.com.ar/sitemap.xml',
   }
 }

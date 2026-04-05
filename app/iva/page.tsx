@@ -1,8 +1,9 @@
 "use client";
 
+import SiteHeader from '@/components/SiteHeader'
+
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { Metadata } from "next";
 
 
@@ -19,49 +20,22 @@ function formatARS(n: number) {
 }
 
 export default function IVAPage() {
-  const pathname = usePathname(); // 👈 agregado
+  const [ventas, setVentas] = useState("")
+  const [compras, setCompras] = useState("")
+  const [alicuota, setAlicuota] = useState(0.21)
+  const [calculado, setCalculado] = useState(false)
 
-  const [ventas, setVentas] = useState("");
-  const [compras, setCompras] = useState("");
-  const [alicuota, setAlicuota] = useState(0.21);
-  const [calculado, setCalculado] = useState(false);
-
-  const ventasNum = parseFloat(ventas.replace(/\./g, "").replace(",", ".")) || 0;
-  const comprasNum = parseFloat(compras.replace(/\./g, "").replace(",", ".")) || 0;
-  const debito = ventasNum * alicuota;
-  const credito = comprasNum * alicuota;
-  const saldo = debito - credito;
-
-  // 👇 lógica para el header activo (IMPORTANTE)
-  const isActive = (t: "mono" | "ri" | "aut") => {
-    return (
-      (t === "mono" && pathname === "/") ||
-      (t === "ri" && pathname === "/responsable-inscripto") ||
-      (t === "aut" && pathname === "/autonomos")
-    );
-  };
+  const ventasNum = parseFloat(ventas.replace(/\./g, "").replace(",", ".")) || 0
+  const comprasNum = parseFloat(compras.replace(/\./g, "").replace(",", ".")) || 0
+  const debito = ventasNum * alicuota
+  const credito = comprasNum * alicuota
+  const saldo = debito - credito
 
   return (
-    <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
-
-      {/* NAV */}
-      <nav style={{
-        background: "#fff",
-        borderBottom: "1px solid #e2e8ed",
-        padding: "9px 24px",
-        display: "flex",
-        alignItems: "center",
-        gap: 16
-        }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center" }}>
-          <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
-        </Link>
-        <span style={{ color: "#99f6e4", fontSize: 14, marginLeft: "auto" }}>
-          <Link href="/ingresos-brutos" style={{ color: "#99f6e4", textDecoration: "none", marginRight: 16 }}>Ingresos Brutos</Link>
-          <Link href="/impuesto-ganancias" style={{ color: "#99f6e4", textDecoration: "none", marginRight: 16 }}>Ganancias</Link>
-          <Link href="/impuestos-importacion" style={{ color: "#99f6e4", textDecoration: "none" }}>Importaciones</Link>
-        </span>
-      </nav>
+    <>
+      <SiteHeader currentPath="/iva" />
+      <div className="ff-page-content">
+      <main style={{ background: "#f8fafc", minHeight: "100vh" }}>
 
       {/* HERO */}
       <section style={{
@@ -381,5 +355,7 @@ export default function IVAPage() {
         <p style={{ margin: 0 }}>© 2025 FácilFiscal · <Link href="/" style={{ color: "#99f6e4" }}>Volver al inicio</Link></p>
       </footer>
     </main>
+      </div>
+    </>
   );
 }

@@ -1,68 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
 
-body{
-  font-family:'Nunito',sans-serif;
-  font-size:14px;
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
-
 /* RESET */
-*, *::before, *::after { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-}
-
-/* VARIABLES */
-:root {
-  --teal-dark:    #0d5c78;
-  --teal:         #1a7fa8;
-  --teal-mid:     #2490bc;
-  --teal-light:   #e8f6fb;
-  --teal-ring:    #a8ddf0;
-
-  --gold:         #f5a623;
-  --gold-dark:    #e8920a;
-  --gold-light:   #fff8ec;
-  --gold-ring:    #fde4a0;
-
-  --red:          #e53535;
-  --red-bg:       #fff1f1;
-  --red-ring:     #ffc8c8;
-
-  --amber:        #d97706;
-  --amber-bg:     #fffbeb;
-  --amber-ring:   #fde68a;
-
-  --green:        #16a34a;
-  --green-bg:     #f0fdf4;
-  --green-ring:   #bbf7d0;
-
-  --bg:           #f4f7f9;
-  --surface:      #ffffff;
-  --border:       #e2e8ed;
-  --border2:      #ccd6de;
-
-  --ink:          #0f2733;
-  --ink2:         #3d5a6b;
-  --ink3:         #7a9aaa;
-  --ink4:         #b8cdd6;
-
-  --r-sm:  8px;
-  --r:     12px;
-  --r-lg:  16px;
-  --r-xl:  20px;
-
-  --sh-sm: 0 1px 4px rgba(13,92,120,.07), 0 1px 2px rgba(0,0,0,.04);
-  --sh:    0 4px 16px rgba(13,92,120,.10), 0 2px 6px rgba(0,0,0,.05);
-  --sh-lg: 0 8px 28px rgba(13,92,120,.13), 0 4px 10px rgba(0,0,0,.06);
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 /* BASE */
-html { 
-  scroll-behavior: smooth; 
-}
+html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Nunito', sans-serif;
@@ -73,85 +19,70 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+button { font-family: 'Nunito', sans-serif; cursor: pointer; }
+input, select { font-family: 'Nunito', sans-serif; }
+select { appearance: none; }
+
+/* VARIABLES */
+:root {
+  --teal-dark:  #0d5c78;
+  --teal:       #1a7fa8;
+  --teal-mid:   #2490bc;
+  --teal-light: #e8f6fb;
+  --teal-ring:  #a8ddf0;
+
+  --gold:       #f5a623;
+  --gold-dark:  #e8920a;
+  --gold-light: #fff8ec;
+  --gold-ring:  #fde4a0;
+
+  --red:        #e53535;
+  --red-bg:     #fff1f1;
+  --red-ring:   #ffc8c8;
+
+  --amber:      #d97706;
+  --amber-bg:   #fffbeb;
+  --amber-ring: #fde68a;
+
+  --green:      #16a34a;
+  --green-bg:   #f0fdf4;
+  --green-ring: #bbf7d0;
+
+  --bg:         #f4f7f9;
+  --surface:    #ffffff;
+  --border:     #e2e8ed;
+  --border2:    #ccd6de;
+
+  --ink:        #0f2733;
+  --ink2:       #3d5a6b;
+  --ink3:       #7a9aaa;
+  --ink4:       #b8cdd6;
+
+  --r-sm: 8px;
+  --r:    12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+
+  --sh-sm: 0 1px 4px rgba(13,92,120,.07), 0 1px 2px rgba(0,0,0,.04);
+  --sh:    0 4px 16px rgba(13,92,120,.10), 0 2px 6px rgba(0,0,0,.05);
+  --sh-lg: 0 8px 28px rgba(13,92,120,.13), 0 4px 10px rgba(0,0,0,.06);
+}
+
 /* SCROLL */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { 
-  background: var(--border2); 
-  border-radius: 3px; 
-}
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
 /* ANIMATIONS */
 @keyframes cardUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: none; }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-/* ========================= */
-/* HOVER CARDS */
-/* ========================= */
-
-.ff-card-link {
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.ff-card-link:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.09);
-}
-
-/* ========================= */
-/* HEADER (CLAVE PARA ESCALA) */
-/* ========================= */
-
-.ff-header-inner {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 16px;
-  height: auto;
-  min-height: 56px;
-
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-/* Switcher */
-.ff-switcher {
-  display: flex;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r);
-  padding: 3px;
-  gap: 2px;
-}
-
-/* Botones tipo */
-.ff-tipo-btn {
-  padding: 7px 12px;
-  border-radius: var(--r-sm);
-  border: none;
-  background: none;
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all .18s;
-}
-
-/* CTA */
-.ff-cta {
-  display: block;
-}
-
+/* ── ff-card-link (links de calculadoras) ── */
 .ff-card-link {
   display: block;
   padding: 16px;
@@ -162,58 +93,137 @@ body {
   text-decoration: none;
   color: var(--ink);
   transition: all 0.2s ease;
+  cursor: pointer;
 }
-
 .ff-card-link:hover {
   transform: translateY(-3px) scale(1.01);
   box-shadow: 0 8px 20px rgba(0,0,0,0.09);
 }
 
-/* ========================= */
-/* MOBILE (LO MÁS IMPORTANTE) */
-/* ========================= */
+/* ── Layout principal con sidebar ── */
+/* El sidebar se injected desde SiteHeader.tsx con clases ff-sidebar / ff-page-content */
+/* Estas reglas son las de contenido dentro del ff-page-content */
 
-@media (max-width: 768px) {
-
-  .ff-header-inner {
-    padding: 8px 12px;
-  }
-
-  /* El switch baja de línea */
-  .ff-switcher {
-    flex-basis: 100%;
-    order: 3;
-
-    display: flex;
-    justify-content: center;
-  }
-
-  /* Botón alertas arriba */
-  .ff-cta {
-    order: 2;
-  }
-
+.ff-main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
 }
 
-/* ========================= */
-/* DESKTOP */
-/* ========================= */
+/* ── Grids responsive ── */
+.ff-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.ff-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.ff-accion-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.ff-dolor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ff-captura {
+  border-radius: 16px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ff-cap-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.ff-cap-input-row {
+  display: flex;
+  gap: 8px;
+}
+.ff-calc-break {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
 
-@media (min-width: 769px) {
+/* ── Hero ── */
+.ff-hero {
+  padding: 40px 16px 36px;
+  text-align: center;
+}
+.ff-hero h1 {
+  font-size: 26px;
+  font-weight: 900;
+  color: white;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  margin-bottom: 12px;
+}
+.ff-hero p {
+  font-size: 14px;
+  color: rgba(255,255,255,.8);
+  font-weight: 600;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.ff-hero-btn {
+  display: inline-block;
+  background: #f5a623;
+  color: #0f2733;
+  border-radius: 10px;
+  padding: 13px 24px;
+  font-size: 15px;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(245,166,35,.4);
+}
+.ff-social-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: 5px 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,.9);
+}
 
-  .ff-header-inner {
-    flex-wrap: nowrap;
-    height: 64px;
-    padding: 0 24px;
-  }
+/* ── Topbar logo: ocultar en desktop (ya está en sidebar) ── */
+@media (min-width: 1024px) {
+  .ff-topbar-logo { display: none !important; }
+}
 
-  .ff-switcher {
-    width: auto;
-    order: 2;
-  }
-
-  .ff-cta {
-    order: 3;
-  }
-
+/* ── Breakpoints responsive ── */
+@media (min-width: 600px) {
+  .ff-cards-grid  { grid-template-columns: repeat(2, 1fr); }
+  .ff-accion-grid { grid-template-columns: repeat(3, 1fr); }
+  .ff-dolor-grid  { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 768px) {
+  .ff-hero         { padding: 52px 24px 48px; }
+  .ff-hero h1      { font-size: 36px; }
+  .ff-hero p       { font-size: 16px; }
+  .ff-main         { padding: 28px 24px 80px; }
+  .ff-cards-grid   { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .ff-two-col      { grid-template-columns: 1fr 1fr; }
+  .ff-captura      { flex-direction: row; align-items: center; justify-content: space-between; padding: 36px 40px; }
+  .ff-cap-form     { width: auto; min-width: 300px; }
+  .ff-cap-input-row { flex-direction: row; }
+}
+@media (min-width: 1024px) {
+  .ff-main { padding: 28px 32px 80px; }
 }

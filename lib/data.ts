@@ -1,4 +1,4 @@
-import type { Vencimiento, Alerta, TipoContribuyente, CategoriaMonotributo } from './types'
+import type { TipoContribuyente, CategoriaMonotributo } from './types'
 
 // ── Terminación CUIT → día de vencimiento ───────────────
 export const TERMINACION_DIAS: Record<string, number> = {
@@ -6,59 +6,7 @@ export const TERMINACION_DIAS: Record<string, number> = {
   '5': 10, '6': 11, '7': 12, '8': 13, '9': 14,
 }
 
-// ── Tabla de vencimientos por tipo ──────────────────────
-// En producción: fetch desde Supabase tabla "vencimientos"
-export const VENCIMIENTOS_BASE: Record<TipoContribuyente, Omit<Vencimiento, 'fecha'>[]> = {
-  mono: [
-    { id: 'mono-1', nombre: 'Monotributo', emoji: '📋', dia: 10, detalle: 'Terminación CUIT 0–4 · pago mensual', tipo: 'mono' },
-    { id: 'mono-2', nombre: 'Monotributo', emoji: '📋', dia: 14, detalle: 'Terminación CUIT 5–9 · pago mensual', tipo: 'mono' },
-    { id: 'mono-3', nombre: 'Obra Social / Previsional', emoji: '🏥', dia: 12, detalle: 'Componente previsional del monotributo', tipo: 'mono' },
-  ],
-  ri: [
-    { id: 'ri-1', nombre: 'IVA', emoji: '🧾', dia: 19, detalle: 'Presentación y pago mensual', tipo: 'ri' },
-    { id: 'ri-2', nombre: 'Ganancias anticipo', emoji: '💼', dia: 25, detalle: 'Anticipo mensual personas jurídicas y humanas', tipo: 'ri' },
-    { id: 'ri-3', nombre: 'SUSS Empleadores', emoji: '👥', dia: 12, detalle: 'Contribuciones patronales y aportes', tipo: 'ri' },
-    { id: 'ri-4', nombre: 'Bienes Personales', emoji: '🏠', dia: 22, detalle: 'Anticipo mensual', tipo: 'ri' },
-  ],
-  aut: [
-    { id: 'aut-1', nombre: 'Autónomos', emoji: '⚡', dia: 8, detalle: 'Aporte mensual categorías I–V', tipo: 'aut' },
-    { id: 'aut-2', nombre: 'IVA', emoji: '🧾', dia: 19, detalle: 'Si estás inscripto en IVA', tipo: 'aut' },
-    { id: 'aut-3', nombre: 'Ganancias anticipo', emoji: '💼', dia: 25, detalle: 'Anticipo mensual personas humanas', tipo: 'aut' },
-  ],
-}
-
-// Agrega la fecha del mes actual a cada vencimiento
-export function getVencimientosConFecha(tipo: TipoContribuyente): Vencimiento[] {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = now.getMonth()
-  return VENCIMIENTOS_BASE[tipo]
-    .map(v => ({ ...v, fecha: new Date(y, m, v.dia) }))
-    .sort((a, b) => (a.fecha!.getTime()) - (b.fecha!.getTime()))
-}
-
-// ── Alertas por tipo ─────────────────────────────────────
-// En producción: fetch desde Supabase tabla "alertas"
-export const ALERTAS_STATIC: Record<TipoContribuyente, Alerta[]> = {
-  mono: [
-    { id: 'a1', icon: '🔄', tipo: 'warn', title: 'Recategorización abierta', desc: 'Período enero–febrero. Revisá si tus ingresos o parámetros cambiaron.', tipo_contribuyente: 'mono', activa: true },
-    { id: 'a2', icon: '💰', tipo: 'warn', title: 'Nuevos valores de cuota', desc: 'Los montos del monotributo se actualizaron. Verificá tu cuota vigente en ARCA.', tipo_contribuyente: 'mono', activa: true },
-    { id: 'a3', icon: '📢', tipo: 'info', title: 'ARCA reemplaza a AFIP', desc: 'Todos los trámites siguen disponibles en afip.gob.ar y arca.gob.ar.', tipo_contribuyente: 'mono', activa: true },
-  ],
-  ri: [
-    { id: 'a4', icon: '📅', tipo: 'warn', title: 'IVA bimestral – revisá', desc: 'Si sos contribuyente bimestral, verificá el cronograma específico.', tipo_contribuyente: 'ri', activa: true },
-    { id: 'a5', icon: '💼', tipo: 'danger', title: 'Retenciones y percepciones', desc: 'Verificá si debés presentar F.2002 o F.572 este mes.', tipo_contribuyente: 'ri', activa: true },
-    { id: 'a6', icon: '📢', tipo: 'info', title: 'Cambios en alícuotas 2026', desc: 'Consultá novedades en el portal de ARCA antes de tu próxima presentación.', tipo_contribuyente: 'ri', activa: true },
-  ],
-  aut: [
-    { id: 'a7', icon: '⚡', tipo: 'warn', title: 'Ajuste de categorías', desc: 'Las categorías de autónomos se actualizan por inflación. Verificá la tuya.', tipo_contribuyente: 'aut', activa: true },
-    { id: 'a8', icon: '💰', tipo: 'warn', title: 'Aportes jubilatorios', desc: 'El importe varía según categoría. Confirmá el monto vigente en ARCA.', tipo_contribuyente: 'aut', activa: true },
-    { id: 'a9', icon: '📢', tipo: 'info', title: 'Factura electrónica oblig.', desc: 'Todos deben emitir comprobantes electrónicos. Activá tu punto de venta.', tipo_contribuyente: 'aut', activa: true },
-  ],
-}
-
-// ── Categorías de Monotributo ────────────────────────────
-// Actualizar estos montos cuando ARCA publique nuevas tablas
+// ── Categorías de Monotributo (A–K) ─────────────────────
 export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
   { letra: 'A', limite_anual: 6450000,  imp: 11000, prev: 28000 },
   { letra: 'B', limite_anual: 9450000,  imp: 12400, prev: 28000 },
@@ -75,21 +23,132 @@ export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
 
 export const OS_EXTRA = 14000
 
+// ── Tabla de montos (FUENTE ÚNICA) ──────────────────────
+export const MONTOS = {
+  mono: {
+    cats:    CATEGORIAS_MONO.map(c => c.letra),
+    limites: ['$6,4M','$9,4M','$13,2M','$16,4M','$19,3M','$24,2M','$29M','$44M','$52M','$62M','$72M'],
+    imp:     CATEGORIAS_MONO.map(c => c.imp),
+    prev:    CATEGORIAS_MONO.map(c => c.prev),
+    os:      OS_EXTRA,
+  },
+  ri: {
+    cats:    ['Pequeño RI (hasta $30M)', 'Mediano RI (hasta $100M)', 'Gran RI (más de $100M)'],
+    limites: ['hasta $30M/año', 'hasta $100M/año', 'más de $100M/año'],
+    imp:     [18000, 35000, 60000],
+    prev:    [28000, 40000, 50000],
+    os:      0,
+  },
+  aut: {
+    cats:    ['Categoría I', 'Categoría II', 'Categoría III', 'Categoría IV', 'Categoría V'],
+    limites: ['menor actividad', '—', '—', '—', 'mayor actividad'],
+    imp:     [15000, 22000, 32000, 48000, 65000],
+    prev:    [22000, 28000, 35000, 45000, 58000],
+    os:      0,
+  },
+}
+
+// ── Tipo UI de vencimiento (con dia_mes) ─────────────────
+export interface VencimientoUI {
+  id: string
+  nombre: string
+  emoji: string
+  detalle: string
+  dia_mes: number
+  tipo: string
+  fecha: string
+}
+
+export type AlertaUI = {
+  id: string
+  icon: string
+  tipo: 'warn' | 'info' | 'danger'
+  title: string
+  description: string
+}
+
+// ── Fallback de vencimientos (FUENTE ÚNICA) ──────────────
+export const FALLBACK_VENC: Record<TipoContribuyente, VencimientoUI[]> = {
+  mono: [
+    { id:'1', nombre:'Monotributo (term. 0-4)', emoji:'📋', detalle:'Terminación CUIT 0, 1, 2, 3 o 4', dia_mes:3,  tipo:'mono', fecha:'' },
+    { id:'2', nombre:'Monotributo (term. 5-9)', emoji:'📋', detalle:'Terminación CUIT 5, 6, 7, 8 o 9', dia_mes:10, tipo:'mono', fecha:'' },
+    { id:'3', nombre:'Obra Social / Previsional',emoji:'🏥', detalle:'Componente previsional',           dia_mes:12, tipo:'mono', fecha:'' },
+  ],
+  ri: [
+    { id:'4',  nombre:'IVA (term. 0-1)',             emoji:'🧾', detalle:'Terminación CUIT 0 o 1 — Presentación y pago',  dia_mes:19, tipo:'ri', fecha:'' },
+    { id:'5',  nombre:'IVA (term. 2-3)',             emoji:'🧾', detalle:'Terminación CUIT 2 o 3 — Presentación y pago',  dia_mes:20, tipo:'ri', fecha:'' },
+    { id:'6',  nombre:'IVA (term. 4-5)',             emoji:'🧾', detalle:'Terminación CUIT 4 o 5 — Presentación y pago',  dia_mes:21, tipo:'ri', fecha:'' },
+    { id:'7',  nombre:'IVA (term. 6-7)',             emoji:'🧾', detalle:'Terminación CUIT 6 o 7 — Presentación y pago',  dia_mes:22, tipo:'ri', fecha:'' },
+    { id:'8',  nombre:'IVA (term. 8-9)',             emoji:'🧾', detalle:'Terminación CUIT 8 o 9 — Presentación y pago',  dia_mes:23, tipo:'ri', fecha:'' },
+    { id:'9',  nombre:'Ganancias — Anticipo',        emoji:'💼', detalle:'Anticipo mensual personas jurídicas y físicas', dia_mes:25, tipo:'ri', fecha:'' },
+    { id:'10', nombre:'Bienes Personales — Anticipo',emoji:'🏠', detalle:'Anticipo mensual',                              dia_mes:22, tipo:'ri', fecha:'' },
+    { id:'11', nombre:'SUSS / Contribuciones',       emoji:'👥', detalle:'Contribuciones patronales si tenés empleados',  dia_mes:12, tipo:'ri', fecha:'' },
+  ],
+  aut: [
+    { id:'12', nombre:'Autónomos — Aporte mensual',  emoji:'⚡', detalle:'Aporte mensual según categoría (I a V)',        dia_mes:8,  tipo:'aut', fecha:'' },
+    { id:'13', nombre:'IVA — Si estás inscripto',    emoji:'🧾', detalle:'Presentación y pago mensual de IVA',            dia_mes:19, tipo:'aut', fecha:'' },
+    { id:'14', nombre:'Ganancias — Anticipo',         emoji:'💼', detalle:'Anticipo mensual personas humanas',             dia_mes:25, tipo:'aut', fecha:'' },
+    { id:'15', nombre:'Bienes Personales — Anticipo', emoji:'🏠', detalle:'Anticipo mensual si corresponde',              dia_mes:22, tipo:'aut', fecha:'' },
+  ],
+}
+
+// ── Fallback de alertas (FUENTE ÚNICA) ──────────────────
+export const FALLBACK_ALERTAS: Record<TipoContribuyente, AlertaUI[]> = {
+  mono: [
+    { id:'a1', icon:'🔄', tipo:'warn',   title:'Recategorización abierta', description:'Período enero-febrero. Revisá si tus ingresos cambiaron.' },
+    { id:'a2', icon:'💰', tipo:'warn',   title:'Nuevos valores de cuota',  description:'Los montos del monotributo se actualizaron. Verificá en ARCA.' },
+    { id:'a3', icon:'📢', tipo:'info',   title:'ARCA reemplaza a AFIP',    description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.' },
+  ],
+  ri: [
+    { id:'a4', icon:'📅', tipo:'warn',   title:'IVA según terminación de CUIT', description:'El vencimiento del IVA varía según el último dígito de tu CUIT. Revisá tu fecha exacta.' },
+    { id:'a5', icon:'💼', tipo:'danger', title:'Retenciones y percepciones',    description:'Si sufriste retenciones o percepciones, descontálas de tu IVA. Verificá el F.2002.' },
+    { id:'a6', icon:'📑', tipo:'warn',   title:'Factura A con CBU',             description:'Para emitir factura A necesitás validar el CBU en ARCA. Sin esto, solo podés emitir B.' },
+    { id:'a7', icon:'📢', tipo:'info',   title:'ARCA reemplaza a AFIP',         description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.' },
+  ],
+  aut: [
+    { id:'a8',  icon:'⚡', tipo:'warn', title:'Ajuste de categorías autónomos', description:'Las categorías de autónomos se actualizan por inflación. Verificá la tuya.' },
+    { id:'a9',  icon:'💰', tipo:'warn', title:'Aportes jubilatorios',            description:'El importe varía según tu categoría (I a V). Confirmá el monto en ARCA.' },
+    { id:'a10', icon:'📑', tipo:'info', title:'Podés estar inscripto en IVA',   description:'Si además de autónomo estás inscripto en IVA, tenés vencimientos mensuales adicionales.' },
+    { id:'a11', icon:'📢', tipo:'info', title:'ARCA reemplaza a AFIP',          description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.' },
+  ],
+}
+
 // ── Helpers de fecha ─────────────────────────────────────
-export function diffDias(fecha: Date): number {
-  const hoy = new Date(); hoy.setHours(0, 0, 0, 0)
-  const f = new Date(fecha); f.setHours(0, 0, 0, 0)
-  return Math.round((f.getTime() - hoy.getTime()) / 86400000)
+export function addFecha(v: VencimientoUI): VencimientoUI {
+  const n = new Date()
+  return { ...v, fecha: new Date(n.getFullYear(), n.getMonth(), v.dia_mes).toISOString() }
 }
 
-export function formatFechaLarga(fecha: Date): string {
-  return new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long' }).format(fecha)
+export function diffDias(f: string): number {
+  const h = new Date(); h.setHours(0,0,0,0)
+  const d = new Date(f); d.setHours(0,0,0,0)
+  return Math.round((d.getTime() - h.getTime()) / 86400000)
 }
 
-export function formatFechaCorta(fecha: Date): string {
-  return new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: 'short' }).format(fecha)
+export function fmtLarga(f: string): string {
+  return new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long' }).format(new Date(f))
 }
 
-export function formatMoney(n: number): string {
+export function fmtCorta(f: string): string {
+  return new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: 'short' }).format(new Date(f))
+}
+
+export function money(n: number): string {
   return '$' + n.toLocaleString('es-AR')
 }
+
+
+
+// ── Navegación del sidebar (FUENTE ÚNICA) ────────────────
+export const NAV_ITEMS = [
+  { href: '/',                       emoji: '📋', label: 'Monotributo',       group: 'regimen' },
+  { href: '/responsable-inscripto',  emoji: '🧾', label: 'Resp. Inscripto',   group: 'regimen' },
+  { href: '/autonomos',              emoji: '⚡', label: 'Autónomos',         group: 'regimen' },
+  { href: '/mi-categoria',           emoji: '📊', label: 'Mi categoría',      group: 'herramientas' },
+  { href: '/como-facturar',          emoji: '📄', label: 'Cómo facturar',     group: 'herramientas' },
+  { href: '/iva',                    emoji: '💰', label: 'IVA',               group: 'calculadoras' },
+  { href: '/ingresos-brutos',        emoji: '📈', label: 'Ingresos Brutos',   group: 'calculadoras' },
+  { href: '/impuesto-ganancias',     emoji: '💼', label: 'Ganancias',         group: 'calculadoras' },
+  { href: '/impuestos-importacion',  emoji: '📦', label: 'Importaciones',     group: 'calculadoras' },
+  { href: '/impuestos-por-provincia',emoji: '🗺️', label: 'Por provincia',     group: 'calculadoras' },
+]

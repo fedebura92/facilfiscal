@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import SiteHeader from '@/components/SiteHeader'
 
 export default function ComoFacturar() {
   const [aiQuery, setAiQuery] = useState('')
@@ -82,25 +83,8 @@ export default function ComoFacturar() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html:`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Nunito',sans-serif;background:#f4f7f9;color:#0f2733;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-        button{font-family:'Nunito',sans-serif;cursor:pointer}
-        input{font-family:'Nunito',sans-serif}
-      `}}/>
-
-      {/* HEADER */}
-      <header style={{background:V.surface,borderBottom:`1px solid ${V.border}`,position:'sticky',top:0,zIndex:100,boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
-        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',height:56,display:'flex',alignItems:'center',gap:16}}>
-          <a href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none'}}>
-            <img src="/logo.svg" alt="FacilFiscal" style={{ height: 48 }} />
-          </a>
-          <span style={{color:V.ink3,fontSize:13}}>›</span>
-          <span style={{fontSize:13,fontWeight:700,color:V.ink2}}>Cómo facturar</span>
-        </div>
-      </header>
-
+      <SiteHeader currentPath="/como-facturar" />
+      <div className="ff-page-content">
       <main style={{maxWidth:860,margin:'0 auto',padding:'32px 24px 80px'}}>
 
         {/* HERO */}
@@ -226,6 +210,7 @@ export default function ComoFacturar() {
         </div>
 
       </main>
+      </div>
     </>
   )
 }
