@@ -75,32 +75,63 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         }
         .ff-topbar-inner {
           max-width: 100%; margin: 0 auto;
-          padding: 0 16px; height: 56px;
+          padding: 0 16px;
           display: flex; align-items: center;
           justify-content: space-between; gap: 8px;
+          flex-wrap: wrap;
+          min-height: 56px;
+        }
+        .ff-topbar-row1 {
+          display: flex; align-items: center;
+          justify-content: space-between;
+          gap: 8px; width: 100%; height: 56px;
         }
 
         /* ── Tipo switcher en topbar (solo en páginas de régimen) ── */
         .ff-switcher {
           display: flex; background: #f4f7f9;
           border: 1.5px solid #e2e8ed; border-radius: 10px;
-          padding: 3px; gap: 2px; flex-shrink: 0;
+          padding: 3px; gap: 2px;
         }
         .ff-tipo-btn {
           padding: 6px 14px; border-radius: 7px; border: none;
           background: none; font-family: 'Nunito', sans-serif;
           font-size: 12px; font-weight: 700; cursor: pointer;
           white-space: nowrap; transition: all .18s; color: #7a9aaa;
+          flex: 1;
         }
         .ff-tipo-btn.active {
           background: #1a7fa8; color: white;
           box-shadow: 0 1px 4px rgba(13,92,120,.18);
         }
-        @media (max-width: 480px) {
-          .ff-tipo-btn { padding: 6px 10px; font-size: 11px; }
+
+        /* Mobile: switcher baja a segunda fila, ancho completo */
+        @media (max-width: 1023px) {
+          .ff-switcher {
+            width: 100%;
+            margin-bottom: 8px;
+            justify-content: stretch;
+          }
+          .ff-tipo-btn {
+            text-align: center;
+            font-size: 12px;
+            padding: 7px 4px;
+          }
+          .ff-topbar-inner {
+            padding-bottom: 0;
+          }
         }
-        @media (max-width: 360px) {
-          .ff-tipo-btn { padding: 5px 7px; font-size: 10px; }
+
+        /* Desktop: switcher en línea, tamaño normal */
+        @media (min-width: 1024px) {
+          .ff-switcher {
+            width: auto;
+            margin-bottom: 0;
+          }
+          .ff-topbar-row1 {
+            width: auto;
+            flex: 1;
+          }
         }
 
         /* ── Hamburger ── */
@@ -220,25 +251,36 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
       {/* ── TOPBAR ── */}
       <header className="ff-topbar">
         <div className="ff-topbar-inner">
-          {/* Hamburger (solo mobile) */}
-          <button
-            className="ff-hamburger"
-            onClick={() => setSidebarOpen(v => !v)}
-            aria-label="Abrir menú"
-          >
-            <span />
-          </button>
 
-          {/* Logo (visible en mobile cuando el sidebar está cerrado) */}
-          <a
-            href="/"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0 }}
-            className="ff-topbar-logo"
-          >
-            <img src="/logo.svg" alt="Fácil Fiscal" style={{ height: 40 }} />
-          </a>
+          {/* Fila 1: hamburguesa + logo + alertas */}
+          <div className="ff-topbar-row1">
+            <button
+              className="ff-hamburger"
+              onClick={() => setSidebarOpen(v => !v)}
+              aria-label="Abrir menú"
+            >
+              <span />
+            </button>
 
-          {/* Switcher de régimen — solo en páginas de régimen */}
+            <a
+              href="/"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0 }}
+              className="ff-topbar-logo"
+            >
+              <img src="/logo.svg" alt="Fácil Fiscal" style={{ height: 40 }} />
+            </a>
+
+            {/* Spacer para empujar alertas a la derecha en desktop */}
+            <div style={{ flex: 1 }} />
+
+            {onAlertasClick && (
+              <button className="ff-alert-cta" onClick={onAlertasClick}>
+                🔔 Alertas
+              </button>
+            )}
+          </div>
+
+          {/* Fila 2: switcher (solo en páginas de régimen) */}
           {TIPO_PATHS.includes(currentPath) && (
             <div className="ff-switcher">
               {TIPO_PATHS.map((path, i) => (
@@ -253,12 +295,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             </div>
           )}
 
-          {/* CTA alertas */}
-          {onAlertasClick && (
-            <button className="ff-alert-cta" onClick={onAlertasClick}>
-              🔔 Alertas
-            </button>
-          )}
         </div>
       </header>
     </>
