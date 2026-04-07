@@ -227,3 +227,8 @@ select { appearance: none; }
 @media (min-width: 1024px) {
   .ff-main { padding: 28px 32px 80px; }
 }
+
+/* ── Email capture input placeholder ── */
+.ff-captura input::placeholder {
+  color: rgba(255,255,255,.65);
+}

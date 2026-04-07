@@ -275,7 +275,9 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
               <img src="/logo.svg" alt="Fácil Fiscal" style={{ height: 40 }} />
             </a>
 
-            {/* Switcher inline en tablet/desktop — oculto en mobile (va en fila 2) */}
+            <div style={{ flex: 1 }} />
+
+            {/* Switcher inline en tablet/desktop — centrado — oculto en mobile (va en fila 2) */}
             {TIPO_PATHS.includes(currentPath) && (
               <div className="ff-switcher ff-switcher-desktop">
                 {TIPO_PATHS.map((path, i) => (
