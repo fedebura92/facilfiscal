@@ -106,27 +106,32 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         }
 
         /* Mobile: switcher baja a segunda fila, ancho completo */
-        @media (max-width: 1023px) {
-          .ff-switcher {
+        @media (max-width: 767px) {
+          .ff-switcher-desktop { display: none !important; }
+          .ff-switcher-mobile {
             width: 100%;
             margin-bottom: 8px;
             justify-content: stretch;
           }
-          .ff-tipo-btn {
+          .ff-switcher-mobile .ff-tipo-btn {
             text-align: center;
             font-size: 12px;
             padding: 7px 4px;
-          }
-          .ff-topbar-inner {
-            padding-bottom: 0;
+            flex: 1;
           }
         }
 
-        /* Desktop: switcher en línea, tamaño normal */
-        @media (min-width: 1024px) {
-          .ff-switcher {
+        /* Tablet y desktop: switcher en línea, mobile switcher oculto */
+        @media (min-width: 768px) {
+          .ff-switcher-mobile { display: none !important; }
+          .ff-switcher-desktop {
             width: auto;
             margin-bottom: 0;
+            flex-shrink: 0;
+          }
+          .ff-switcher-desktop .ff-tipo-btn {
+            flex: none;
+            padding: 6px 14px;
           }
           .ff-topbar-row1 {
             width: auto;
@@ -252,7 +257,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
       <header className="ff-topbar">
         <div className="ff-topbar-inner">
 
-          {/* Fila 1: hamburguesa + logo + alertas */}
+          {/* Fila 1: hamburguesa + logo + switcher (tablet/desktop) + alertas */}
           <div className="ff-topbar-row1">
             <button
               className="ff-hamburger"
@@ -270,7 +275,21 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
               <img src="/logo.svg" alt="Fácil Fiscal" style={{ height: 40 }} />
             </a>
 
-            {/* Spacer para empujar alertas a la derecha en desktop */}
+            {/* Switcher inline en tablet/desktop — oculto en mobile (va en fila 2) */}
+            {TIPO_PATHS.includes(currentPath) && (
+              <div className="ff-switcher ff-switcher-desktop">
+                {TIPO_PATHS.map((path, i) => (
+                  <button
+                    key={path}
+                    className={`ff-tipo-btn${currentPath === path ? ' active' : ''}`}
+                    onClick={() => { window.location.href = path }}
+                  >
+                    {TIPO_LABELS[i]}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div style={{ flex: 1 }} />
 
             {onAlertasClick && (
@@ -280,9 +299,9 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             )}
           </div>
 
-          {/* Fila 2: switcher (solo en páginas de régimen) */}
+          {/* Fila 2: switcher solo en mobile */}
           {TIPO_PATHS.includes(currentPath) && (
-            <div className="ff-switcher">
+            <div className="ff-switcher ff-switcher-mobile">
               {TIPO_PATHS.map((path, i) => (
                 <button
                   key={path}
