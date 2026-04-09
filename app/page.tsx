@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
+import { SEOMonotributo } from '@/components/SEOContent'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,
@@ -326,6 +327,9 @@ export default function Home() {
               }
             </div>
           </div>
+
+          {/* SEO: Contenido informativo */}
+          <SEOMonotributo />
 
           {/* SEO: Calculadoras */}
           <section style={{ marginTop:32 }}>

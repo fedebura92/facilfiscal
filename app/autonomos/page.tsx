@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import SiteHeader from '@/components/SiteHeader'
+import { SEOAutonomos } from '@/components/SEOContent'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,
@@ -319,6 +320,9 @@ export default function AutonomosPage() {
               }
             </div>
           </div>
+          {/* SEO: Contenido informativo */}
+          <SEOAutonomos />
+
         </main>
       </div>
 

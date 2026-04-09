@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import SiteHeader from '@/components/SiteHeader'
+import { SEOResponsableInscripto } from '@/components/SEOContent'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,
@@ -322,6 +323,9 @@ export default function ResponsableInscriptoPage() {
               }
             </div>
           </div>
+          {/* SEO: Contenido informativo */}
+          <SEOResponsableInscripto />
+
         </main>
       </div>
 
