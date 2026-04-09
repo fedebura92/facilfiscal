@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import SiteHeader from '@/components/SiteHeader'
-import { SEOComoFacturar } from '@/components/SEOContent'
+import { SEOComoFacturar } from '@/components/SEOContent/SEOContent'
 
 export default function ComoFacturar() {
   const [aiQuery, setAiQuery] = useState('')

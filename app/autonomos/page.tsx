@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import SiteHeader from '@/components/SiteHeader'
-import { SEOAutonomos } from '@/components/SEOContent'
+import { SEOAutonomos } from '@/components/SEOContent/SEOContent'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,

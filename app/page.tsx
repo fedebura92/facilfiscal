@@ -12,7 +12,7 @@ import {
 const TIPO = 'mono'
 
 const V = {
-  tealDark:'#0d5c78', teal:'#1a7fa8', tealMid:'#2490bc', tealLight:'#e8f6fb', tealRing:'#a8ddf0',
+  tealDark:'#0d5c78', teal:'#060a0c', tealMid:'#2490bc', tealLight:'#e8f6fb', tealRing:'#a8ddf0',
   gold:'#f5a623', goldDark:'#e8920a', goldLight:'#fff8ec', goldRing:'#fde4a0',
   red:'#e53535', redBg:'#fff1f1', redRing:'#ffc8c8',
   amber:'#d97706', amberBg:'#fffbeb', amberRing:'#fde68a',
