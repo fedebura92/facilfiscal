@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
-import { SEOMonotributo } from '@/components/SEOContent'
+import { SEOMonotributo } from '@/components/SEOContent/SEOContent'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,
