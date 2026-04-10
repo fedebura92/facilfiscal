@@ -177,7 +177,7 @@ export default function ComoFacturar() {
         </div>
 
         {/* AI */}
-        <div style={{background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,overflow:'hidden',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
+        <div style={{marginBottom: 24, background:V.surface,border:`1.5px solid ${V.border}`,borderRadius:16,overflow:'hidden',boxShadow:`0 1px 4px rgba(13,92,120,.07)`}}>
           <div style={{background:'#0a0a1a',color:'white',padding:'10px 16px',display:'flex',alignItems:'center',gap:8,fontSize:11,letterSpacing:'1.5px',textTransform:'uppercase',fontWeight:700}}>
             <div style={{width:7,height:7,borderRadius:'50%',background:'#4caf50',boxShadow:'0 0 0 3px rgba(76,175,80,.2)'}}/>
             Asistente Fiscal IA · Dudas sobre facturación
@@ -211,7 +211,7 @@ export default function ComoFacturar() {
         </div>
 
       {/* SEO: Contenido informativo */}
-      <div style={{marginTop: 24, maxWidth:860,margin:'0 auto',padding:'0 16px 40px'}}>
+      <div style={{ maxWidth:860,margin:'0 auto',padding:'0 16px 40px'}}>
         <SEOComoFacturar />
       </div>
 
