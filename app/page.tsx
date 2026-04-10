@@ -310,7 +310,7 @@ export default function Home() {
 
 
           {/* CAPTURA EMAIL */}
-          <div className="ff-captura" style={{ background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden', boxShadow:`0 8px 32px rgba(13,92,120,.25)` }}>
+          <div className="ff-captura" style={{ marginTop: 24, background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden', boxShadow:`0 8px 32px rgba(13,92,120,.25)` }}>
             <div style={{ position:'absolute', right:-50, top:-50, width:200, height:200, borderRadius:'50%', background:'rgba(255,255,255,.05)' }} />
             <div style={{ position:'relative', zIndex:1 }}>
               <div style={{ fontSize:10, fontWeight:800, letterSpacing:'2px', textTransform:'uppercase', color:V.gold, marginBottom:5 }}>Recordatorios gratis</div>
