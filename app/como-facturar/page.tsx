@@ -210,10 +210,10 @@ export default function ComoFacturar() {
           </div>
         </div>
 
-      {/* SEO: Contenido informativo */}
-      <div style={{ maxWidth:860,margin:'0 auto',padding:'0 16px 40px'}}>
+        {/* SEO: Contenido informativo */}
+        <div style={{ maxWidth:860,margin:'0 auto',padding:'0 16px 40px'}}>
         <SEOComoFacturar />
-      </div>
+       </div>
 
       </main>
       </div>
