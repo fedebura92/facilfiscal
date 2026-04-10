@@ -211,9 +211,9 @@ export default function ComoFacturar() {
         </div>
 
         {/* SEO: Contenido informativo */}
-        <div style={{ maxWidth:860,margin:'0 auto',padding:'0 16px 40px'}}>
-        <SEOComoFacturar />
-       </div>
+        <div style={{ maxWidth:860,margin:'0 auto',padding:'32px 24px 80px'}}>
+          <SEOComoFacturar />
+        </div>
 
       </main>
       </div>
