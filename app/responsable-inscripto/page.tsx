@@ -21,10 +21,10 @@ const V = {
 
 function cardCfg(d: number) {
   return d === 0
-    ? { bg:`linear-gradient(150deg,#fff 65%,${V.redBg})`,  border:V.redRing,  iconBg:V.redBg,   pill:{bg:V.redBg,   color:V.red,      border:V.redRing},  txt:'🔴 Vence HOY', diasColor:V.red,   diasTxt:'¡HOY!',      btnDanger:true }
+    ? { bg:`linear-gradient(150deg,#fff 65%,${V.redBg})`,   border:V.redRing,  iconBg:V.redBg,   pill:{bg:V.redBg,   color:V.red,      border:V.redRing},  txt:'🔴 Vence HOY',  diasColor:V.red,   diasTxt:'¡HOY!',       btnDanger:true }
     : d === 1
-    ? { bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,   border:V.goldRing}, txt:'🟡 Mañana',    diasColor:V.amber, diasTxt:'Mañana',     btnDanger:false }
-    : { bg:`linear-gradient(150deg,#fff 65%,${V.tealLight})`,border:V.tealRing,iconBg:V.tealLight,pill:{bg:V.tealLight,color:V.tealDark,border:V.tealRing}, txt:`🟢 En ${d} días`,diasColor:V.teal, diasTxt:`En ${d} días`,btnDanger:false }
+    ? { bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing, iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,   border:V.goldRing}, txt:'🟡 Mañana',     diasColor:V.amber, diasTxt:'Mañana',      btnDanger:false }
+    : { bg:`linear-gradient(150deg,#fff 65%,${V.tealLight})`,border:V.tealRing, iconBg:V.tealLight,pill:{bg:V.tealLight,color:V.tealDark,border:V.tealRing}, txt:`🟢 En ${d} días`,diasColor:V.teal,  diasTxt:`En ${d} días`,btnDanger:false }
 }
 
 export default function ResponsableInscriptoPage() {
@@ -289,7 +289,10 @@ export default function ResponsableInscriptoPage() {
             </div>
           </div>
 
-          {/* CAPTURA */}
+          {/* SEO */}
+          <SEOResponsableInscripto />
+
+          {/* CAPTURA EMAIL */}
           <div className="ff-captura" style={{ background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden', boxShadow:`0 8px 32px rgba(13,92,120,.25)` }}>
             <div style={{ position:'absolute', right:-50, top:-50, width:200, height:200, borderRadius:'50%', background:'rgba(255,255,255,.05)' }} />
             <div style={{ position:'relative', zIndex:1 }}>
@@ -323,8 +326,6 @@ export default function ResponsableInscriptoPage() {
               }
             </div>
           </div>
-          {/* SEO: Contenido informativo */}
-          <SEOResponsableInscripto />
 
         </main>
       </div>

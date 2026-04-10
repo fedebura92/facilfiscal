@@ -285,6 +285,36 @@ export default function AutonomosPage() {
               </div>}
             </div>
           </div>
+            <div className="ff-cap-form" style={{ position:'relative', zIndex:1 }}>
+              {emailOk
+                ? <div style={{ color:V.gold, fontSize:15, fontWeight:800 }}>✓ ¡Listo! Revisá tu email.</div>
+                : <>
+                    <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+                      {[{key:'mono',label:'Monotributista'},{key:'ri',label:'Resp. Inscripto'},{key:'aut',label:'Autónomo'}].map(op => (
+                        <label key={op.key} style={{ display:'flex', alignItems:'center', gap:5, cursor:tipoDisabled(op.key)?'not-allowed':'pointer', opacity:tipoDisabled(op.key)?.4:1 }}>
+                          <input type="checkbox" checked={tiposSel.includes(op.key)} disabled={tipoDisabled(op.key)} onChange={() => toggleTipo(op.key)} style={{ width:15, height:15, accentColor:V.gold }}/>
+                          <span style={{ fontSize:12, fontWeight:700, color:'white' }}>{op.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {suscError && <div style={{ fontSize:12, color:'#fca5a5', fontWeight:600 }}>{suscError}</div>}
+                    <div className="ff-cap-input-row">
+                      <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email}
+                        onChange={e => { setEmail(e.target.value); setSuscError('') }}
+                        onKeyDown={e => e.key==='Enter'&&suscribir()}
+                        style={{ background:'rgba(255,255,255,.25)', border:'1.5px solid rgba(255,255,255,.6)', borderRadius:8, padding:'10px 14px', fontSize:13, fontWeight:600, color:'white', outline:'none', flex:1, minWidth:0 }}/>
+                      <button onClick={suscribir} style={{ background:V.gold, color:V.ink, border:'none', borderRadius:8, padding:'10px 16px', fontSize:13, fontWeight:900, whiteSpace:'nowrap', boxShadow:`0 2px 8px rgba(245,166,35,.4)`, flexShrink:0 }}>
+                        Activar →
+                      </button>
+                    </div>
+                  </>
+              }
+            </div>
+          
+          {/* SEO: Contenido informativo */}
+          <SEOAutonomos />
+
+
 
           {/* CAPTURA */}
           <div className="ff-captura" style={{ background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden', boxShadow:`0 8px 32px rgba(13,92,120,.25)` }}>
@@ -320,8 +350,6 @@ export default function AutonomosPage() {
               }
             </div>
           </div>
-          {/* SEO: Contenido informativo */}
-          <SEOAutonomos />
 
         </main>
       </div>
