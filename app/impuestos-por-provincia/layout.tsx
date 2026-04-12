@@ -1,45 +1,43 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculá Ingresos Brutos",
+  title: "Impuestos provinciales en Argentina — IIBB, Sellos y más por provincia",
   description:
-    "Calculá cuánto tenés que pagar de Ingresos Brutos en Argentina según tu actividad y provincia. Simple, rápido y sin errores.",
+    "Consultá los impuestos de cada provincia argentina: Ingresos Brutos (IIBB), Impuesto de Sellos, Inmobiliario y Tasas Municipales. Las 24 jurisdicciones actualizadas 2025.",
 
   keywords: [
-    "ingresos brutos argentina",
-    "calcular ingresos brutos",
-    "alicuota ingresos brutos",
-    "impuesto ingresos brutos provincias",
-    "cuánto pagar ingresos brutos"
+    "impuestos provinciales argentina",
+    "ingresos brutos por provincia",
+    "alicuota IIBB argentina 2025",
+    "impuesto de sellos provincia",
+    "cuanto se paga de ingresos brutos",
+    "impuestos municipales argentina",
+    "provincia con mas impuestos argentina",
+    "IIBB ARBA AGIP DGR",
+    "cuantos impuestos se pagan en argentina",
+    "impuesto ingresos brutos todas las provincias",
   ],
 
   openGraph: {
-    title: "Calculá Ingresos Brutos | FacilFiscal",
+    title: "Impuestos por provincia en Argentina | FácilFiscal",
     description:
-      "Calculá fácilmente cuánto pagar de Ingresos Brutos según tu actividad y provincia.",
-    url: "/ingresos-brutos",
-    siteName: "FacilFiscal",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
+      "IIBB, Sellos, Inmobiliario y Tasas Municipales de las 24 jurisdicciones argentinas. Datos actualizados 2025.",
+    url: "/impuestos-por-provincia",
+    siteName: "FácilFiscal",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     locale: "es_AR",
     type: "website",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Calculá Ingresos Brutos | FacilFiscal",
-    description:
-      "Calculá cuánto pagar de Ingresos Brutos en segundos.",
+    title: "Impuestos por provincia en Argentina | FácilFiscal",
+    description: "IIBB, Sellos, Inmobiliario de las 24 jurisdicciones. Datos actualizados 2025.",
     images: ["/og-image.png"],
   },
 
   alternates: {
-    canonical: "/ingresos-brutos",
+    canonical: "/impuestos-por-provincia",
   },
 
   robots: {
@@ -48,7 +46,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function IngresosBrutosLayout({
+export default function ImpuestosPorProvinciaLayout({
   children,
 }: {
   children: React.ReactNode;
