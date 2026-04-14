@@ -215,10 +215,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         {/* Logo en sidebar */}
         <a href="/" className="ff-sidebar-logo" onClick={() => setSidebarOpen(false)}>
           <img src="/logo.svg" alt="Fácil Fiscal" />
-          <div className="ff-sidebar-logo-text">
-            <span className="ff-sidebar-logo-name">Fácil Fiscal</span>
-            <span className="ff-sidebar-logo-sub">Tu solución fiscal simplificada</span>
-          </div>
         </a>
 
         {/* Nav groups */}
