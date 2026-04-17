@@ -213,7 +213,7 @@ export default function LoginPage() {
       <div className="login-root">
         <div className="login-card">
           <Link href="/" className="login-logo">
-            <img src="/logo.png" alt="Fácil Fiscal" style={{ height: '80px', width: 'auto' }} />
+            <img src="/logo.png" alt="Fácil Fiscal" style={{ height: '120px', width: 'auto' }} />
           </Link>
 
           <div className="login-title">
