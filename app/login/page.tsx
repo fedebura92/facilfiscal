@@ -80,11 +80,6 @@ export default function LoginPage() {
         .login-logo {
           display: block;
           text-align: center;
-          font-size: 1.4rem;
-          font-weight: 800;
-          background: linear-gradient(135deg, #0d9488, #d97706);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
           margin-bottom: 28px;
           text-decoration: none;
         }
@@ -217,7 +212,9 @@ export default function LoginPage() {
 
       <div className="login-root">
         <div className="login-card">
-          <Link href="/" className="login-logo">Fácil Fiscal</Link>
+          <Link href="/" className="login-logo">
+            <img src="/logo.png" alt="Fácil Fiscal" style={{ height: '40px', width: 'auto' }} />
+          </Link>
 
           <div className="login-title">
             {mode === 'login' ? 'Bienvenido de vuelta' : 'Creá tu cuenta gratis'}
