@@ -207,6 +207,29 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
         /* ── Page content wrapper ── */
         .ff-page-content { min-height: 100vh; transition: margin-left .22s; }
+
+        /* ── CTAs header ── */
+        .ff-cta-primary {
+          background: linear-gradient(135deg, #0d9488, #0f766e);
+          color: #fff; border: none; border-radius: 8px;
+          padding: 7px 14px; font-family: 'Nunito', sans-serif;
+          font-size: 12px; font-weight: 800; cursor: pointer;
+          white-space: nowrap; text-decoration: none;
+          display: inline-flex; align-items: center;
+        }
+        .ff-cta-secondary {
+          background: #f4f7f9; color: #0d5c78;
+          border: 1.5px solid #e2e8ed; border-radius: 8px;
+          padding: 7px 14px; font-family: 'Nunito', sans-serif;
+          font-size: 12px; font-weight: 800; cursor: pointer;
+          white-space: nowrap; text-decoration: none;
+          display: inline-flex; align-items: center; gap: 4px;
+        }
+        .ff-cta-secondary:hover { background: #e8f6fb; border-color: #a8ddf0; }
+          .ff-cta-primary:hover { opacity: .9; }
+          @media (max-width: 500px) { .ff-cta-label { display: none; } 
+        }
+
       ` }} />
 
       {/* ── SIDEBAR ── */}
@@ -237,6 +260,15 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
         {/* Separador y link a AFIP */}
         <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid #e2e8ed' }}>
+          <a href="/crear-negocio" className="ff-nav-item">
+            <span className="ff-nav-emoji">🏗️</span>
+            Crear negocio
+          </a>
+          <a href="/mipanel" className="ff-nav-item" style={{ color: '#0d9488', fontWeight: 800 }}>
+            <span className="ff-nav-emoji">📊</span>
+            Mi panel
+          </a>
+          
           <a
             href="https://www.afip.gob.ar"
             target="_blank"
@@ -289,6 +321,16 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             )}
 
             <div style={{ flex: 1 }} />
+
+            {/* CTAs principales */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <a href="/crear-negocio" className="ff-cta-secondary">
+                🏗️ <span className="ff-cta-label">Crear negocio</span>
+              </a>
+              <a href="/mipanel" className="ff-cta-primary">
+                Mi panel →
+              </a>
+            </div>
 
             {onAlertasClick && (
               <button className="ff-alert-cta" onClick={onAlertasClick}>
