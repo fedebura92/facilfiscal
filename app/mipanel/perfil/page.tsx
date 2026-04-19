@@ -38,14 +38,12 @@ export default function PerfilPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-
   const [nombre, setNombre] = useState('')
   const [provincia, setProvincia] = useState('')
   const [actividad, setActividad] = useState('')
   const [tipo, setTipo] = useState('')
   const [facturacion, setFacturacion] = useState('')
 
-  // Cargar perfil existente
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -74,7 +72,6 @@ export default function PerfilPage() {
       setError('Completá todos los campos obligatorios.')
       return
     }
-
     setSaving(true)
     setError('')
 
@@ -105,354 +102,182 @@ export default function PerfilPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Nunito, sans-serif', color: '#64748b' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Nunito', sans-serif", color: 'var(--ink3)' }}>
         Cargando tu perfil...
       </div>
     )
   }
 
+  const inputStyle: React.CSSProperties = {
+    padding: '11px 14px',
+    border: '1.5px solid var(--border)',
+    borderRadius: 'var(--r)',
+    fontSize: 13,
+    fontFamily: "'Nunito', sans-serif",
+    color: 'var(--ink)',
+    background: 'var(--surface)',
+    outline: 'none',
+    width: '100%',
+  }
+
   return (
-    <>
-      <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', fontFamily: "'Nunito', sans-serif", color: 'var(--ink)' }}>
 
-        .perfil-root {
-          min-height: 100vh;
-          background: #f8fafc;
-          font-family: 'Nunito', sans-serif;
-          color: #1e293b;
-        }
+      {/* Topbar */}
+      <header style={{
+        background: 'var(--surface)', borderBottom: '1px solid var(--border)',
+        padding: '0 24px', height: 60,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: 'var(--sh-sm)',
+      }}>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <img src="/logo.png" alt="Fácil Fiscal" style={{ height: 36, width: 'auto' }} />
+        </Link>
+        <Link href="/mipanel" style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink3)', textDecoration: 'none' }}>
+          ← Volver al panel
+        </Link>
+      </header>
 
-        .perfil-topbar {
-          background: #fff;
-          border-bottom: 1px solid #e2e8f0;
-          padding: 0 24px;
-          height: 60px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
+      {/* Main */}
+      <main style={{ maxWidth: 600, margin: '0 auto', padding: '36px 20px 80px' }}>
 
-        .perfil-topbar a {
-          font-weight: 800;
-          font-size: 1rem;
-          background: linear-gradient(135deg, #0d9488, #d97706);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          text-decoration: none;
-        }
-
-        .back-link {
-          font-size: .85rem;
-          color: #64748b;
-          font-weight: 600;
-          text-decoration: none;
-        }
-
-        .back-link:hover { color: #0d9488; }
-
-        .perfil-main {
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 36px 20px 64px;
-        }
-
-        .perfil-head {
-          margin-bottom: 28px;
-        }
-
-        .perfil-title {
-          font-size: 1.6rem;
-          font-weight: 800;
-          margin-bottom: 6px;
-        }
-
-        .perfil-sub {
-          font-size: .9rem;
-          color: #64748b;
-        }
-
-        .section {
-          background: #fff;
-          border: 1px solid #e2e8f0;
-          border-radius: 14px;
-          padding: 24px;
-          margin-bottom: 16px;
-          box-shadow: 0 1px 3px rgba(0,0,0,.05);
-        }
-
-        .section-title {
-          font-size: .8rem;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: .06em;
-          color: #94a3b8;
-          margin-bottom: 16px;
-        }
-
-        .field {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          margin-bottom: 14px;
-        }
-
-        .field:last-child { margin-bottom: 0; }
-
-        .field label {
-          font-size: .82rem;
-          font-weight: 700;
-          color: #475569;
-        }
-
-        .field input,
-        .field select {
-          padding: 11px 14px;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          font-size: .9rem;
-          font-family: 'Nunito', sans-serif;
-          color: #1e293b;
-          background: #fff;
-          outline: none;
-          transition: border-color .15s, box-shadow .15s;
-        }
-
-        .field input:focus,
-        .field select:focus {
-          border-color: #0d9488;
-          box-shadow: 0 0 0 3px rgba(13,148,136,.1);
-        }
-
-        .field .hint {
-          font-size: .78rem;
-          color: #94a3b8;
-          font-weight: 600;
-        }
-
-        /* Tipo cards */
-        .tipo-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .tipo-card {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 14px 16px;
-          border: 2px solid #e2e8f0;
-          border-radius: 12px;
-          cursor: pointer;
-          transition: border-color .15s, background .15s;
-        }
-
-        .tipo-card:hover { border-color: #99f6e4; background: #f0fdf4; }
-
-        .tipo-card.selected {
-          border-color: #0d9488;
-          background: #f0fdfa;
-        }
-
-        .tipo-radio {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          border: 2px solid #cbd5e1;
-          flex-shrink: 0;
-          margin-top: 2px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: border-color .15s;
-        }
-
-        .tipo-card.selected .tipo-radio {
-          border-color: #0d9488;
-          background: #0d9488;
-        }
-
-        .tipo-radio-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: #fff;
-          display: none;
-        }
-
-        .tipo-card.selected .tipo-radio-dot { display: block; }
-
-        .tipo-label {
-          font-size: .9rem;
-          font-weight: 700;
-          color: #1e293b;
-        }
-
-        .tipo-desc {
-          font-size: .8rem;
-          color: #64748b;
-          margin-top: 2px;
-        }
-
-        /* Actions */
-        .actions {
-          margin-top: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .error-box {
-          background: #fef2f2;
-          border: 1px solid #fecaca;
-          border-radius: 10px;
-          padding: 11px 14px;
-          font-size: .85rem;
-          color: #dc2626;
-          font-weight: 600;
-        }
-
-        .success-box {
-          background: #f0fdf4;
-          border: 1px solid #bbf7d0;
-          border-radius: 10px;
-          padding: 11px 14px;
-          font-size: .9rem;
-          color: #166534;
-          font-weight: 700;
-          text-align: center;
-        }
-
-        .btn-save {
-          padding: 14px;
-          background: linear-gradient(135deg, #0d9488, #0f766e);
-          color: #fff;
-          border: none;
-          border-radius: 12px;
-          font-size: .95rem;
-          font-weight: 800;
-          font-family: 'Nunito', sans-serif;
-          cursor: pointer;
-          transition: opacity .2s, transform .15s;
-        }
-
-        .btn-save:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
-        .btn-save:disabled { opacity: .6; cursor: not-allowed; }
-
-        .btn-cancel {
-          padding: 12px;
-          background: none;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          font-size: .875rem;
-          font-weight: 700;
-          font-family: 'Nunito', sans-serif;
-          color: #64748b;
-          cursor: pointer;
-          text-align: center;
-          text-decoration: none;
-          display: block;
-          transition: background .15s;
-        }
-
-        .btn-cancel:hover { background: #f1f5f9; }
-      `}</style>
-
-      <div className="perfil-root">
-        <header className="perfil-topbar">
-          <Link href="/">Fácil Fiscal</Link>
-          <Link href="/mipanel" className="back-link">← Volver al panel</Link>
-        </header>
-
-        <main className="perfil-main">
-          <div className="perfil-head">
-            <div className="perfil-title">Tu perfil fiscal ⚙️</div>
-            <div className="perfil-sub">
-              Con estos datos personalizamos tus vencimientos, tareas y alertas.
-            </div>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--ink)', marginBottom: 6 }}>Tu perfil fiscal ⚙️</div>
+          <div style={{ fontSize: 13, color: 'var(--ink3)', fontWeight: 600 }}>
+            Con estos datos personalizamos tus vencimientos, tareas y alertas.
           </div>
+        </div>
 
-          {/* Datos básicos */}
-          <div className="section">
-            <div className="section-title">Datos personales</div>
-            <div className="field">
-              <label>Nombre (opcional)</label>
-              <input
-                type="text"
-                placeholder="¿Cómo te llamás?"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-              />
-            </div>
+        {/* Datos personales */}
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 24, marginBottom: 16, boxShadow: 'var(--sh-sm)' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink3)', marginBottom: 16 }}>
+            Datos personales
           </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink2)' }}>Nombre (opcional)</label>
+            <input
+              type="text"
+              placeholder="¿Cómo te llamás?"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+        </div>
 
-          {/* Situación fiscal */}
-          <div className="section">
-            <div className="section-title">Tu situación fiscal *</div>
-            <div className="tipo-grid">
-              {TIPOS.map((t) => (
-                <div
-                  key={t.value}
-                  className={`tipo-card ${tipo === t.value ? 'selected' : ''}`}
-                  onClick={() => setTipo(t.value)}
-                >
-                  <div className="tipo-radio">
-                    <div className="tipo-radio-dot" />
-                  </div>
-                  <div>
-                    <div className="tipo-label">{t.label}</div>
-                    <div className="tipo-desc">{t.desc}</div>
-                  </div>
+        {/* Situación fiscal */}
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 24, marginBottom: 16, boxShadow: 'var(--sh-sm)' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink3)', marginBottom: 16 }}>
+            Tu situación fiscal *
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {TIPOS.map((t) => (
+              <div
+                key={t.value}
+                onClick={() => setTipo(t.value)}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                  padding: '14px 16px', cursor: 'pointer',
+                  border: `2px solid ${tipo === t.value ? 'var(--teal)' : 'var(--border)'}`,
+                  borderRadius: 'var(--r)',
+                  background: tipo === t.value ? 'var(--teal-light)' : 'var(--surface)',
+                  transition: 'all .15s',
+                }}
+              >
+                <div style={{
+                  width: 18, height: 18, borderRadius: '50%', flexShrink: 0, marginTop: 2,
+                  border: `2px solid ${tipo === t.value ? 'var(--teal)' : 'var(--border2)'}`,
+                  background: tipo === t.value ? 'var(--teal)' : 'transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {tipo === t.value && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#fff' }} />}
                 </div>
-              ))}
-            </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{t.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink3)', marginTop: 2 }}>{t.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Negocio */}
+        <div style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 24, marginBottom: 16, boxShadow: 'var(--sh-sm)' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--ink3)', marginBottom: 16 }}>
+            Tu negocio *
           </div>
 
-          {/* Actividad y provincia */}
-          <div className="section">
-            <div className="section-title">Tu negocio *</div>
-            <div className="field">
-              <label>Tipo de actividad</label>
-              <select value={actividad} onChange={(e) => setActividad(e.target.value)}>
-                <option value="">Seleccioná tu actividad</option>
-                {ACTIVIDADES.map((a) => (
-                  <option key={a} value={a}>{a}</option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label>Provincia</label>
-              <select value={provincia} onChange={(e) => setProvincia(e.target.value)}>
-                <option value="">Seleccioná tu provincia</option>
-                {PROVINCIAS.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label>Facturación mensual estimada (opcional)</label>
-              <input
-                type="number"
-                placeholder="Ej: 500000"
-                value={facturacion}
-                onChange={(e) => setFacturacion(e.target.value)}
-              />
-              <span className="hint">En pesos argentinos. Sirve para recomendarte la categoría correcta.</span>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink2)' }}>Tipo de actividad</label>
+            <select value={actividad} onChange={(e) => setActividad(e.target.value)} style={inputStyle}>
+              <option value="">Seleccioná tu actividad</option>
+              {ACTIVIDADES.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
           </div>
 
-          {/* Actions */}
-          <div className="actions">
-            {error && <div className="error-box">⚠️ {error}</div>}
-            {success && <div className="success-box">✅ Perfil guardado. Volviendo al panel...</div>}
-            <button className="btn-save" onClick={handleSave} disabled={saving || success}>
-              {saving ? 'Guardando...' : 'Guardar perfil →'}
-            </button>
-            <Link href="/mipanel" className="btn-cancel">Cancelar</Link>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink2)' }}>Provincia</label>
+            <select value={provincia} onChange={(e) => setProvincia(e.target.value)} style={inputStyle}>
+              <option value="">Seleccioná tu provincia</option>
+              {PROVINCIAS.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
           </div>
-        </main>
-      </div>
-    </>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink2)' }}>Facturación mensual estimada (opcional)</label>
+            <input
+              type="number"
+              placeholder="Ej: 500000"
+              value={facturacion}
+              onChange={(e) => setFacturacion(e.target.value)}
+              style={inputStyle}
+            />
+            <span style={{ fontSize: 11, color: 'var(--ink3)', fontWeight: 600 }}>
+              En pesos argentinos. Sirve para recomendarte la categoría correcta.
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
+          {error && (
+            <div style={{ background: 'var(--red-bg)', border: '1px solid var(--red-ring)', borderRadius: 'var(--r)', padding: '11px 14px', fontSize: 13, fontWeight: 600, color: 'var(--red)' }}>
+              ⚠️ {error}
+            </div>
+          )}
+          {success && (
+            <div style={{ background: 'var(--green-bg)', border: '1px solid var(--green-ring)', borderRadius: 'var(--r)', padding: '11px 14px', fontSize: 13, fontWeight: 700, color: 'var(--green)', textAlign: 'center' }}>
+              ✅ Perfil guardado. Volviendo al panel...
+            </div>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={saving || success}
+            style={{
+              padding: 14, border: 'none', borderRadius: 'var(--r)',
+              background: 'linear-gradient(135deg, var(--teal-dark), var(--teal))',
+              color: '#fff', fontSize: 14, fontWeight: 900,
+              fontFamily: "'Nunito', sans-serif",
+              cursor: saving || success ? 'not-allowed' : 'pointer',
+              opacity: saving || success ? .6 : 1,
+            }}
+          >
+            {saving ? 'Guardando...' : 'Guardar perfil →'}
+          </button>
+          <Link
+            href="/mipanel"
+            style={{
+              padding: 12, border: '1.5px solid var(--border)', borderRadius: 'var(--r)',
+              fontSize: 13, fontWeight: 700, color: 'var(--ink3)',
+              textDecoration: 'none', textAlign: 'center', display: 'block',
+              background: 'var(--surface)',
+            }}
+          >
+            Cancelar
+          </Link>
+        </div>
+
+      </main>
+    </div>
   )
 }

@@ -17,7 +17,7 @@ const INITIAL_TASKS: Task[] = [
 
 const HELP_CARDS = [
   { icon: "🏗️", label: "Crear negocio", href: "/crear-negocio" },
-  { icon: "📋", label: "Monotributo", href: "/monotributo" },
+  { icon: "📋", label: "Monotributo", href: "/" },
   { icon: "🧾", label: "Cómo facturar", href: "/como-facturar" },
   { icon: "🤖", label: "Asistente IA", href: "/" },
 ];
@@ -38,92 +38,121 @@ export default function MiPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+    <div style={{ minHeight: "100vh", background: "var(--bg)", fontFamily: "'Nunito', sans-serif", color: "var(--ink)" }}>
 
       {/* ── Top bar ── */}
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between px-6 h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Fácil Fiscal" className="h-9 w-auto" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:block text-sm text-slate-500 font-semibold">
-              Hola, Federico 👋
-            </span>
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen((v) => !v)}
-                className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-500 to-amber-500 flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition"
-                aria-label="Menú de usuario"
-              >
-                F
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-11 w-44 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50">
-                  <Link
-                    href="/mipanel/perfil"
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-3 text-sm font-600 text-slate-700 hover:bg-slate-50 transition"
-                  >
-                    ⚙️ Mi perfil
-                  </Link>
-                  <button
-                    onClick={() => setMenuOpen(false)}
-                    className="block w-full text-left px-4 py-3 text-sm font-semibold text-red-500 hover:bg-slate-50 transition"
-                  >
-                    → Salir
-                  </button>
-                </div>
-              )}
-            </div>
+      <header style={{
+        position: "sticky", top: 0, zIndex: 100,
+        background: "var(--surface)", borderBottom: "1px solid var(--border)",
+        boxShadow: "var(--sh-sm)", padding: "0 24px", height: 64,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <img src="/logo.png" alt="Fácil Fiscal" style={{ height: 40, width: "auto" }} />
+        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span style={{ fontSize: 13, color: "var(--ink3)", fontWeight: 600 }}>
+            Hola, Federico 👋
+          </span>
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Menú de usuario"
+              style={{
+                width: 36, height: 36, borderRadius: "50%",
+                background: "linear-gradient(135deg, var(--teal), var(--gold))",
+                border: "none", cursor: "pointer", color: "#fff",
+                fontSize: 14, fontWeight: 800, display: "flex",
+                alignItems: "center", justifyContent: "center",
+              }}
+            >
+              F
+            </button>
+            {menuOpen && (
+              <div style={{
+                position: "absolute", top: 44, right: 0,
+                background: "var(--surface)", border: "1px solid var(--border)",
+                borderRadius: "var(--r)", boxShadow: "var(--sh)",
+                minWidth: 160, overflow: "hidden", zIndex: 200,
+              }}>
+                <Link
+                  href="/mipanel/perfil"
+                  onClick={() => setMenuOpen(false)}
+                  style={{ display: "block", padding: "11px 16px", fontSize: 13, fontWeight: 700, color: "var(--ink)", textDecoration: "none" }}
+                >
+                  ⚙️ Mi perfil
+                </Link>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  style={{ display: "block", width: "100%", textAlign: "left", padding: "11px 16px", fontSize: 13, fontWeight: 700, color: "var(--red)", background: "none", border: "none", cursor: "pointer" }}
+                >
+                  → Salir
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       {/* ── Main ── */}
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-5">
+      <main style={{ maxWidth: 860, margin: "0 auto", padding: "32px 20px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* Bloque 1 — Estado */}
-        <div className="rounded-2xl bg-gradient-to-br from-teal-600 to-teal-700 text-white p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div style={{
+          background: "linear-gradient(135deg, var(--teal-dark), var(--teal))",
+          borderRadius: "var(--r-xl)", padding: "28px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: 20, flexWrap: "wrap", color: "#fff",
+        }}>
           <div>
-            <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider mb-3">
-              <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse" />
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "rgba(255,255,255,.18)", borderRadius: 999,
+              padding: "4px 12px", fontSize: 11, fontWeight: 800,
+              letterSpacing: ".05em", textTransform: "uppercase", marginBottom: 10,
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--gold-light)", display: "inline-block" }} />
               En preparación
             </div>
-            <div className="text-2xl font-extrabold mb-1">Tu panel fiscal está listo</div>
-            <div className="text-sm text-white/80 max-w-sm leading-relaxed">
+            <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Tu panel fiscal está listo</div>
+            <div style={{ fontSize: 13, opacity: .85, maxWidth: 340, lineHeight: 1.6 }}>
               Completá tu perfil y te armamos un plan personalizado: vencimientos, tareas y alertas según tu situación.
             </div>
           </div>
           <Link
             href="/mipanel/perfil"
-            className="shrink-0 bg-white text-teal-700 font-extrabold text-sm px-5 py-3 rounded-xl hover:shadow-lg transition"
+            style={{
+              background: "#fff", color: "var(--teal-dark)", borderRadius: "var(--r)",
+              padding: "12px 22px", fontSize: 13, fontWeight: 900,
+              textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0,
+              boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+            }}
           >
             Completar perfil →
           </Link>
         </div>
 
         {/* Bloque 2 — Tareas */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-base font-extrabold text-slate-800">✅ Lo que tenés que hacer hoy</div>
-            <span className="text-xs font-semibold text-slate-400">{completedCount}/{totalCount} completadas</span>
+        <div style={{ background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: "var(--r-lg)", boxShadow: "var(--sh-sm)", padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "var(--ink)" }}>✅ Lo que tenés que hacer hoy</div>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink3)" }}>{completedCount}/{totalCount} completadas</span>
           </div>
 
-          {/* Progress */}
-          <div className="h-1.5 bg-slate-100 rounded-full mb-5 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-teal-500 to-amber-400 rounded-full transition-all duration-300"
-              style={{ width: `${progressPct}%` }}
-            />
+          <div style={{ height: 6, background: "var(--border)", borderRadius: 999, marginBottom: 18, overflow: "hidden" }}>
+            <div style={{
+              height: "100%", borderRadius: 999,
+              background: "linear-gradient(90deg, var(--teal), var(--gold))",
+              width: `${progressPct}%`, transition: "width .4s ease",
+            }} />
           </div>
 
           {allDone ? (
-            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm font-bold text-green-700">
+            <div style={{ background: "var(--green-bg)", border: "1px solid var(--green-ring)", borderRadius: "var(--r)", padding: "13px 16px", fontSize: 13, fontWeight: 700, color: "var(--green)", display: "flex", alignItems: "center", gap: 8 }}>
               🎉 ¡Perfil completo! Ya podemos personalizar tu panel.
             </div>
           ) : (
-            <div className="space-y-2">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {tasks.map((task) => (
                 <div
                   key={task.id}
@@ -132,25 +161,31 @@ export default function MiPanel() {
                   aria-checked={task.done}
                   tabIndex={0}
                   onKeyDown={(e) => e.key === " " && toggleTask(task.id)}
-                  className={`flex items-center gap-3 px-4 py-3 border rounded-xl cursor-pointer transition select-none
-                    ${task.done
-                      ? "border-slate-100 opacity-50"
-                      : "border-slate-200 hover:border-teal-200 hover:bg-teal-50"
-                    }`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "12px 16px", border: "1.5px solid var(--border)",
+                    borderRadius: "var(--r)", cursor: "pointer",
+                    opacity: task.done ? .5 : 1,
+                    transition: "all .15s",
+                  }}
                 >
-                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition
-                    ${task.done ? "bg-teal-500 border-teal-500" : "border-slate-300"}`}
-                  >
+                  <div style={{
+                    width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                    border: `2px solid ${task.done ? "var(--teal)" : "var(--border2)"}`,
+                    background: task.done ? "var(--teal)" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "all .2s",
+                  }}>
                     {task.done && (
                       <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
                         <path d="M1 4L4 7L10 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     )}
                   </div>
-                  <span className={`text-sm font-semibold flex-1 ${task.done ? "line-through text-slate-400" : "text-slate-700"}`}>
+                  <span style={{ fontSize: 13, fontWeight: 600, flex: 1, color: "var(--ink2)", textDecoration: task.done ? "line-through" : "none" }}>
                     {task.label}
                   </span>
-                  <span className="text-slate-300 text-sm">›</span>
+                  <span style={{ color: "var(--ink4)", fontSize: 13 }}>›</span>
                 </div>
               ))}
             </div>
@@ -158,30 +193,36 @@ export default function MiPanel() {
         </div>
 
         {/* Bloque 3 — Vencimientos */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-          <div className="text-base font-extrabold text-slate-800 mb-4">📅 Próximos vencimientos</div>
-          <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <span className="text-4xl opacity-30">🔒</span>
-            <p className="text-sm font-semibold text-slate-400 max-w-xs leading-relaxed">
+        <div style={{ background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: "var(--r-lg)", boxShadow: "var(--sh-sm)", padding: 24 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--ink)", marginBottom: 16 }}>📅 Próximos vencimientos</div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "20px 0 8px", textAlign: "center" }}>
+            <span style={{ fontSize: 36, opacity: .3 }}>🔒</span>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--ink3)", maxWidth: 280, lineHeight: 1.6 }}>
               Completá tu perfil para ver los vencimientos de AFIP, IIBB y Autónomos que te aplican.
             </p>
-            <Link href="/mipanel/perfil" className="text-sm font-bold text-teal-600 hover:underline">
+            <Link href="/mipanel/perfil" style={{ fontSize: 13, fontWeight: 800, color: "var(--teal)", textDecoration: "none" }}>
               Completar perfil →
             </Link>
           </div>
         </div>
 
         {/* Bloque 4 — Ayuda rápida */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-          <div className="text-base font-extrabold text-slate-800 mb-4">💡 Centro de ayuda</div>
-          <div className="grid grid-cols-2 gap-3">
+        <div style={{ background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: "var(--r-lg)", boxShadow: "var(--sh-sm)", padding: 24 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--ink)", marginBottom: 16 }}>💡 Centro de ayuda</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {HELP_CARDS.map((c) => (
               <Link
-                key={c.href}
+                key={c.label}
                 href={c.href}
-                className="flex items-center gap-3 px-4 py-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:border-teal-200 hover:bg-teal-50 transition"
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "13px 16px", border: "1.5px solid var(--border)",
+                  borderRadius: "var(--r)", textDecoration: "none",
+                  color: "var(--ink)", fontSize: 13, fontWeight: 700,
+                  background: "var(--surface)",
+                }}
               >
-                <span className="text-xl">{c.icon}</span>
+                <span style={{ fontSize: 18 }}>{c.icon}</span>
                 {c.label}
               </Link>
             ))}
