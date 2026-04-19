@@ -29,8 +29,9 @@ export default function LoginPage() {
           password,
           options: {
             data: { nombre },
+            emailRedirectTo: 'https://www.facilfiscal.com.ar/mipanel',
           },
-        })
+      })
         if (error) throw error
         setSuccess('¡Cuenta creada! Revisá tu email para confirmar.')
       } else {
