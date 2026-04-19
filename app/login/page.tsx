@@ -39,9 +39,8 @@ export default function LoginPage() {
           email,
           password,
         })
-        console.log('data:', data)
-        console.log('error:', error)
         if (error) throw error
+        router.refresh()
         router.push('/mipanel')
       }
     } catch (err: unknown) {
