@@ -29,7 +29,7 @@ export default function LoginPage() {
           password,
           options: {
             data: { nombre },
-            emailRedirectTo: 'https://www.facilfiscal.com.ar/mipanel',
+            emailRedirectTo: 'https://www.facilfiscal.com.ar/auth/callback',
           },
       })
         if (error) throw error
