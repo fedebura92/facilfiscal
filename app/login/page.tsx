@@ -35,10 +35,12 @@ export default function LoginPage() {
         if (error) throw error
         setSuccess('¡Cuenta creada! Revisá tu email para confirmar.')
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
+        console.log('data:', data)
+        console.log('error:', error)
         if (error) throw error
         router.push('/mipanel')
       }
