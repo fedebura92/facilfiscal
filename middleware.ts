@@ -2,7 +2,11 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+  let res = NextResponse.next({
+    request: {
+      headers: req.headers,
+    },
+  })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,10 +18,16 @@ export async function middleware(req: NextRequest) {
         },
         set(name: string, value: string, options: CookieOptions) {
           req.cookies.set({ name, value, ...options })
+          res = NextResponse.next({
+            request: { headers: req.headers },
+          })
           res.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
           req.cookies.set({ name, value: '', ...options })
+          res = NextResponse.next({
+            request: { headers: req.headers },
+          })
           res.cookies.set({ name, value: '', ...options })
         },
       },
@@ -26,7 +36,6 @@ export async function middleware(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Rutas protegidas
   const isProtected = req.nextUrl.pathname.startsWith('/mipanel')
 
   if (isProtected && !session) {
@@ -35,7 +44,6 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Si ya está logueado y va a /login, redirigir al panel
   if (req.nextUrl.pathname === '/login' && session) {
     return NextResponse.redirect(new URL('/mipanel', req.url))
   }
