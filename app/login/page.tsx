@@ -40,8 +40,7 @@ export default function LoginPage() {
           password,
         })
         if (error) throw error
-        router.refresh()
-        router.push('/mipanel')
+        window.location.href = '/mipanel'
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Ocurrió un error'
