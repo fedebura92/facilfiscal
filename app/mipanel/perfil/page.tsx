@@ -131,7 +131,7 @@ export default function PerfilPage() {
         boxShadow: 'var(--sh-sm)',
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-          <img src="/logo.png" alt="Fácil Fiscal" style={{ height: 80, width: 'auto' }} />
+          <img src="/logo.png" alt="Fácil Fiscal" style={{ height: 70, width: 'auto' }} />
         </Link>
         <Link href="/mipanel" style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink3)', textDecoration: 'none' }}>
           ← Volver al panel
