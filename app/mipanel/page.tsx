@@ -104,7 +104,11 @@ export default function MiPanel() {
                   ⚙️ Mi perfil
                 </Link>
                 <button
-                  onClick={() => setMenuOpen(false)}
+                  onClick={async () => {
+                    setMenuOpen(false)
+                    await supabase.auth.signOut()
+                    window.location.href = '/login'
+                  }}
                   style={{ display: "block", width: "100%", textAlign: "left", padding: "11px 16px", fontSize: 13, fontWeight: 700, color: "var(--red)", background: "none", border: "none", cursor: "pointer" }}
                 >
                   → Salir
