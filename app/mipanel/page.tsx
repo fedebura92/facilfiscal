@@ -65,11 +65,11 @@ export default function MiPanel() {
       <header style={{
         position: "sticky", top: 0, zIndex: 100,
         background: "var(--surface)", borderBottom: "1px solid var(--border)",
-        boxShadow: "var(--sh-sm)", padding: "0 24px", height: 64,
+        boxShadow: "var(--sh-sm)", padding: "0 24px", height: 80,
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src="/logo.png" alt="Fácil Fiscal" style={{ height: 60, width: "auto" }} />
+          <img src="/logo_apaisado_Facil_Fiscal.png" alt="Fácil Fiscal" style={{ height: 52, width: "auto" }} />
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <span style={{ fontSize: 13, color: "var(--ink3)", fontWeight: 600 }}>
