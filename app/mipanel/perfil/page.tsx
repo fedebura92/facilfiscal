@@ -144,7 +144,7 @@ export default function PerfilPage() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--ink)', marginBottom: 6 }}>Tu perfil fiscal ⚙️</div>
           <div style={{ fontSize: 13, color: 'var(--ink3)', fontWeight: 600 }}>
-            Con estos datos personalizamos tus vencimientos, tareas y alertas.
+            Con estos datos personalizamos tus vencimientos, tareas y alertas serán según tu situación fiscal.
           </div>
         </div>
 
