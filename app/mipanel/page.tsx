@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 interface Task {
@@ -25,6 +26,26 @@ const HELP_CARDS = [
 export default function MiPanel() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const session = data.session
+      if (!session) {
+        window.location.href = '/login'
+      } else {
+        setAuthChecked(true)
+      }
+    })
+  }, [])
+
+  if (!authChecked) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Nunito', sans-serif", color: 'var(--ink3)' }}>
+        Cargando...
+      </div>
+    )
+  }
 
   const completedCount = tasks.filter((t) => t.done).length;
   const totalCount = tasks.length;
