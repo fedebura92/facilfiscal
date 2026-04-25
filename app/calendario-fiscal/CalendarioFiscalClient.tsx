@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import SiteHeader from "@/components/SiteHeader";
 
+// ── Tipos ──────────────────────────────────────────────────────────────────
 type Categoria = "monotributo" | "responsable" | "autonomo" | "empleador" | "todos";
 
 interface Vencimiento {
@@ -25,8 +27,8 @@ interface MesData {
 
 // ── Paleta ───────────────────────────────────────────────────────────────────
 const C = {
-  teal:        "#1d5c27",
-  tealDark:    "#1a1f64",
+  teal:        "#1a485e",
+  tealDark:    "#122870",
   tealLight:   "#e6f4f3",
   gold:        "#d97706",
   goldLight:   "#fef3c7",
@@ -548,35 +550,11 @@ export default function CalendarioFiscalClient() {
       .slice(0, 5);
   }, [categoriaFiltro, mounted]);
 
-  return (
-    <div style={{ minHeight: "100vh", background: C.white, fontFamily: "'Nunito', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');`}</style>
-
-      {/* NAV */}
-      <nav style={{ background: C.teal, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
-        <a href="/" style={{ color: C.white, fontWeight: 800, fontSize: 20, textDecoration: "none" }}>FácilFiscal</a>
-        <div style={{ display: "flex", gap: 4 }}>
-          {[
-            { href: "/", label: "Inicio" },
-            { href: "/calendario-fiscal", label: "Calendario" },
-            { href: "/mi-categoria", label: "Mi Categoría" },
-            { href: "/como-facturar", label: "Cómo Facturar" },
-          ].map((item) => {
-            const activo = item.href === "/calendario-fiscal";
-            return (
-              <a key={item.href} href={item.href} style={{
-                color: activo ? C.gold : "rgba(255,255,255,0.85)",
-                fontWeight: activo ? 700 : 500,
-                fontSize: 14,
-                textDecoration: "none",
-                padding: "6px 12px",
-                borderRadius: 8,
-                background: activo ? "rgba(255,255,255,0.12)" : "transparent",
-              }}>{item.label}</a>
-            );
-          })}
-        </div>
-      </nav>
+return (
+  <div style={{ minHeight: "100vh", background: C.white, fontFamily: "inherit" }}>
+    
+    {/* Reemplazo del NAV manual por el componente oficial */}
+    <SiteHeader currentPath="/calendario-fiscal" />
 
       {/* HERO */}
       <section style={{ background: `linear-gradient(135deg, ${C.teal} 0%, ${C.tealDark} 100%)`, padding: "52px 24px 44px", color: C.white }}>
