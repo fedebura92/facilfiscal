@@ -25,8 +25,8 @@ interface MesData {
 
 // ── Paleta ───────────────────────────────────────────────────────────────────
 const C = {
-  teal:        "#202b5e",
-  tealDark:    "#ffee8b",
+  teal:        "#1d5c27",
+  tealDark:    "#1a1f64",
   tealLight:   "#e6f4f3",
   gold:        "#d97706",
   goldLight:   "#fef3c7",
