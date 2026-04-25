@@ -1,18 +1,26 @@
-import { MetadataRoute } from 'next'
-
-const BASE = 'https://www.facilfiscal.com.ar'
+import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    { url: BASE,                                    lastModified: new Date(), changeFrequency: 'weekly',  priority: 1.0 },
-    { url: `${BASE}/responsable-inscripto`,         lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
-    { url: `${BASE}/autonomos`,                     lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
-    { url: `${BASE}/como-facturar`,                 lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE}/mi-categoria`,                  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE}/iva`,                           lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE}/ingresos-brutos`,               lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${BASE}/impuesto-ganancias`,            lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE}/impuestos-importacion`,         lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE}/impuestos-por-provincia`,       lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
-  ]
+  const baseUrl = "https://facilfiscal.com.ar";
+
+  const rutas = [
+    { url: "/", prioridad: 1.0, cambio: "weekly" },
+    { url: "/calendario-fiscal", prioridad: 0.9, cambio: "monthly" },
+    { url: "/mi-categoria", prioridad: 0.9, cambio: "monthly" },
+    { url: "/responsable-inscripto", prioridad: 0.8, cambio: "monthly" },
+    { url: "/autonomos", prioridad: 0.8, cambio: "monthly" },
+    { url: "/como-facturar", prioridad: 0.8, cambio: "monthly" },
+    { url: "/iva", prioridad: 0.8, cambio: "monthly" },
+    { url: "/ingresos-brutos", prioridad: 0.7, cambio: "monthly" },
+    { url: "/impuesto-ganancias", prioridad: 0.7, cambio: "monthly" },
+    { url: "/impuestos-importacion", prioridad: 0.7, cambio: "monthly" },
+    { url: "/impuestos-por-provincia", prioridad: 0.7, cambio: "monthly" },
+  ] as const;
+
+  return rutas.map(({ url, prioridad, cambio }) => ({
+    url: `${baseUrl}${url}`,
+    lastModified: new Date(),
+    changeFrequency: cambio,
+    priority: prioridad,
+  }));
 }
