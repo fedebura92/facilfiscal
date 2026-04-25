@@ -25,7 +25,7 @@ function cardCfg(d: number) {
   return d === 0
     ? { bg:`linear-gradient(150deg,#fff 65%,${V.redBg})`,  border:V.redRing,  iconBg:V.redBg,  pill:{bg:V.redBg,  color:V.red,      border:V.redRing},  txt:'🔴 Vence HOY', diasColor:V.red,   diasTxt:'¡HOY!',     btnDanger:true }
     : d === 1
-    ? { bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,  border:V.goldRing}, txt:'🟡 Mañana',    diasColor:V.amber, diasTxt:'Mañana',    btnDanger:false }
+    ? { bg:`linear-gradient(150deg,#fff 65%,${V.goldLight})`,border:V.goldRing,iconBg:V.goldLight,pill:{bg:V.goldLight,color:V.amber,  border:V.goldRing}, txt:'🟡 Mañana',     diasColor:V.amber, diasTxt:'Mañana',     btnDanger:false }
     : { bg:`linear-gradient(150deg,#fff 65%,${V.tealLight})`,border:V.tealRing,iconBg:V.tealLight,pill:{bg:V.tealLight,color:V.tealDark,border:V.tealRing},txt:`🟢 En ${d} días`,diasColor:V.teal, diasTxt:`En ${d} días`,btnDanger:false }
 }
 
@@ -190,7 +190,7 @@ export default function Home() {
             }
           </div>
 
-          {/* PRÓXIMOS */}
+          {/* PRÓXIMOS (Lista del mes) */}
           <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:14, overflow:'hidden', marginBottom:20, boxShadow:`0 1px 4px rgba(13,92,120,.07)` }}>
             <div style={{ padding:'13px 16px', borderBottom:`1px solid ${V.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
               <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>📋 Lista de vencimientos del mes</div>
@@ -216,6 +216,22 @@ export default function Home() {
                     )
                   })
               }
+            </div>
+          </div>
+
+          {/* BANNER (Nuevo bloque agregado) */}
+          <div style={{ marginBottom: 20, borderRadius: 14, overflow: 'hidden', border: `1.5px solid ${V.border}`, background: V.surface, boxShadow: `0 1px 4px rgba(13,92,120,.07)` }}>
+            <div style={{ background: `linear-gradient(90deg, ${V.tealDark}, ${V.tealMid})`, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 20 }}>🎁</span>
+                <div>
+                  <div style={{ color: 'white', fontSize: 13, fontWeight: 900 }}>¿Buscás más herramientas?</div>
+                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: 600 }}>Descargá nuestra guía gratuita de facturación 2026.</div>
+                </div>
+              </div>
+              <button style={{ background: V.gold, color: V.ink, border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
+                Descargar ahora
+              </button>
             </div>
           </div>
 
@@ -305,6 +321,7 @@ export default function Home() {
               <Link href="/impuesto-ganancias"     className="ff-card-link">💼 Ganancias</Link>
               <Link href="/impuestos-importacion"  className="ff-card-link">📦 Importaciones</Link>
               <Link href="/impuestos-por-provincia"className="ff-card-link">🗺️ Por provincia</Link>
+              <Link href="/calendario-fiscal"      className="ff-card-link">📅 Calendario Fiscal 2026</Link>
             </div>
           </section>
 
