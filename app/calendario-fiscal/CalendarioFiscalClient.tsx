@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useVencimientosFiscales } from "@/hooks/useVencimientosFiscales";
 
 type Categoria = "monotributo" | "responsable" | "autonomo" | "empleador" | "todos";
 
@@ -514,6 +515,7 @@ export default function CalendarioFiscalClient() {
   const [mounted, setMounted] = useState(false);
   const hoy = new Date();
   const mesActual = hoy.getMonth() + 1;
+  const anioActual = hoy.getFullYear();
 
   const [mesSeleccionado, setMesSeleccionado] = useState(mesActual);
   const [categoriaFiltro, setCategoriaFiltro] = useState<Categoria>("todos");
@@ -521,14 +523,33 @@ export default function CalendarioFiscalClient() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const mesData = useMemo(
-    () => CALENDARIO_2026.find((m) => m.mes === mesSeleccionado)!,
+  // ── Datos de Supabase para el mes seleccionado ──────────────────────────
+  const { vencimientos: vencimientosDB, verificado: verificadoDB, loading } =
+    useVencimientosFiscales(mesSeleccionado, anioActual);
+
+  // ── Fallback al array local si Supabase no tiene datos para ese mes ─────
+  const mesDataLocal = useMemo(
+    () => CALENDARIO_2026.find((m) => m.mes === mesSeleccionado),
     [mesSeleccionado]
   );
 
+  const usandoDB = vencimientosDB.length > 0;
+
+  const mesData = useMemo((): MesData => {
+    if (usandoDB) {
+      return {
+        mes: mesSeleccionado,
+        nombre: CALENDARIO_2026.find(m => m.mes === mesSeleccionado)?.nombre ?? "",
+        verificado: verificadoDB,
+        vencimientos: vencimientosDB as Vencimiento[],
+      };
+    }
+    return mesDataLocal ?? { mes: mesSeleccionado, nombre: "", verificado: false, vencimientos: [] };
+  }, [usandoDB, mesSeleccionado, vencimientosDB, verificadoDB, mesDataLocal]);
+
   const vencimientosFiltrados = useMemo(() => {
     if (categoriaFiltro === "todos") return mesData.vencimientos;
-    return mesData.vencimientos.filter((v) => v.categoria.includes(categoriaFiltro));
+    return mesData.vencimientos.filter((v) => v.categoria.includes(categoriaFiltro as Categoria));
   }, [mesData, categoriaFiltro]);
 
   // Próximos 30 días — solo para vencimientos con día exacto
@@ -695,10 +716,16 @@ export default function CalendarioFiscalClient() {
           </div>
 
           {/* Badge verificado / pendiente */}
-          {mesData.verificado ? (
+          {loading ? (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: C.gray100, border: `1px solid ${C.gray200}`, borderRadius: 8, padding: "6px 12px", marginBottom: 20 }}>
+              <span style={{ fontSize: 13, color: C.gray400 }}>Cargando fechas…</span>
+            </div>
+          ) : mesData.verificado ? (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 8, padding: "6px 12px", marginBottom: 20 }}>
               <span style={{ fontSize: 14 }}>✓</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#16a34a" }}>Fechas verificadas — Fuente: ARCA 2026</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#16a34a" }}>
+                Fechas verificadas — {usandoDB ? "Actualizadas automáticamente desde ARCA" : "Fuente: ARCA 2026"}
+              </span>
             </div>
           ) : (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: C.amberLight, border: `1px solid #fcd34d`, borderRadius: 8, padding: "6px 12px", marginBottom: 20 }}>
