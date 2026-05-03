@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://facilfiscal.com.ar";
+  const baseUrl = "https://www.facilfiscal.com.ar";
 
   const rutas = [
     { url: "/", prioridad: 1.0, cambio: "weekly" },
