@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import SiteHeader from "@/components/SiteHeader";
 
-// ── Tipos ──────────────────────────────────────────────────────────────────
 type Categoria = "monotributo" | "responsable" | "autonomo" | "empleador" | "todos";
 
 interface Vencimiento {
@@ -27,8 +25,8 @@ interface MesData {
 
 // ── Paleta ───────────────────────────────────────────────────────────────────
 const C = {
-  teal:        "#1a485e",
-  tealDark:    "#122870",
+  teal:        "#0f766e",
+  tealDark:    "#0d5c56",
   tealLight:   "#e6f4f3",
   gold:        "#d97706",
   goldLight:   "#fef3c7",
@@ -74,8 +72,8 @@ const CAT_CONFIG: Record<Categoria, { label: string; bg: string; color: string }
 //   - MyContador Blog: blog.mycontador.com.ar/arca-publico-el-calendario-de-vencimientos-de-abril-de-2026
 //   - El Cronista: cronista.com (calendario ARCA 2026)
 //
-// VERIFICADOS con fechas exactas: Enero, Febrero, Marzo, Abril 2026
-// PENDIENTES de publicación oficial ARCA: Mayo a Diciembre 2026
+// VERIFICADOS con fechas exactas: Enero, Febrero, Marzo, Abril, Mayo 2026
+// PENDIENTES de publicación oficial ARCA: Junio a Diciembre 2026
 //
 // Autónomos: vence los primeros días hábiles de cada mes según terminación CUIT
 //   CUIT 0-1-2-3 / CUIT 4-5-6 / CUIT 7-8-9
@@ -221,39 +219,39 @@ const CALENDARIO_2026: MesData[] = [
     ],
   },
 
-  // ── MAYO (pendiente) ────────────────────────────────────────────────────
+  // ── MAYO (verificado) ───────────────────────────────────────────────────
   {
-    mes: 5, nombre: "Mayo", verificado: false,
+    mes: 5, nombre: "Mayo", verificado: true,
     vencimientos: [
       {
         rango: "5, 6 y 7",
         titulo: "Autónomos — cuota abril 2026",
-        descripcion: "Pago de aportes previsionales (período abril 2026). Fechas aproximadas: primeros días hábiles de mayo según terminación de CUIT. Confirmá la fecha exacta en arca.gob.ar antes del vencimiento.",
-        categoria: ["autonomo"], tipo: "pago", pendiente: true,
+        descripcion: "Pago de aportes previsionales (período abril 2026) según terminación de CUIT: día 5 para CUIT 0-1-2-3 / día 6 para CUIT 4-5-6 / día 7 para CUIT 7-8-9. Fuente: calendariofiscal.com.ar / ARCA mayo 2026.",
+        categoria: ["autonomo"], tipo: "pago",
       },
       {
         rango: "9, 10 y 11",
         titulo: "Cargas sociales — F.931 (período abril 2026)",
-        descripcion: "Presentación del F.931 y pago de cargas sociales. Fecha aproximada: entre el 9 y 11 de mayo según terminación de CUIT. Confirmá en arca.gob.ar.",
-        categoria: ["empleador"], tipo: "pago", pendiente: true,
+        descripcion: "Presentación del F.931 y pago de cargas sociales: CUIT 0-1-2-3 → 9/may · CUIT 4-5-6 → 10/may · CUIT 7-8-9 → 11/may. Fuente: ARCA mayo 2026.",
+        categoria: ["empleador"], tipo: "pago",
+      },
+      {
+        rango: "13, 14 y 15",
+        titulo: "Ganancias — anticipos (sociedades)",
+        descripcion: "Anticipos del Impuesto a las Ganancias para sociedades con cierre febrero a noviembre 2026: CUIT 0-1-2-3 → 13/may · CUIT 4-5-6 → 14/may · CUIT 7-8-9 → 15/may. Fuente: ARCA mayo 2026.",
+        categoria: ["responsable"], tipo: "pago",
       },
       {
         dia: 20,
         titulo: "Monotributo — cuota mayo 2026",
-        descripcion: "Pago de la cuota mensual de monotributo. El día 20 es la fecha habitual; si cae en finde o feriado corre al siguiente día hábil.",
+        descripcion: "Pago de la cuota mensual de monotributo (componentes impositivo, jubilatorio y obra social). Fecha única para todas las terminaciones de CUIT. Fuente: ARCA mayo 2026.",
         categoria: ["monotributo"], tipo: "pago",
       },
       {
         rango: "18 al 22",
         titulo: "IVA — DJ mensual (período abril 2026)",
-        descripcion: "Presentación y pago del IVA. Fechas aproximadas en la segunda quincena de mayo, escalonadas por terminación de CUIT. Confirmá la fecha exacta en arca.gob.ar.",
-        categoria: ["responsable"], tipo: "declaracion", pendiente: true,
-      },
-      {
-        rango: "11 al 16",
-        titulo: "Recategorización Monotributo — 2° cuatrimestre",
-        descripcion: "Segundo período de recategorización obligatoria del año. Revisá tus ventas acumuladas de los últimos 12 meses. Fecha exacta a confirmar en el calendario oficial de ARCA.",
-        categoria: ["monotributo"], tipo: "recategorizacion", pendiente: true,
+        descripcion: "Presentación y pago del IVA escalonado por terminación de CUIT: CUIT 0-1 → 18/may · CUIT 2-3 → 19/may · CUIT 4-5 → 20/may · CUIT 6-7 → 21/may · CUIT 8-9 → 22/may. Fuente: ARCA mayo 2026.",
+        categoria: ["responsable"], tipo: "declaracion",
       },
     ],
   },
@@ -550,11 +548,35 @@ export default function CalendarioFiscalClient() {
       .slice(0, 5);
   }, [categoriaFiltro, mounted]);
 
-return (
-  <div style={{ minHeight: "100vh", background: C.white, fontFamily: "inherit" }}>
-    
-    {/* Reemplazo del NAV manual por el componente oficial */}
-    <SiteHeader currentPath="/calendario-fiscal" />
+  return (
+    <div style={{ minHeight: "100vh", background: C.white, fontFamily: "'Nunito', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');`}</style>
+
+      {/* NAV */}
+      <nav style={{ background: C.teal, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
+        <a href="/" style={{ color: C.white, fontWeight: 800, fontSize: 20, textDecoration: "none" }}>FácilFiscal</a>
+        <div style={{ display: "flex", gap: 4 }}>
+          {[
+            { href: "/", label: "Inicio" },
+            { href: "/calendario-fiscal", label: "Calendario" },
+            { href: "/mi-categoria", label: "Mi Categoría" },
+            { href: "/como-facturar", label: "Cómo Facturar" },
+          ].map((item) => {
+            const activo = item.href === "/calendario-fiscal";
+            return (
+              <a key={item.href} href={item.href} style={{
+                color: activo ? C.gold : "rgba(255,255,255,0.85)",
+                fontWeight: activo ? 700 : 500,
+                fontSize: 14,
+                textDecoration: "none",
+                padding: "6px 12px",
+                borderRadius: 8,
+                background: activo ? "rgba(255,255,255,0.12)" : "transparent",
+              }}>{item.label}</a>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* HERO */}
       <section style={{ background: `linear-gradient(135deg, ${C.teal} 0%, ${C.tealDark} 100%)`, padding: "52px 24px 44px", color: C.white }}>
