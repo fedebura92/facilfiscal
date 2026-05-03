@@ -151,6 +151,7 @@ export const NAV_ITEMS = [
   { href: '/autonomos',              emoji: '⚡', label: 'Autónomos',         group: 'regimen' },
   { href: '/mi-categoria',           emoji: '📊', label: 'Mi categoría',      group: 'herramientas' },
   { href: '/como-facturar',          emoji: '📄', label: 'Cómo facturar',     group: 'herramientas' },
+  { href: '/calendario-fiscal',      emoji: '📅', label: 'Calendario Fiscal', group: 'herramientas' },
   { href: '/iva',                    emoji: '💰', label: 'IVA',               group: 'calculadoras' },
   { href: '/ingresos-brutos',        emoji: '📈', label: 'Ingresos Brutos',   group: 'calculadoras' },
   { href: '/impuesto-ganancias',     emoji: '💼', label: 'Ganancias',         group: 'calculadoras' },

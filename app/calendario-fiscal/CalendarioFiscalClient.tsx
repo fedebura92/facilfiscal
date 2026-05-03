@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useVencimientosFiscales } from "@/hooks/useVencimientosFiscales";
+import SiteHeader from "@/components/SiteHeader";
 
 type Categoria = "monotributo" | "responsable" | "autonomo" | "empleador" | "todos";
 
@@ -24,31 +25,31 @@ interface MesData {
   vencimientos: Vencimiento[];
 }
 
-// ── Paleta ───────────────────────────────────────────────────────────────────
+// ── Paleta ── igual al resto del sitio (azul oscuro)
 const C = {
-  teal:        "#0f766e",
-  tealDark:    "#0d5c56",
-  tealLight:   "#e6f4f3",
-  gold:        "#d97706",
-  goldLight:   "#fef3c7",
+  teal:        "#1a7fa8",   // azul principal del sitio
+  tealDark:    "#0d5c78",   // azul oscuro
+  tealLight:   "#e8f6fb",   // azul muy claro
+  gold:        "#f5a623",   // gold del sitio
+  goldLight:   "#fff8ec",
   white:       "#ffffff",
-  gray50:      "#f9fafb",
-  gray100:     "#f3f4f6",
-  gray200:     "#e5e7eb",
-  gray400:     "#9ca3af",
-  gray500:     "#6b7280",
-  gray700:     "#374151",
-  gray900:     "#111827",
-  red:         "#dc2626",
-  redLight:    "#fee2e2",
+  gray50:      "#f4f7f9",
+  gray100:     "#f4f7f9",
+  gray200:     "#e2e8ed",
+  gray400:     "#7a9aaa",
+  gray500:     "#7a9aaa",
+  gray700:     "#3d5a6b",
+  gray900:     "#0f2733",
+  red:         "#e53535",
+  redLight:    "#fff1f1",
   purple:      "#7c3aed",
   purpleLight: "#ede9fe",
-  blue:        "#1d4ed8",
-  blueLight:   "#dbeafe",
+  blue:        "#1a7fa8",
+  blueLight:   "#e8f6fb",
   amber:       "#d97706",
   amberLight:  "#fef3c7",
-  slate:       "#64748b",
-  slateLight:  "#f1f5f9",
+  slate:       "#3d5a6b",
+  slateLight:  "#f4f7f9",
 };
 
 const TIPO_CONFIG = {
@@ -570,34 +571,11 @@ export default function CalendarioFiscalClient() {
   }, [categoriaFiltro, mounted]);
 
   return (
-    <div style={{ minHeight: "100vh", background: C.white, fontFamily: "'Nunito', sans-serif" }}>
+    <>
+      <SiteHeader currentPath="/calendario-fiscal" />
+      <div className="ff-page-content">
+      <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Nunito', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');`}</style>
-
-      {/* NAV */}
-      <nav style={{ background: C.teal, padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
-        <a href="/" style={{ color: C.white, fontWeight: 800, fontSize: 20, textDecoration: "none" }}>FácilFiscal</a>
-        <div style={{ display: "flex", gap: 4 }}>
-          {[
-            { href: "/", label: "Inicio" },
-            { href: "/calendario-fiscal", label: "Calendario" },
-            { href: "/mi-categoria", label: "Mi Categoría" },
-            { href: "/como-facturar", label: "Cómo Facturar" },
-          ].map((item) => {
-            const activo = item.href === "/calendario-fiscal";
-            return (
-              <a key={item.href} href={item.href} style={{
-                color: activo ? C.gold : "rgba(255,255,255,0.85)",
-                fontWeight: activo ? 700 : 500,
-                fontSize: 14,
-                textDecoration: "none",
-                padding: "6px 12px",
-                borderRadius: 8,
-                background: activo ? "rgba(255,255,255,0.12)" : "transparent",
-              }}>{item.label}</a>
-            );
-          })}
-        </div>
-      </nav>
 
       {/* HERO */}
       <section style={{ background: `linear-gradient(135deg, ${C.teal} 0%, ${C.tealDark} 100%)`, padding: "52px 24px 44px", color: C.white }}>
@@ -852,5 +830,7 @@ export default function CalendarioFiscalClient() {
         }
       `}</style>
     </div>
+    </div>
+    </>
   );
 }
