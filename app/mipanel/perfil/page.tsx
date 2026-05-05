@@ -50,7 +50,7 @@ export default function PerfilPage() {
       if (!user) { router.push('/login'); return }
 
       const { data } = await supabase
-        .from('profiles')
+        .from('users')
         .select('*')
         .eq('id', user.id)
         .single()
@@ -79,16 +79,18 @@ export default function PerfilPage() {
     if (!user) { router.push('/login'); return }
 
     const { error: err } = await supabase
-      .from('profiles')
-      .update({
+      .from('users')
+      .upsert({
+        id: user.id,
+        email: user.email,
         nombre,
         provincia,
         actividad,
         tipo_contribuyente: tipo,
+        tipo: tipo, // columna original del schema
         facturacion_estimada: facturacion ? parseFloat(facturacion) : null,
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id)
+      }, { onConflict: 'id' })
 
     setSaving(false)
 
