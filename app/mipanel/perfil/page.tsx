@@ -94,8 +94,8 @@ export default function PerfilPage() {
 
     setSaving(false)
 
-    if (err) {
-      setError('Error al guardar. Intentá de nuevo.')
+  if (err) {
+      setError(`Error: ${err.message} (${err.code})`)
     } else {
       setSuccess(true)
       setTimeout(() => router.push('/mipanel'), 1500)
