@@ -80,21 +80,20 @@ export default function PerfilPage() {
 
     const { error: err } = await supabase
       .from('users')
-      .upsert({
-        id: user.id,
-        email: user.email,
+      .update({
         nombre,
         provincia,
         actividad,
         tipo_contribuyente: tipo,
-        tipo: tipo, // columna original del schema
+        tipo: tipo,
         facturacion_estimada: facturacion ? parseFloat(facturacion) : null,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'id' })
+      })
+      .eq('id', user.id)
 
     setSaving(false)
 
-  if (err) {
+    if (err) {
       setError(`Error: ${err.message} (${err.code})`)
     } else {
       setSuccess(true)
