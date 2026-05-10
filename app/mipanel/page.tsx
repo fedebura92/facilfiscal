@@ -77,6 +77,13 @@ export default function MiPanel() {
   const [aiHistory, setAiHistory]     = useState<{role:'user'|'assistant';text:string}[]>([])
   const aiEndRef = useRef<HTMLDivElement>(null)
 
+  // Alertas inline
+  const [alertasEmail, setAlertasEmail]   = useState('')
+  const [alertasOk, setAlertasOk]         = useState(false)
+  const [alertasError, setAlertasError]   = useState('')
+  const [alertasLoading, setAlertasLoading] = useState(false)
+  const [showAlertasForm, setShowAlertasForm] = useState(false)
+
   useEffect(() => {
     const load = async () => {
       const { data:{ user } } = await supabase.auth.getUser()
@@ -121,6 +128,8 @@ export default function MiPanel() {
     if (!userId) return
     const task = tasks.find(t => t.id === taskId)
     if (!task || task.bloqueada) return
+    // Para alertas, abrir el form en vez de tildar directamente
+    if (taskId === 'alertas' && !task.done) { setShowAlertasForm(true); return }
     const newDone = !task.done
     setTasks(prev => prev.map(t => t.id === taskId ? {...t, done:newDone} : t))
     await supabase.from('user_checklist').upsert({
@@ -128,6 +137,33 @@ export default function MiPanel() {
       done_at: newDone ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     }, { onConflict:'user_id,task_id' })
+  }
+
+  const suscribirAlertas = async () => {
+    if (!alertasEmail || !alertasEmail.includes('@')) { setAlertasError('Ingresá un email válido.'); return }
+    setAlertasLoading(true); setAlertasError('')
+    try {
+      const tipo = perfil?.tipo_contribuyente || 'mono'
+      const res = await fetch('/api/suscribir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: alertasEmail, tipos: [tipo] }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setAlertasError(data.error || 'Error al suscribir.'); setAlertasLoading(false); return }
+
+      // Marcar tarea como hecha
+      setAlertasOk(true)
+      setShowAlertasForm(false)
+      setTasks(prev => prev.map(t => t.id === 'alertas' ? {...t, done:true} : t))
+      if (userId) {
+        await supabase.from('user_checklist').upsert({
+          user_id: userId, task_id: 'alertas', done: true,
+          done_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        }, { onConflict:'user_id,task_id' })
+      }
+    } catch { setAlertasError('Error de conexión.') }
+    finally { setAlertasLoading(false) }
   }
 
   const askAI = async (q?: string) => {
@@ -267,11 +303,43 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
                     </div>
                     {task.done && <span style={{ fontSize:11, color:V.teal, fontWeight:700, flexShrink:0 }}>✓ Listo</span>}
                   </div>
-                  {!task.done && task.accion_href && (
-                    <div style={{ borderTop:`1px solid ${V.border}`, padding:'9px 16px', background:V.bg, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                      <span style={{ fontSize:11, color:V.ink3, fontWeight:600 }}>{task.bloqueada ? '🔒 Completá esta info en tu perfil' : 'Pendiente'}</span>
-                      <Link href={task.accion_href} style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none', whiteSpace:'nowrap' }}>{task.accion_label} →</Link>
-                    </div>
+                  {!task.done && (
+                    <>
+                      {/* Form inline para alertas */}
+                      {task.id === 'alertas' && showAlertasForm && (
+                        <div style={{ borderTop:`1px solid ${V.border}`, padding:'14px 16px', background:V.bg, display:'flex', flexDirection:'column', gap:10 }}>
+                          <div style={{ fontSize:12, fontWeight:700, color:V.ink2 }}>📧 Tu email para recibir alertas</div>
+                          <div style={{ display:'flex', gap:8 }}>
+                            <input
+                              type="email"
+                              placeholder="tu@email.com"
+                              value={alertasEmail}
+                              onChange={e => { setAlertasEmail(e.target.value); setAlertasError('') }}
+                              onKeyDown={e => e.key==='Enter' && suscribirAlertas()}
+                              style={{ flex:1, border:`1.5px solid ${V.border}`, borderRadius:8, padding:'8px 12px', fontSize:13, fontWeight:600, color:V.ink, background:V.surface, outline:'none', fontFamily:"'Nunito',sans-serif" }}
+                            />
+                            <button onClick={suscribirAlertas} disabled={alertasLoading} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:8, padding:'8px 14px', fontSize:13, fontWeight:800, cursor:alertasLoading?'not-allowed':'pointer', opacity:alertasLoading?.6:1, fontFamily:"'Nunito',sans-serif", whiteSpace:'nowrap' }}>
+                              {alertasLoading ? '...' : 'Activar →'}
+                            </button>
+                          </div>
+                          {alertasError && <div style={{ fontSize:12, color:V.red, fontWeight:600 }}>⚠️ {alertasError}</div>}
+                          <button onClick={() => setShowAlertasForm(false)} style={{ fontSize:11, color:V.ink3, background:'none', border:'none', cursor:'pointer', textAlign:'left', fontFamily:"'Nunito',sans-serif" }}>Cancelar</button>
+                        </div>
+                      )}
+                      {/* Acción normal para otras tareas o alertas sin form abierto */}
+                      {!(task.id === 'alertas' && showAlertasForm) && task.accion_href && (
+                        <div style={{ borderTop:`1px solid ${V.border}`, padding:'9px 16px', background:V.bg, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                          <span style={{ fontSize:11, color:V.ink3, fontWeight:600 }}>{task.bloqueada ? '🔒 Completá esta info en tu perfil' : 'Pendiente'}</span>
+                          {task.id === 'alertas' ? (
+                            <button onClick={() => setShowAlertasForm(true)} style={{ fontSize:12, fontWeight:800, color:V.teal, background:'none', border:'none', cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>
+                              Activar alertas →
+                            </button>
+                          ) : (
+                            <Link href={task.accion_href} style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none', whiteSpace:'nowrap' }}>{task.accion_label} →</Link>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ))}
