@@ -219,22 +219,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* BANNER (Nuevo bloque agregado) */}
-          <div style={{ marginBottom: 20, borderRadius: 14, overflow: 'hidden', border: `1.5px solid ${V.border}`, background: V.surface, boxShadow: `0 1px 4px rgba(13,92,120,.07)` }}>
-            <div style={{ background: `linear-gradient(90deg, ${V.tealDark}, ${V.tealMid})`, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 20 }}>🎁</span>
-                <div>
-                  <div style={{ color: 'white', fontSize: 13, fontWeight: 900 }}>¿Buscás más herramientas?</div>
-                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: 600 }}>Descargá nuestra guía gratuita de facturación 2026.</div>
-                </div>
-              </div>
-              <button style={{ background: V.gold, color: V.ink, border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>
-                Descargar ahora
-              </button>
-            </div>
-          </div>
-
           {/* ALERTAS + CALCULADORA */}
           <div className="ff-two-col">
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:14, overflow:'hidden', boxShadow:`0 1px 4px rgba(13,92,120,.07)` }}>
