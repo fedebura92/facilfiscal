@@ -1,11 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { query } = await req.json()
+  const body = await req.json()
+  const { query, contexto, historial } = body
 
   if (!query || typeof query !== 'string') {
     return NextResponse.json({ error: 'query requerido' }, { status: 400 })
   }
+
+  // Si viene contexto del perfil, lo agregamos al system prompt
+  const systemBase = `Sos un asistente fiscal experto en impuestos argentinos (ARCA/AFIP).
+Usá búsqueda web para traer datos actualizados del calendario fiscal, montos y normativas.
+Respondé siempre en español rioplatense, claro y sin jerga legal innecesaria.
+Texto plano, sin markdown ni asteriscos. Usá saltos de línea para separar secciones.`
+
+  const systemContexto = contexto
+    ? `\n\n${contexto}\n\nUsá este contexto para personalizar tu respuesta.`
+    : ''
+
+  const systemCierre = `\n\nAl final de cada respuesta sobre fechas o montos, agregá: "Verificá en afip.gob.ar para datos oficiales."`
+
+  const system = systemBase + systemContexto + systemCierre
+
+  // Construir mensajes — si hay historial, lo incluimos
+  const messages: { role: string; content: string }[] = []
+
+  if (historial && Array.isArray(historial)) {
+    for (const h of historial) {
+      if (h.role && h.content) {
+        messages.push({ role: h.role, content: h.content })
+      }
+    }
+  }
+
+  messages.push({ role: 'user', content: query })
+
+  // Consultas de recupero necesitan más tokens para explicar pasos
+  const esRecupero = query.toLowerCase().includes('reclamar') ||
+    query.toLowerCase().includes('recupero') ||
+    query.toLowerCase().includes('percep') ||
+    query.toLowerCase().includes('saldo a favor') ||
+    query.toLowerCase().includes('devolución')
+
+  const maxTokens = esRecupero ? 1500 : 800
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -17,13 +54,9 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
-        system: `Sos un asistente fiscal experto en impuestos argentinos (ARCA/AFIP).
-Usá búsqueda web para traer datos actualizados del calendario fiscal, montos y normativas.
-Respondé siempre en español rioplatense, claro y sin jerga legal innecesaria.
-Texto plano, sin markdown. Máximo 200 palabras.
-Al final de cada respuesta sobre fechas o montos, agregá: "Verificá en afip.gob.ar para datos oficiales."`,
-        messages: [{ role: 'user', content: query }],
+        max_tokens: maxTokens,
+        system,
+        messages,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
       }),
     })
