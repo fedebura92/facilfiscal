@@ -95,6 +95,24 @@ export default function MiPanel() {
   const [recordatorioGuardado, setRecordatorioGuardado]         = useState(false)
   const [recordatorioLoading, setRecordatorioLoading]           = useState(false)
 
+  // Simulador
+  const [simFacturacion, setSimFacturacion] = useState('')
+  const [simTipo, setSimTipo]               = useState<'mono'|'ri'|'aut'>('mono')
+  const [simResultado, setSimResultado]     = useState<any>(null)
+  const [simLoading, setSimLoading]         = useState(false)
+  const [simTab, setSimTab]                 = useState<'mas'|'ri'|'cuanto'>('mas')
+
+  // Proyección de categoría
+  const [proyFacturadoMes, setProyFacturadoMes]   = useState('')
+  const [proyMesActual, setProyMesActual]           = useState(String(new Date().getMonth() + 1))
+  const [proyResultado, setProyResultado]           = useState<any>(null)
+
+  // Recupero saldo a favor
+  const [recuperoTipo, setRecuperoTipo]             = useState<'percepciones'|'iva'|'arba'|null>(null)
+  const [recuperoMonto, setRecuperoMonto]           = useState('')
+  const [recuperoRespuesta, setRecuperoRespuesta]   = useState('')
+  const [recuperoLoading, setRecuperoLoading]       = useState(false)
+
   useEffect(() => {
     const load = async () => {
       const { data:{ user } } = await supabase.auth.getUser()
@@ -175,6 +193,117 @@ export default function MiPanel() {
       }
     } catch { setAlertasError('Error de conexión.') }
     finally { setAlertasLoading(false) }
+  }
+
+  // ── Simulador ────────────────────────────────────────────────────────────
+  const LIMITES_MONO = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
+  const CATS_MONO    = ['A','B','C','D','E','F','G','H','I','J','K']
+
+  const simular = () => {
+    const facAnual = parseFloat(simFacturacion) * 12
+    if (!simFacturacion || isNaN(facAnual)) return
+
+    if (simTab === 'mas') {
+      // ¿Qué pasa si facturo más?
+      const catActualIdx = LIMITES_MONO.findIndex(l => facAnual <= l)
+      const limiteActual = catActualIdx >= 0 ? LIMITES_MONO[catActualIdx] : LIMITES_MONO[LIMITES_MONO.length-1]
+      const catSiguienteIdx = catActualIdx + 1
+      const disponible = limiteActual - facAnual
+      const pct = Math.round((facAnual / limiteActual) * 100)
+      setSimResultado({
+        tipo: 'mas',
+        catActual: catActualIdx >= 0 ? CATS_MONO[catActualIdx] : 'K (máximo)',
+        limiteActual,
+        disponible: disponible > 0 ? disponible : 0,
+        pct,
+        proxCat: catSiguienteIdx < CATS_MONO.length ? CATS_MONO[catSiguienteIdx] : null,
+        superaLimite: facAnual > LIMITES_MONO[LIMITES_MONO.length-1],
+      })
+    } else if (simTab === 'ri') {
+      // Mono vs RI
+      const catIdx = LIMITES_MONO.findIndex(l => facAnual <= l)
+      const ivaVenta = facAnual * 0.21
+      const ivaCompras = facAnual * 0.10  // estimado 10% de crédito fiscal
+      const ivaAPagar = Math.max(0, ivaVenta - ivaCompras)
+      const ganancias = Math.max(0, (facAnual - 2000000) * 0.15) // simplificado
+      const totalRI = ivaAPagar + ganancias
+      const montoMono = catIdx >= 0 ? LIMITES_MONO[catIdx] * 0.04 : 0 // aprox 4% del límite
+      setSimResultado({
+        tipo: 'ri',
+        facAnual,
+        mono: { cat: catIdx >= 0 ? CATS_MONO[catIdx] : 'Superás el límite', pagoEstimado: montoMono / 12 },
+        ri: { ivaAPagar: ivaAPagar / 12, ganancias: ganancias / 12, total: totalRI / 12 },
+        conviene: totalRI < montoMono ? 'ri' : 'mono',
+      })
+    } else {
+      // ¿Cuánto pago?
+      const catIdx = LIMITES_MONO.findIndex(l => facAnual <= l)
+      // Cuotas 2026 estimadas
+      const CUOTAS = [5000,7500,10000,13000,18000,25000,35000,45000,55000,67000,130000]
+      const cuota = catIdx >= 0 ? CUOTAS[catIdx] : CUOTAS[CUOTAS.length-1]
+      setSimResultado({
+        tipo: 'cuanto',
+        cat: catIdx >= 0 ? CATS_MONO[catIdx] : 'K',
+        cuota,
+        anual: cuota * 12,
+        pctIngresos: Math.round((cuota / (parseFloat(simFacturacion) || 1)) * 100),
+      })
+    }
+  }
+
+  // ── Proyección de categoría ──────────────────────────────────────────────
+  const calcularProyeccion = () => {
+    const facMes = parseFloat(proyFacturadoMes)
+    const mes = parseInt(proyMesActual)
+    if (!facMes || !mes) return
+    const facAnualProyectada = facMes * 12
+    const facHastaHoy = facMes * mes
+    const catIdx = LIMITES_MONO.findIndex(l => facAnualProyectada <= l)
+    const limiteActual = catIdx >= 0 ? LIMITES_MONO[catIdx] : LIMITES_MONO[LIMITES_MONO.length-1]
+    const disponibleAnual = Math.max(0, limiteActual - facHastaHoy)
+    const mesesRestantes = 12 - mes
+    const podeFacMensual = mesesRestantes > 0 ? disponibleAnual / mesesRestantes : 0
+    const pct = Math.round((facHastaHoy / limiteActual) * 100)
+    const riesgo = pct >= 90 ? 'danger' : pct >= 75 ? 'warn' : 'ok'
+    setProyResultado({
+      facHastaHoy,
+      facAnualProyectada,
+      limiteActual,
+      disponibleAnual,
+      podeFacMensual,
+      pct,
+      riesgo,
+      cat: catIdx >= 0 ? CATS_MONO[catIdx] : 'K',
+      mesesRestantes,
+    })
+  }
+
+  // ── Recupero saldo a favor ───────────────────────────────────────────────
+  const consultarRecupero = async () => {
+    if (!recuperoTipo) return
+    setRecuperoLoading(true)
+    setRecuperoRespuesta('')
+    const monto = parseFloat(recuperoMonto)
+    const tipoLabel2 = perfil?.tipo_contribuyente==='mono'?'monotributista':perfil?.tipo_contribuyente==='ri'?'responsable inscripto':'autónomo'
+    const provincia = perfil?.provincia || 'Argentina'
+    const queryMap = {
+      percepciones: `Soy ${tipoLabel2} en ${provincia}${monto ? ` y tengo $${monto.toLocaleString('es-AR')} de percepciones acumuladas` : ''}. ¿Cómo puedo reclamar la devolución o compensación de percepciones de Ingresos Brutos? Dame los pasos exactos, formularios y plazos.`,
+      iva: `Soy ${tipoLabel2} en ${provincia} y tengo saldo técnico a favor en IVA. ¿Cómo puedo recuperarlo o compensarlo? Dame los pasos con ARCA/AFIP, formularios (F.799 u otros) y condiciones.`,
+      arba: `Soy ${tipoLabel2} en Buenos Aires. ¿Cómo reclamo devolución de percepciones de ARBA (Ingresos Brutos provincia de Buenos Aires)? Dame el procedimiento completo, plazos y documentación necesaria.`,
+    }
+    try {
+      const r = await fetch('/api/fiscal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: queryMap[recuperoTipo], contexto: `Perfil: ${tipoLabel2}, provincia: ${provincia}` }),
+      })
+      const d = await r.json()
+      setRecuperoRespuesta(d.response || 'Sin respuesta.')
+    } catch {
+      setRecuperoRespuesta('Error de conexión. Intentá de nuevo.')
+    } finally {
+      setRecuperoLoading(false)
+    }
   }
 
   const cargarNoticias = async () => {
@@ -860,6 +989,253 @@ const timelineItems = useMemo<TimelineItems>(() => {
                 <span style={{ fontSize:12, color:V.green, fontWeight:700 }}>✓ Guardado</span>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* ── SIMULADOR FISCAL ── */}
+        <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
+          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${V.border}` }}>
+            <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🔮 Simulador fiscal</div>
+            <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>Calculá escenarios antes de tomar decisiones</div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display:'flex', borderBottom:`1px solid ${V.border}`, background:V.bg }}>
+            {([
+              { id:'mas', label:'¿Qué pasa si facturo más?' },
+              { id:'ri',  label:'¿Me conviene RI?' },
+              { id:'cuanto', label:'¿Cuánto pago?' },
+            ] as const).map(tab => (
+              <button key={tab.id} onClick={() => { setSimTab(tab.id); setSimResultado(null) }} style={{
+                flex:1, padding:'10px 8px', border:'none', borderBottom:`2px solid ${simTab===tab.id?V.teal:'transparent'}`,
+                background:'transparent', fontSize:11, fontWeight:simTab===tab.id?800:600,
+                color:simTab===tab.id?V.teal:V.ink3, cursor:'pointer', fontFamily:"'Nunito',sans-serif",
+                transition:'all .15s',
+              }}>{tab.label}</button>
+            ))}
+          </div>
+
+          <div style={{ padding:'20px' }}>
+            <div style={{ display:'flex', gap:10, marginBottom:16, flexWrap:'wrap' }}>
+              <div style={{ flex:1, minWidth:160 }}>
+                <label style={{ fontSize:11, fontWeight:700, color:V.ink2, display:'block', marginBottom:6 }}>
+                  {simTab==='cuanto' ? 'Tu facturación mensual' : 'Facturación mensual estimada'}
+                </label>
+                <input
+                  type="number"
+                  placeholder="Ej: 500000"
+                  value={simFacturacion}
+                  onChange={e => { setSimFacturacion(e.target.value); setSimResultado(null) }}
+                  style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif", boxSizing:'border-box' }}
+                />
+              </div>
+              <div style={{ display:'flex', alignItems:'flex-end' }}>
+                <button onClick={simular} disabled={!simFacturacion} style={{
+                  background: simFacturacion ? `linear-gradient(135deg,${V.tealDark},${V.teal})` : V.border,
+                  color: simFacturacion ? '#fff' : V.ink3,
+                  border:'none', borderRadius:10, padding:'10px 20px',
+                  fontSize:13, fontWeight:800, cursor:simFacturacion?'pointer':'not-allowed',
+                  fontFamily:"'Nunito',sans-serif", whiteSpace:'nowrap',
+                }}>Simular →</button>
+              </div>
+            </div>
+
+            {simResultado && simResultado.tipo === 'mas' && (
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                <div style={{ background:simResultado.superaLimite?V.redBg:simResultado.pct>=75?V.amberBg:V.greenBg, border:`1.5px solid ${simResultado.superaLimite?V.redRing:simResultado.pct>=75?V.amberRing:V.greenRing}`, borderRadius:12, padding:'16px 20px' }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:V.ink, marginBottom:4 }}>
+                    {simResultado.superaLimite ? '🔴 Superás el límite del monotributo' : `📊 Categoría actual: ${simResultado.catActual}`}
+                  </div>
+                  <div style={{ height:8, background:'rgba(0,0,0,.08)', borderRadius:999, marginBottom:10, overflow:'hidden' }}>
+                    <div style={{ height:'100%', borderRadius:999, width:`${Math.min(simResultado.pct,100)}%`, background:simResultado.pct>=90?V.red:simResultado.pct>=75?V.amber:V.green }} />
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                    <div style={{ background:'rgba(255,255,255,.7)', borderRadius:8, padding:'10px 12px' }}>
+                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.05em' }}>Usaste del límite</div>
+                      <div style={{ fontSize:20, fontWeight:900, color:simResultado.pct>=90?V.red:V.ink, marginTop:2 }}>{simResultado.pct}%</div>
+                    </div>
+                    <div style={{ background:'rgba(255,255,255,.7)', borderRadius:8, padding:'10px 12px' }}>
+                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.05em' }}>Podés facturar más</div>
+                      <div style={{ fontSize:20, fontWeight:900, color:V.green, marginTop:2 }}>${Math.round(simResultado.disponible/1000)}K</div>
+                    </div>
+                  </div>
+                </div>
+                {simResultado.proxCat && (
+                  <div style={{ background:V.tealLight, border:`1px solid ${V.tealRing}`, borderRadius:10, padding:'12px 16px', fontSize:13, fontWeight:600, color:V.tealDark }}>
+                    Si superás el límite, pasás a categoría <strong>{simResultado.proxCat}</strong> y tu cuota sube.
+                  </div>
+                )}
+                {simResultado.superaLimite && (
+                  <div style={{ background:V.redBg, border:`1px solid ${V.redRing}`, borderRadius:10, padding:'12px 16px', fontSize:13, fontWeight:600, color:V.red }}>
+                    Superás el límite máximo del monotributo. Debés evaluar pasarte a Responsable Inscripto.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {simResultado && simResultado.tipo === 'ri' && (
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                  <div style={{ background:simResultado.conviene==='mono'?V.greenBg:V.bg, border:`1.5px solid ${simResultado.conviene==='mono'?V.greenRing:V.border}`, borderRadius:12, padding:'16px' }}>
+                    <div style={{ fontSize:12, fontWeight:800, color:V.ink, marginBottom:8 }}>📋 Monotributo {simResultado.conviene==='mono'&&'✓'}</div>
+                    <div style={{ fontSize:10, color:V.ink3, fontWeight:600, marginBottom:4 }}>Categoría</div>
+                    <div style={{ fontSize:16, fontWeight:900, color:V.ink, marginBottom:8 }}>{simResultado.mono.cat}</div>
+                    <div style={{ fontSize:10, color:V.ink3, fontWeight:600, marginBottom:4 }}>Pago mensual estimado</div>
+                    <div style={{ fontSize:20, fontWeight:900, color:V.teal }}>${Math.round(simResultado.mono.pagoEstimado).toLocaleString('es-AR')}</div>
+                  </div>
+                  <div style={{ background:simResultado.conviene==='ri'?V.greenBg:V.bg, border:`1.5px solid ${simResultado.conviene==='ri'?V.greenRing:V.border}`, borderRadius:12, padding:'16px' }}>
+                    <div style={{ fontSize:12, fontWeight:800, color:V.ink, marginBottom:8 }}>🏢 Resp. Inscripto {simResultado.conviene==='ri'&&'✓'}</div>
+                    <div style={{ fontSize:10, color:V.ink3, fontWeight:600, marginBottom:4 }}>IVA a pagar / mes</div>
+                    <div style={{ fontSize:16, fontWeight:900, color:V.ink, marginBottom:8 }}>${Math.round(simResultado.ri.ivaAPagar).toLocaleString('es-AR')}</div>
+                    <div style={{ fontSize:10, color:V.ink3, fontWeight:600, marginBottom:4 }}>Total estimado / mes</div>
+                    <div style={{ fontSize:20, fontWeight:900, color:V.teal }}>${Math.round(simResultado.ri.total).toLocaleString('es-AR')}</div>
+                  </div>
+                </div>
+                <div style={{ background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10, padding:'12px 16px', fontSize:12, fontWeight:600, color:V.amber, lineHeight:1.6 }}>
+                  ⚠️ Estimación simplificada. El IVA real depende de tus compras y crédito fiscal. Consultá con un contador antes de decidir.
+                </div>
+              </div>
+            )}
+
+            {simResultado && simResultado.tipo === 'cuanto' && (
+              <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, borderRadius:12, padding:'20px', color:'#fff' }}>
+                <div style={{ fontSize:12, fontWeight:700, opacity:.7, marginBottom:4 }}>Categoría estimada: {simResultado.cat}</div>
+                <div style={{ fontSize:36, fontWeight:900, lineHeight:1, marginBottom:4 }}>${simResultado.cuota.toLocaleString('es-AR')}</div>
+                <div style={{ fontSize:12, opacity:.7, marginBottom:16 }}>por mes · estimado 2026</div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                  <div style={{ background:'rgba(255,255,255,.1)', borderRadius:8, padding:'10px 12px' }}>
+                    <div style={{ fontSize:10, opacity:.6, marginBottom:2 }}>Pago anual</div>
+                    <div style={{ fontSize:15, fontWeight:800 }}>${simResultado.anual.toLocaleString('es-AR')}</div>
+                  </div>
+                  <div style={{ background:'rgba(255,255,255,.1)', borderRadius:8, padding:'10px 12px' }}>
+                    <div style={{ fontSize:10, opacity:.6, marginBottom:2 }}>% de tus ingresos</div>
+                    <div style={{ fontSize:15, fontWeight:800 }}>{simResultado.pctIngresos}%</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── PROYECCIÓN DE CATEGORÍA ── */}
+        {perfil?.tipo_contribuyente === 'mono' && (
+          <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
+            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${V.border}` }}>
+              <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>📈 Proyección de categoría</div>
+              <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>¿Cuánto podés seguir facturando sin cambiar de categoría?</div>
+            </div>
+            <div style={{ padding:'20px' }}>
+              <div style={{ display:'flex', gap:10, marginBottom:16, flexWrap:'wrap' }}>
+                <div style={{ flex:2, minWidth:140 }}>
+                  <label style={{ fontSize:11, fontWeight:700, color:V.ink2, display:'block', marginBottom:6 }}>Facturación mensual promedio</label>
+                  <input type="number" placeholder="Ej: 400000" value={proyFacturadoMes} onChange={e=>{setProyFacturadoMes(e.target.value);setProyResultado(null)}}
+                    style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif", boxSizing:'border-box' }} />
+                </div>
+                <div style={{ flex:1, minWidth:100 }}>
+                  <label style={{ fontSize:11, fontWeight:700, color:V.ink2, display:'block', marginBottom:6 }}>Mes actual</label>
+                  <select value={proyMesActual} onChange={e=>{setProyMesActual(e.target.value);setProyResultado(null)}}
+                    style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif" }}>
+                    {['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'].map((m,i)=>(
+                      <option key={i} value={i+1}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ display:'flex', alignItems:'flex-end' }}>
+                  <button onClick={calcularProyeccion} disabled={!proyFacturadoMes} style={{
+                    background:proyFacturadoMes?`linear-gradient(135deg,${V.tealDark},${V.teal})`:V.border,
+                    color:proyFacturadoMes?'#fff':V.ink3, border:'none', borderRadius:10, padding:'10px 20px',
+                    fontSize:13, fontWeight:800, cursor:proyFacturadoMes?'pointer':'not-allowed', fontFamily:"'Nunito',sans-serif",
+                  }}>Calcular →</button>
+                </div>
+              </div>
+
+              {proyResultado && (
+                <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                  {/* Barra de progreso */}
+                  <div style={{ background:proyResultado.riesgo==='danger'?V.redBg:proyResultado.riesgo==='warn'?V.amberBg:V.greenBg, border:`1.5px solid ${proyResultado.riesgo==='danger'?V.redRing:proyResultado.riesgo==='warn'?V.amberRing:V.greenRing}`, borderRadius:12, padding:'16px 20px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+                      <span style={{ fontSize:13, fontWeight:700, color:V.ink }}>Categoría {proyResultado.cat} · Usado {proyResultado.pct}%</span>
+                      <span style={{ fontSize:13, fontWeight:800, color:proyResultado.riesgo==='danger'?V.red:proyResultado.riesgo==='warn'?V.amber:V.green }}>
+                        {proyResultado.riesgo==='danger'?'⚠️ Riesgo alto':proyResultado.riesgo==='warn'?'⚠️ Atención':'✅ OK'}
+                      </span>
+                    </div>
+                    <div style={{ height:10, background:'rgba(0,0,0,.08)', borderRadius:999, marginBottom:12, overflow:'hidden' }}>
+                      <div style={{ height:'100%', borderRadius:999, width:`${Math.min(proyResultado.pct,100)}%`, background:proyResultado.riesgo==='danger'?V.red:proyResultado.riesgo==='warn'?V.amber:V.green, transition:'width .5s ease' }} />
+                    </div>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
+                      {[
+                        { label:'Facturado hasta hoy', valor:`$${Math.round(proyResultado.facHastaHoy/1000)}K` },
+                        { label:'Disponible en el año', valor:`$${Math.round(proyResultado.disponibleAnual/1000)}K` },
+                        { label:`Podés facturar/mes (${proyResultado.mesesRestantes} meses)`, valor:proyResultado.podeFacMensual>0?`$${Math.round(proyResultado.podeFacMensual/1000)}K`:'¡Cuidado!' },
+                      ].map((item,i) => (
+                        <div key={i} style={{ background:'rgba(255,255,255,.7)', borderRadius:8, padding:'10px 12px' }}>
+                          <div style={{ fontSize:9, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.04em', marginBottom:4, lineHeight:1.3 }}>{item.label}</div>
+                          <div style={{ fontSize:16, fontWeight:900, color:V.ink }}>{item.valor}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {proyResultado.riesgo !== 'ok' && (
+                    <Link href="/mi-categoria" style={{ fontSize:13, fontWeight:800, color:V.teal, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:4 }}>
+                      Verificar categoría correcta →
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── RECUPERO DE SALDO A FAVOR ── */}
+        <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
+          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${V.border}` }}>
+            <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>💰 Recupero de saldo a favor</div>
+            <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>Detectá si tenés percepciones o saldos que podés reclamar</div>
+          </div>
+          <div style={{ padding:'20px' }}>
+            <div style={{ fontSize:12, fontWeight:700, color:V.ink2, marginBottom:12 }}>¿Qué tipo de recupero querés consultar?</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:16 }}>
+              {([
+                { id:'percepciones', icon:'📊', titulo:'Percepciones de Ingresos Brutos', desc:'Retenciones cobradas de más en tus ventas o cobros.' },
+                { id:'iva',          icon:'🧾', titulo:'Saldo técnico a favor en IVA',    desc:'Crédito fiscal acumulado que podés compensar o pedir devolución.' },
+                { id:'arba',         icon:'🏛️', titulo:'Percepciones ARBA (Bs. As.)',     desc:'Percepciones provinciales de Ingresos Brutos en Buenos Aires.' },
+              ] as const).map(op => (
+                <div key={op.id} onClick={() => { setRecuperoTipo(op.id); setRecuperoRespuesta('') }} style={{
+                  display:'flex', alignItems:'flex-start', gap:12, padding:'13px 16px', cursor:'pointer',
+                  border:`2px solid ${recuperoTipo===op.id?V.teal:V.border}`,
+                  borderRadius:10, background:recuperoTipo===op.id?V.tealLight:V.surface, transition:'all .15s',
+                }}>
+                  <span style={{ fontSize:20, flexShrink:0 }}>{op.icon}</span>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color:V.ink }}>{op.titulo}</div>
+                    <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>{op.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {recuperoTipo && (
+              <div style={{ marginBottom:16 }}>
+                <label style={{ fontSize:11, fontWeight:700, color:V.ink2, display:'block', marginBottom:6 }}>Monto aproximado a recuperar (opcional)</label>
+                <input type="number" placeholder="Ej: 84000" value={recuperoMonto} onChange={e=>setRecuperoMonto(e.target.value)}
+                  style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif", boxSizing:'border-box' }} />
+              </div>
+            )}
+
+            <button onClick={consultarRecupero} disabled={!recuperoTipo||recuperoLoading} style={{
+              background:recuperoTipo?`linear-gradient(135deg,${V.tealDark},${V.teal})`:V.border,
+              color:recuperoTipo?'#fff':V.ink3, border:'none', borderRadius:10, padding:'11px 20px',
+              fontSize:13, fontWeight:800, cursor:recuperoTipo&&!recuperoLoading?'pointer':'not-allowed',
+              fontFamily:"'Nunito',sans-serif", opacity:recuperoLoading?.6:1,
+            }}>
+              {recuperoLoading ? 'Consultando...' : '¿Cómo recuperarlo? →'}
+            </button>
+
+            {recuperoRespuesta && (
+              <div style={{ marginTop:16, padding:'14px 16px', background:V.bg, borderRadius:10, borderLeft:`3px solid ${V.teal}`, fontSize:13, color:V.ink2, fontWeight:600, lineHeight:1.8, whiteSpace:'pre-wrap' }}>
+                {recuperoRespuesta}
+              </div>
+            )}
           </div>
         </div>
 
