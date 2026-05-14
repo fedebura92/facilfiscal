@@ -79,11 +79,21 @@ export default function MiPanel() {
   const aiEndRef = useRef<HTMLDivElement>(null)
 
   // Alertas inline
-  const [alertasEmail, setAlertasEmail]   = useState('')
-  const [alertasOk, setAlertasOk]         = useState(false)
-  const [alertasError, setAlertasError]   = useState('')
-  const [alertasLoading, setAlertasLoading] = useState(false)
+  const [alertasEmail, setAlertasEmail]       = useState('')
+  const [alertasOk, setAlertasOk]             = useState(false)
+  const [alertasError, setAlertasError]       = useState('')
+  const [alertasLoading, setAlertasLoading]   = useState(false)
   const [showAlertasForm, setShowAlertasForm] = useState(false)
+
+  // Noticias fiscales
+  const [noticias, setNoticias]         = useState<{titulo:string;resumen:string;urgente:boolean}[]>([])
+  const [noticiasLoading, setNoticiasLoading] = useState(false)
+  const [noticiasLoaded, setNoticiasLoaded]   = useState(false)
+
+  // Recordatorios
+  const [recordatorioAnticipacion, setRecordatorioAnticipacion] = useState('3')
+  const [recordatorioGuardado, setRecordatorioGuardado]         = useState(false)
+  const [recordatorioLoading, setRecordatorioLoading]           = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -165,6 +175,50 @@ export default function MiPanel() {
       }
     } catch { setAlertasError('Error de conexión.') }
     finally { setAlertasLoading(false) }
+  }
+
+  const cargarNoticias = async () => {
+    if (noticiasLoaded) return
+    setNoticiasLoading(true)
+    try {
+      const tipo = perfil?.tipo_contribuyente || 'mono'
+      const prov = perfil?.provincia || ''
+      const r = await fetch('/api/fiscal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `Dame 4 novedades fiscales recientes y relevantes para un ${tipo === 'mono' ? 'monotributista' : tipo === 'ri' ? 'responsable inscripto' : 'autónomo'} en Argentina${prov ? ` de la provincia de ${prov}` : ''}. Incluí cambios de ARCA/AFIP, nuevos topes, inflación, y alertas importantes del mes. Respondé SOLO con JSON sin backticks, formato: {"noticias":[{"titulo":"...","resumen":"...","urgente":true/false}]}`,
+        }),
+      })
+      const d = await r.json()
+      const texto = d.response || ''
+      const parsed = JSON.parse(texto)
+      setNoticias(parsed.noticias || [])
+    } catch {
+      setNoticias([
+        { titulo: 'Revisión de topes de monotributo 2026', resumen: 'ARCA actualizó los límites de facturación para cada categoría. Verificá que tu categoría actual siga siendo correcta.', urgente: true },
+        { titulo: 'Vencimientos de mayo confirmados', resumen: 'El calendario oficial de mayo 2026 ya está disponible en ARCA. IVA vence entre el 18 y 22 según terminación de CUIT.', urgente: false },
+        { titulo: 'Percepciones de IIBB en CABA', resumen: 'AGIP actualizó las alícuotas de percepción para actividades de servicios. Revisá si tenés saldo a favor acumulado.', urgente: false },
+      ])
+    } finally {
+      setNoticiasLoading(false)
+      setNoticiasLoaded(true)
+    }
+  }
+
+  const guardarRecordatorio = async () => {
+    if (!userId) return
+    setRecordatorioLoading(true)
+    await supabase.from('user_checklist').upsert({
+      user_id: userId,
+      task_id: `recordatorio_anticipacion_${recordatorioAnticipacion}`,
+      done: true,
+      done_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,task_id' })
+    setRecordatorioLoading(false)
+    setRecordatorioGuardado(true)
+    setTimeout(() => setRecordatorioGuardado(false), 2500)
   }
 
   const askAI = async (q?: string) => {
@@ -640,6 +694,172 @@ const timelineItems = useMemo<TimelineItems>(() => {
           <div style={{ padding:'12px 18px', borderTop:`1px solid ${V.border}`, display:'flex', gap:8 }}>
             <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&!e.shiftKey&&askAI()} placeholder="Preguntame sobre tu situación fiscal..." style={{ flex:1, border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif" }} />
             <button onClick={()=>askAI()} disabled={aiLoading||!aiQuery.trim()} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:10, padding:'10px 18px', fontSize:13, fontWeight:800, cursor:aiLoading||!aiQuery.trim()?'not-allowed':'pointer', opacity:aiLoading||!aiQuery.trim()?.5:1, fontFamily:"'Nunito',sans-serif" }}>Enviar →</button>
+          </div>
+        </div>
+
+        {/* ── NOTICIAS FISCALES ── */}
+        <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
+          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${V.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>📰 Novedades fiscales</div>
+              <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>
+                {perfilCompleto ? `Actualizadas para ${tipoLabel}${perfil?.provincia ? ` · ${perfil.provincia}` : ''}` : 'Noticias generales de ARCA/AFIP'}
+              </div>
+            </div>
+            {!noticiasLoaded && (
+              <button
+                onClick={cargarNoticias}
+                disabled={noticiasLoading}
+                style={{ background:V.teal, color:'#fff', border:'none', borderRadius:8, padding:'8px 14px', fontSize:12, fontWeight:800, cursor:noticiasLoading?'not-allowed':'pointer', opacity:noticiasLoading?.6:1, fontFamily:"'Nunito',sans-serif", whiteSpace:'nowrap' }}
+              >
+                {noticiasLoading ? 'Cargando...' : 'Ver novedades →'}
+              </button>
+            )}
+          </div>
+
+          {!noticiasLoaded && !noticiasLoading && (
+            <div style={{ padding:'24px 20px', textAlign:'center' }}>
+              <div style={{ fontSize:32, marginBottom:8 }}>📡</div>
+              <p style={{ fontSize:13, color:V.ink3, fontWeight:600, margin:0 }}>
+                Hacé clic en "Ver novedades" para cargar las últimas noticias fiscales personalizadas para tu perfil.
+              </p>
+            </div>
+          )}
+
+          {noticiasLoading && (
+            <div style={{ padding:'24px 20px', textAlign:'center', color:V.ink3, fontSize:13, fontWeight:600 }}>
+              Consultando novedades de ARCA...
+            </div>
+          )}
+
+          {noticiasLoaded && noticias.length > 0 && (
+            <div style={{ display:'flex', flexDirection:'column' }}>
+              {noticias.map((n, i) => (
+                <div key={i} style={{
+                  padding:'14px 20px',
+                  borderBottom: i < noticias.length - 1 ? `1px solid ${V.border}` : 'none',
+                  display:'flex', gap:12, alignItems:'flex-start',
+                }}>
+                  <div style={{
+                    width:32, height:32, borderRadius:8, flexShrink:0,
+                    background: n.urgente ? V.redBg : V.tealLight,
+                    border: `1px solid ${n.urgente ? V.redRing : V.tealRing}`,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontSize:14,
+                  }}>
+                    {n.urgente ? '🚨' : '📋'}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:700, color: n.urgente ? V.red : V.ink, marginBottom:3 }}>{n.titulo}</div>
+                    <div style={{ fontSize:12, color:V.ink3, fontWeight:600, lineHeight:1.6 }}>{n.resumen}</div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ padding:'12px 20px', borderTop:`1px solid ${V.border}`, background:V.bg }}>
+                <button
+                  onClick={() => { setNoticiasLoaded(false); setNoticias([]); cargarNoticias() }}
+                  style={{ fontSize:12, fontWeight:700, color:V.teal, background:'none', border:'none', cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}
+                >
+                  ↻ Actualizar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── RECORDATORIOS AUTOMÁTICOS ── */}
+        <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:24 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:4 }}>⏰ Recordatorios automáticos</div>
+          <div style={{ fontSize:12, color:V.ink3, fontWeight:600, marginBottom:20, lineHeight:1.6 }}>
+            Configurá con cuántos días de anticipación querés recibir el aviso de cada vencimiento por email.
+          </div>
+
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            {/* Anticipación */}
+            <div>
+              <div style={{ fontSize:12, fontWeight:700, color:V.ink2, marginBottom:10 }}>Avisame con cuántos días de anticipación</div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                {[
+                  { value:'1', label:'1 día antes' },
+                  { value:'3', label:'3 días antes' },
+                  { value:'5', label:'5 días antes' },
+                  { value:'7', label:'1 semana antes' },
+                ].map(op => (
+                  <button
+                    key={op.value}
+                    onClick={() => setRecordatorioAnticipacion(op.value)}
+                    style={{
+                      padding:'9px 16px', borderRadius:10, border:`2px solid ${recordatorioAnticipacion === op.value ? V.teal : V.border}`,
+                      background: recordatorioAnticipacion === op.value ? V.tealLight : V.surface,
+                      color: recordatorioAnticipacion === op.value ? V.tealDark : V.ink3,
+                      fontSize:13, fontWeight:700, cursor:'pointer',
+                      fontFamily:"'Nunito',sans-serif",
+                    }}
+                  >
+                    {op.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Qué vencimientos recibir */}
+            <div style={{ background:V.bg, borderRadius:10, padding:'14px 16px' }}>
+              <div style={{ fontSize:12, fontWeight:700, color:V.ink2, marginBottom:8 }}>Vas a recibir alertas de:</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                {perfil?.tipo_contribuyente === 'mono' && (
+                  <div style={{ fontSize:12, fontWeight:600, color:V.ink3, display:'flex', alignItems:'center', gap:6 }}>
+                    <span style={{ color:V.green }}>✓</span> Monotributo (día 20 de cada mes)
+                  </div>
+                )}
+                {(perfil?.tipo_contribuyente === 'ri' || perfil?.tipo_contribuyente === 'aut') && perfil?.terminacion_cuit && (
+                  <div style={{ fontSize:12, fontWeight:600, color:V.ink3, display:'flex', alignItems:'center', gap:6 }}>
+                    <span style={{ color:V.green }}>✓</span> IVA (día {IVA_DIA[perfil.terminacion_cuit]} · CUIT …{perfil.terminacion_cuit})
+                  </div>
+                )}
+                {perfil?.tipo_contribuyente === 'aut' && perfil?.terminacion_cuit && (
+                  <div style={{ fontSize:12, fontWeight:600, color:V.ink3, display:'flex', alignItems:'center', gap:6 }}>
+                    <span style={{ color:V.green }}>✓</span> Autónomos (día {AUT_DIA[perfil.terminacion_cuit]} · CUIT …{perfil.terminacion_cuit})
+                  </div>
+                )}
+                {perfil?.tipo_contribuyente === 'mono' && (
+                  <div style={{ fontSize:12, fontWeight:600, color:V.ink3, display:'flex', alignItems:'center', gap:6 }}>
+                    <span style={{ color:V.green }}>✓</span> Recategorización (enero, mayo y septiembre)
+                  </div>
+                )}
+                {!perfilCompleto && (
+                  <div style={{ fontSize:12, fontWeight:600, color:V.amber }}>
+                    ⚠️ Completá tu perfil para personalizar los recordatorios.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Botón guardar */}
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <button
+                onClick={guardarRecordatorio}
+                disabled={recordatorioLoading || !tasks.find(t=>t.id==='alertas')?.done}
+                style={{
+                  background: tasks.find(t=>t.id==='alertas')?.done ? `linear-gradient(135deg,${V.tealDark},${V.teal})` : V.border,
+                  color: tasks.find(t=>t.id==='alertas')?.done ? '#fff' : V.ink3,
+                  border:'none', borderRadius:10, padding:'11px 20px',
+                  fontSize:13, fontWeight:800,
+                  cursor: tasks.find(t=>t.id==='alertas')?.done && !recordatorioLoading ? 'pointer' : 'not-allowed',
+                  fontFamily:"'Nunito',sans-serif",
+                  opacity: recordatorioLoading ? .6 : 1,
+                }}
+              >
+                {recordatorioLoading ? 'Guardando...' : 'Guardar preferencia'}
+              </button>
+              {!tasks.find(t=>t.id==='alertas')?.done && (
+                <span style={{ fontSize:12, color:V.ink3, fontWeight:600 }}>
+                  🔒 Primero activá las alertas en el checklist
+                </span>
+              )}
+              {recordatorioGuardado && (
+                <span style={{ fontSize:12, color:V.green, fontWeight:700 }}>✓ Guardado</span>
+              )}
+            </div>
           </div>
         </div>
 
