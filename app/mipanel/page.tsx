@@ -28,6 +28,7 @@ const V = {
   tealDark:'#0d5c78', teal:'#1a7fa8', tealLight:'#e8f6fb', tealRing:'#a8ddf0',
   gold:'#f5a623', goldLight:'#fff8ec',
   red:'#e53535', redBg:'#fff1f1', redRing:'#ffc8c8',
+  amber:'#d97706', amberBg:'#fffbeb', amberRing:'#fde68a',
   green:'#16a34a', greenBg:'#f0fdf4', greenRing:'#bbf7d0',
   bg:'#f4f7f9', surface:'#fff', border:'#e2e8ed', border2:'#c8d8e2',
   ink:'#0f2733', ink2:'#3d5a6b', ink3:'#7a9aaa',
@@ -214,6 +215,123 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     return items.sort((a,b)=>getDias(a.dia)-getDias(b.dia))
   }, [perfil])
 
+  // ── Score fiscal ────────────────────────────────────────────────────────
+  const scoreItems = useMemo(() => {
+    if (!perfil) return []
+    const items: { texto: string; nivel: 'ok' | 'warn' | 'danger'; detalle?: string }[] = []
+    const tipo = perfil.tipo_contribuyente
+    const t    = perfil.terminacion_cuit
+
+    // Perfil completo
+    if (perfilCompleto) items.push({ texto: 'Perfil completo', nivel: 'ok' })
+    else items.push({ texto: 'Perfil incompleto', nivel: 'warn', detalle: 'Completá tu perfil para ver alertas personalizadas.' })
+
+    // Facturación vs límite de categoría
+    if (perfil.facturacion_estimada && tipo === 'mono') {
+      const anual = perfil.facturacion_estimada * 12
+      // Límites 2026 aproximados por categoría (A=2.700.000 ... K=68.000.000)
+      const LIMITES = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
+      const limiteH = LIMITES[LIMITES.length - 1]
+      const pct = Math.round((anual / limiteH) * 100)
+      // Buscar qué categoría le toca
+      const catIdx = LIMITES.findIndex(l => anual <= l)
+      const limiteActual = catIdx >= 0 ? LIMITES[catIdx] : limiteH
+      const pctCat = Math.round((anual / limiteActual) * 100)
+      if (pctCat >= 90) items.push({ texto: `Facturación al ${pctCat}% del límite de tu categoría`, nivel: 'danger', detalle: 'Estás muy cerca del tope. Si lo superás, debés recategorizarte o pasarte a RI.' })
+      else if (pctCat >= 75) items.push({ texto: `Facturación al ${pctCat}% del límite de tu categoría`, nivel: 'warn', detalle: 'Empezá a planificar si es necesario recategorizarte.' })
+      else items.push({ texto: 'Facturación dentro del límite de categoría', nivel: 'ok' })
+    }
+
+    // Vencimientos próximos
+    if (t) {
+      const vencCheck = []
+      if (tipo === 'mono') vencCheck.push({ nombre: 'Monotributo', dia: 20 })
+      if (tipo === 'ri' || tipo === 'aut') vencCheck.push({ nombre: 'IVA', dia: IVA_DIA[t] })
+      if (tipo === 'aut') vencCheck.push({ nombre: 'Autónomos', dia: AUT_DIA[t] })
+      for (const v of vencCheck) {
+        const dias = getDias(v.dia)
+        if (dias === 0) items.push({ texto: `${v.nombre} vence HOY`, nivel: 'danger', detalle: '¡Pagá ahora para evitar recargos!' })
+        else if (dias <= 3) items.push({ texto: `${v.nombre} vence en ${dias} día${dias !== 1 ? 's' : ''}`, nivel: 'danger', detalle: 'Muy próximo. Generá el VEP y pagá.' })
+        else if (dias <= 7) items.push({ texto: `${v.nombre} vence en ${dias} días`, nivel: 'warn', detalle: 'Tenés tiempo, pero no lo dejes para último momento.' })
+        else items.push({ texto: `${v.nombre} al día`, nivel: 'ok' })
+      }
+    }
+
+    // Recategorización
+    const mes = new Date().getMonth() + 1
+    if (tipo === 'mono') {
+      if ([3, 7, 11].includes(mes)) items.push({ texto: 'Mes de recategorización', nivel: 'warn', detalle: 'Este mes debés revisar si tu categoría sigue siendo correcta.' })
+      else items.push({ texto: 'Recategorización al día', nivel: 'ok' })
+    }
+
+    // Alertas faltantes
+    const alertaTask = tasks.find(t => t.id === 'alertas')
+    if (!alertaTask?.done) items.push({ texto: 'Alertas de vencimiento no activadas', nivel: 'warn', detalle: 'Activá las alertas para recibir avisos antes de cada vencimiento.' })
+    else items.push({ texto: 'Alertas de vencimiento activas', nivel: 'ok' })
+
+    return items
+  }, [perfil, perfilCompleto, tasks, vencimientos])
+
+  const score = useMemo(() => {
+    if (scoreItems.length === 0) return 0
+    const puntos = scoreItems.reduce((acc, item) => {
+      if (item.nivel === 'ok')     return acc + 10
+      if (item.nivel === 'warn')   return acc + 5
+      if (item.nivel === 'danger') return acc + 0
+      return acc
+    }, 0)
+    return Math.round((puntos / (scoreItems.length * 10)) * 100)
+  }, [scoreItems])
+
+  const scoreColor = score >= 80 ? V.green : score >= 50 ? V.amber : V.red
+  const scoreLabel = score >= 80 ? 'Bueno' : score >= 50 ? 'Regular' : 'Atención'
+
+  // ── Timeline / Qué hacer hoy ─────────────────────────────────────────────
+  type TimelineItem = {
+  texto: string
+  dias: number
+}
+
+type TimelineItems = {
+  hoy: string[]
+  pronto: TimelineItem[]
+  semana: TimelineItem[]
+}
+
+const timelineItems = useMemo<TimelineItems>(() => {
+  if (!perfil?.terminacion_cuit) {
+    return {
+      hoy: [],
+      pronto: [],
+      semana: [],
+    }
+  }
+    const t    = perfil.terminacion_cuit
+    const tipo = perfil.tipo_contribuyente
+    const hoy: string[]   = []
+    const pronto: { texto: string; dias: number }[] = []
+    const semana: { texto: string; dias: number }[] = []
+
+    const checks = []
+    if (tipo === 'mono') checks.push({ nombre: 'Pagar monotributo', dia: 20 })
+    if (tipo === 'ri' || tipo === 'aut') checks.push({ nombre: 'Presentar y pagar IVA', dia: IVA_DIA[t] })
+    if (tipo === 'aut') checks.push({ nombre: 'Pagar aportes autónomos', dia: AUT_DIA[t] })
+
+    for (const c of checks) {
+      const dias = getDias(c.dia)
+      if (dias === 0) hoy.push(c.nombre)
+      else if (dias <= 2) pronto.push({ texto: c.nombre, dias })
+      else if (dias <= 7) semana.push({ texto: c.nombre, dias })
+    }
+
+    const mes = new Date().getMonth() + 1
+    if ([3, 7, 11].includes(mes) && tipo === 'mono') {
+      hoy.push('Revisar recategorización de monotributo')
+    }
+
+    return { hoy, pronto, semana }
+  }, [perfil])
+
   const sugerencias = perfilCompleto ? [
     `¿Cuánto pago de ${tipoLabel?.toLowerCase()} este mes?`,
     `¿Cuándo vencen mis obligaciones con CUIT terminado en ${perfil?.terminacion_cuit}?`,
@@ -277,7 +395,110 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
           </Link>
         </div>
 
-        {/* ── Checklist ── */}
+        {/* ── QUÉ HACER HOY ── */}
+        {perfilCompleto && (timelineItems.hoy.length > 0 || timelineItems.pronto.length > 0 || timelineItems.semana.length > 0) && (
+          <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
+            <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, padding:'12px 18px', display:'flex', alignItems:'center', gap:8 }}>
+              <span style={{ fontSize:18 }}>📌</span>
+              <span style={{ fontSize:14, fontWeight:800, color:'#fff' }}>Qué tenés que hacer</span>
+            </div>
+            <div style={{ padding:'16px 18px', display:'flex', flexDirection:'column', gap:12 }}>
+              {timelineItems.hoy.length > 0 && (
+                <div>
+                  <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', color:V.red, marginBottom:8 }}>🔴 Hoy</div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                    {timelineItems.hoy.map((t,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', background:V.redBg, border:`1px solid ${V.redRing}`, borderRadius:10 }}>
+                        <span style={{ fontSize:16 }}>⚠️</span>
+                        <span style={{ fontSize:13, fontWeight:700, color:V.red }}>{t}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {timelineItems.pronto.length > 0 && (
+                <div>
+                  <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', color:V.amber, marginBottom:8 }}>🟡 En los próximos días</div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                    {timelineItems.pronto.map((t,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10 }}>
+                        <span style={{ fontSize:13, fontWeight:700, color:V.amber }}>{t.texto}</span>
+                        <span style={{ fontSize:11, fontWeight:800, color:V.amber }}>en {t.dias} día{t.dias!==1?'s':''}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {timelineItems.semana.length > 0 && (
+                <div>
+                  <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', color:V.teal, marginBottom:8 }}>🟢 Esta semana</div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                    {timelineItems.semana.map((t,i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:V.tealLight, border:`1px solid ${V.tealRing}`, borderRadius:10 }}>
+                        <span style={{ fontSize:13, fontWeight:700, color:V.tealDark }}>{t.texto}</span>
+                        <span style={{ fontSize:11, fontWeight:800, color:V.teal }}>en {t.dias} días</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── SCORE FISCAL ── */}
+        {perfilCompleto && (
+          <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:24 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:12 }}>
+              <div>
+                <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:4 }}>🎯 Score fiscal</div>
+                <div style={{ fontSize:12, color:V.ink3, fontWeight:600 }}>Resumen de tu situación impositiva</div>
+              </div>
+              {/* Número grande */}
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontSize:48, fontWeight:900, color:scoreColor, lineHeight:1 }}>{score}</div>
+                <div style={{ fontSize:11, fontWeight:700, color:scoreColor, textTransform:'uppercase', letterSpacing:'.05em' }}>{scoreLabel}</div>
+              </div>
+            </div>
+
+            {/* Barra de score */}
+            <div style={{ height:10, background:V.border, borderRadius:999, marginBottom:20, overflow:'hidden' }}>
+              <div style={{ height:'100%', borderRadius:999, width:`${score}%`, transition:'width .6s ease',
+                background: score >= 80
+                  ? `linear-gradient(90deg, ${V.green}, #4ade80)`
+                  : score >= 50
+                  ? `linear-gradient(90deg, ${V.amber}, #fbbf24)`
+                  : `linear-gradient(90deg, ${V.red}, #f87171)`,
+              }} />
+            </div>
+
+            {/* Items */}
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              {scoreItems.map((item, i) => (
+                <div key={i} style={{
+                  display:'flex', alignItems:'flex-start', gap:10,
+                  padding:'10px 14px', borderRadius:10,
+                  background: item.nivel==='ok' ? V.greenBg : item.nivel==='warn' ? V.amberBg : V.redBg,
+                  border: `1px solid ${item.nivel==='ok' ? V.greenRing : item.nivel==='warn' ? V.amberRing : V.redRing}`,
+                }}>
+                  <span style={{ fontSize:14, flexShrink:0 }}>
+                    {item.nivel==='ok' ? '✅' : item.nivel==='warn' ? '⚠️' : '🔴'}
+                  </span>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color: item.nivel==='ok' ? V.green : item.nivel==='warn' ? V.amber : V.red }}>
+                      {item.texto}
+                    </div>
+                    {item.detalle && (
+                      <div style={{ fontSize:11, fontWeight:600, color:V.ink3, marginTop:2, lineHeight:1.5 }}>{item.detalle}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── CHECKLIST ── */}
         <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:24 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
             <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>✅ Lo que tenés que hacer</div>
