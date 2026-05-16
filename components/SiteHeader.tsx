@@ -30,6 +30,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
     { key: 'regimen',       label: 'Régimen fiscal' },
     { key: 'herramientas',  label: 'Herramientas' },
     { key: 'calculadoras',  label: 'Calculadoras' },
+    { key: 'mipanel',       label: 'Mi Panel' },
   ]
 
   return (
