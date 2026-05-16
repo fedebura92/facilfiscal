@@ -1244,12 +1244,22 @@ const timelineItems = useMemo<TimelineItems>(() => {
           <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:16 }}>💡 Accesos rápidos</div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
             {[
-              { icon:'📊', label:'Mi categoría',      href:'/mi-categoria' },
-              { icon:'📄', label:'Cómo facturar',     href:'/como-facturar' },
-              { icon:'📅', label:'Calendario fiscal',  href:'/calendario-fiscal' },
-              { icon:'🗺️', label:'Por provincia',      href:'/impuestos-por-provincia' },
+              { icon:'💼', label:'Panel financiero',   href:'/mipanel/financiero', destacado: true },
+              { icon:'🧾', label:'Facturación',        href:'/mipanel/facturacion', destacado: true },
+              { icon:'📊', label:'Mi categoría',       href:'/mi-categoria' },
+              { icon:'📄', label:'Cómo facturar',      href:'/como-facturar' },
+              { icon:'📅', label:'Calendario fiscal',   href:'/calendario-fiscal' },
+              { icon:'🗺️', label:'Por provincia',       href:'/impuestos-por-provincia' },
             ].map(c => (
-              <Link key={c.label} href={c.href} style={{ display:'flex', alignItems:'center', gap:10, padding:'13px 16px', border:`1.5px solid ${V.border}`, borderRadius:10, textDecoration:'none', color:V.ink, fontSize:13, fontWeight:700 }}>
+              <Link key={c.label} href={c.href} style={{
+                display:'flex', alignItems:'center', gap:10,
+                padding:'13px 16px',
+                border:`1.5px solid ${c.destacado ? V.tealRing : V.border}`,
+                borderRadius:10, textDecoration:'none',
+                color: c.destacado ? V.tealDark : V.ink,
+                fontSize:13, fontWeight:700,
+                background: c.destacado ? V.tealLight : V.surface,
+              }}>
                 <span style={{ fontSize:18 }}>{c.icon}</span>{c.label}
               </Link>
             ))}
