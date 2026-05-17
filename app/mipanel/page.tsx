@@ -67,6 +67,85 @@ function buildTasks(p: Perfil | null, db: Record<string,{done:boolean;done_at:st
   return tasks
 }
 
+// ── Widget resumen del panel financiero ──────────────────────────────────────
+function WidgetFinanciero({ userId, perfil }: { userId: string|null; perfil: any }) {
+  const [data, setData] = useState<{ totalAnio:number; disponible:number; porCobrar:number; pct:number; cat:string } | null>(null)
+  const anio = new Date().getFullYear()
+
+  const LIMITES = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
+  const CATS    = ['A','B','C','D','E','F','G','H','I','J','K']
+
+  useEffect(() => {
+    if (!userId) return
+    const load = async () => {
+      const [{ data: ingresos }, { data: facturas }] = await Promise.all([
+        supabase.from('ingresos_mensuales').select('monto').eq('user_id', userId).eq('anio', anio),
+        supabase.from('facturas').select('monto, estado').eq('user_id', userId).eq('estado', 'pendiente'),
+      ])
+      const totalAnio  = (ingresos || []).reduce((a: number, r: any) => a + r.monto, 0)
+      const porCobrar  = (facturas || []).reduce((a: number, r: any) => a + r.monto, 0)
+      const catIdx     = LIMITES.findIndex(l => (totalAnio * (12 / Math.max(new Date().getMonth()+1,1))) <= l)
+      const limite     = catIdx >= 0 ? LIMITES[catIdx] : LIMITES[LIMITES.length-1]
+      const mesActual  = new Date().getMonth() + 1
+      const pct        = Math.min(Math.round((totalAnio / limite) * 100), 100)
+      const disponible = Math.max(0, limite - totalAnio)
+      setData({ totalAnio, disponible, porCobrar, pct, cat: catIdx >= 0 ? CATS[catIdx] : 'K' })
+    }
+    load()
+  }, [userId, anio])
+
+  const pctColor = data ? (data.pct >= 90 ? V.red : data.pct >= 75 ? V.amber : V.green) : V.teal
+
+  return (
+    <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
+      <div style={{ padding:'14px 20px', borderBottom:`1px solid ${V.border}`, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>💼 Panel financiero</div>
+        <Link href="/mipanel/financiero" style={{ fontSize:12, fontWeight:700, color:V.teal, textDecoration:'none' }}>Ver completo →</Link>
+      </div>
+      {!data ? (
+        <div style={{ padding:'20px', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+          {[0,1,2].map(i => <div key={i} style={{ height:64, background:V.bg, borderRadius:10, animation:'pulse 1.5s infinite' }} />)}
+        </div>
+      ) : (
+        <div style={{ padding:'16px 20px', display:'flex', flexDirection:'column', gap:14 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+            {[
+              { label:'Facturado en el año', valor: data.totalAnio >= 1000000 ? `$${(data.totalAnio/1000000).toFixed(1)}M` : `$${Math.round(data.totalAnio/1000)}K`, color:V.tealDark },
+              { label:'Disponible cat. '+data.cat, valor: data.disponible >= 1000000 ? `$${(data.disponible/1000000).toFixed(1)}M` : `$${Math.round(data.disponible/1000)}K`, color:pctColor },
+              { label:'Por cobrar', valor: data.porCobrar > 0 ? (data.porCobrar >= 1000000 ? `$${(data.porCobrar/1000000).toFixed(1)}M` : `$${Math.round(data.porCobrar/1000)}K`) : '—', color: data.porCobrar > 0 ? V.amber : V.ink3 },
+            ].map((k,i) => (
+              <div key={i} style={{ background:V.bg, borderRadius:10, padding:'12px 14px', border:`1px solid ${V.border}` }}>
+                <div style={{ fontSize:10, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.04em', marginBottom:5, lineHeight:1.3 }}>{k.label}</div>
+                <div style={{ fontSize:18, fontWeight:900, color:k.color }}>{k.valor}</div>
+              </div>
+            ))}
+          </div>
+          {/* Barra de progreso */}
+          <div>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, fontWeight:600, color:V.ink3, marginBottom:5 }}>
+              <span>Progreso en categoría {data.cat}</span>
+              <span style={{ color:pctColor, fontWeight:800 }}>{data.pct}%</span>
+            </div>
+            <div style={{ height:8, background:V.border, borderRadius:999, overflow:'hidden' }}>
+              <div style={{ height:'100%', borderRadius:999, width:`${data.pct}%`, background: data.pct>=90?`linear-gradient(90deg,${V.red},#f87171)`:data.pct>=75?`linear-gradient(90deg,${V.amber},#fbbf24)`:`linear-gradient(90deg,${V.teal},#34d399)`, transition:'width .5s ease' }} />
+            </div>
+          </div>
+          {data.pct >= 75 && (
+            <div style={{ padding:'9px 12px', background:data.pct>=90?V.redBg:V.amberBg, border:`1px solid ${data.pct>=90?V.redRing:V.amberRing}`, borderRadius:8, fontSize:12, fontWeight:700, color:data.pct>=90?V.red:V.amber }}>
+              {data.pct>=90 ? '🔴 Estás muy cerca del límite. Evaluá recategorizarte.' : '⚠️ Vas al 75%+ del límite. Revisá tu categoría.'}
+            </div>
+          )}
+          {data.totalAnio === 0 && (
+            <Link href="/mipanel/financiero" style={{ fontSize:12, fontWeight:700, color:V.ink3, textDecoration:'none', textAlign:'center', display:'block' }}>
+              Cargá tus ingresos mensuales para ver proyecciones →
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function MiPanel() {
   const [perfil, setPerfil]           = useState<Perfil|null>(null)
   const [userId, setUserId]           = useState<string|null>(null)
@@ -555,10 +634,25 @@ const timelineItems = useMemo<TimelineItems>(() => {
         </div>
       </header>
 
-      <main style={{ maxWidth:860, margin:'0 auto', padding:'28px 20px 80px', display:'flex', flexDirection:'column', gap:20 }}>
+      <main style={{ maxWidth:1200, margin:'0 auto', padding:'28px 20px 80px' }}>
+        <style>{`
+          .panel-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          .panel-sidebar { display: flex; flex-direction: column; gap: 20px; }
+          .panel-main    { display: flex; flex-direction: column; gap: 20px; }
+          @media (min-width: 1024px) {
+            .panel-grid {
+              grid-template-columns: 340px 1fr;
+              align-items: start;
+            }
+          }
+        `}</style>
 
-        {/* ── Banner perfil ── */}
-        <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, borderRadius:20, padding:'24px 28px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:20, flexWrap:'wrap', color:'#fff' }}>
+        {/* ── Banner perfil — ancho completo ── */}
+        <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, borderRadius:20, padding:'24px 28px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:20, flexWrap:'wrap', color:'#fff', marginBottom:20 }}>
           <div>
             <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,.18)', borderRadius:999, padding:'4px 12px', fontSize:11, fontWeight:800, letterSpacing:'.05em', textTransform:'uppercase', marginBottom:10 }}>
               <span style={{ width:7, height:7, borderRadius:'50%', background:perfilCompleto?'#4ade80':V.gold, display:'inline-block' }} />
@@ -579,6 +673,8 @@ const timelineItems = useMemo<TimelineItems>(() => {
         </div>
 
         {/* ── QUÉ HACER HOY ── */}
+        <div className="panel-grid">
+        <div className="panel-sidebar">
         {perfilCompleto && (timelineItems.hoy.length > 0 || timelineItems.pronto.length > 0 || timelineItems.semana.length > 0) && (
           <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
             <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, padding:'12px 18px', display:'flex', alignItems:'center', gap:8 }}>
@@ -1265,6 +1361,17 @@ const timelineItems = useMemo<TimelineItems>(() => {
             ))}
           </div>
         </div>
+
+        </div>{/* fin panel-sidebar */}
+
+        {/* ── COLUMNA DERECHA ── */}
+        <div className="panel-main">
+
+        {/* ── WIDGET PANEL FINANCIERO ── */}
+        <WidgetFinanciero userId={userId} perfil={perfil} />
+
+        </div>{/* fin panel-main */}
+        </div>{/* fin panel-grid */}
 
       </main>
     </div>
