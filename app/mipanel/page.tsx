@@ -645,7 +645,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
           .panel-main    { display: flex; flex-direction: column; gap: 20px; }
           @media (min-width: 1024px) {
             .panel-grid {
-              grid-template-columns: 340px 1fr;
+              grid-template-columns: 320px 1fr;
               align-items: start;
             }
           }
@@ -675,8 +675,8 @@ const timelineItems = useMemo<TimelineItems>(() => {
         {/* ── GRID DOS COLUMNAS ── */}
         <div className="panel-grid">
 
-          {/* ══ COLUMNA PRINCIPAL (izquierda/centro) ══ */}
-          <div className="panel-main">
+          {/* ══ SIDEBAR (izquierda) ══ */}
+          <div className="panel-sidebar">
 
             {/* Qué tenés que hacer */}
             {perfilCompleto && (timelineItems.hoy.length > 0 || timelineItems.pronto.length > 0 || timelineItems.semana.length > 0) && (
@@ -940,10 +940,10 @@ const timelineItems = useMemo<TimelineItems>(() => {
               </div>
             </div>
 
-          </div>{/* fin panel-main */}
+          </div>{/* fin panel-sidebar */}
 
-          {/* ══ SIDEBAR (derecha) ══ */}
-          <div className="panel-sidebar">
+          {/* ══ COLUMNA PRINCIPAL (derecha) ══ */}
+          <div className="panel-main">
 
             {/* Score fiscal */}
             {perfilCompleto && (
@@ -1096,7 +1096,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
               </div>
             )}
 
-          </div>{/* fin panel-sidebar */}
+          </div>{/* fin panel-main */}
 
         </div>{/* fin panel-grid */}
 
