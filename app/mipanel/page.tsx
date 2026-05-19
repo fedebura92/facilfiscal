@@ -645,7 +645,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
           .panel-main    { display: flex; flex-direction: column; gap: 20px; }
           @media (min-width: 1024px) {
             .panel-grid {
-              grid-template-columns: 1fr 320px;
+              grid-template-columns: 1fr 380px;
               align-items: start;
             }
           }
