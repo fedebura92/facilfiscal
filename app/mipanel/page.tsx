@@ -641,13 +641,15 @@ const timelineItems = useMemo<TimelineItems>(() => {
             grid-template-columns: 1fr;
             gap: 20px;
           }
-          .panel-sidebar { display: flex; flex-direction: column; gap: 20px; }
-          .panel-main    { display: flex; flex-direction: column; gap: 20px; }
+          .panel-sidebar { display: flex; flex-direction: column; gap: 20px; order: 2; }
+          .panel-main    { display: flex; flex-direction: column; gap: 20px; order: 1; }
           @media (min-width: 1024px) {
             .panel-grid {
               grid-template-columns: 320px 1fr;
               align-items: start;
             }
+            .panel-sidebar { order: 1; }
+            .panel-main    { order: 2; }
           }
         `}</style>
 
