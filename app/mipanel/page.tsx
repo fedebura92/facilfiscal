@@ -155,6 +155,7 @@ export default function MiPanel() {
   const [aiQuery, setAiQuery]         = useState('')
   const [aiLoading, setAiLoading]     = useState(false)
   const [aiHistory, setAiHistory]     = useState<{role:'user'|'assistant';text:string}[]>([])
+  const [aiOpen, setAiOpen]           = useState(false)
   const aiEndRef = useRef<HTMLDivElement>(null)
 
   // Alertas inline
@@ -645,7 +646,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
           .panel-main    { display: flex; flex-direction: column; gap: 20px; }
           @media (min-width: 1024px) {
             .panel-grid {
-              grid-template-columns: 340px 1fr;
+              grid-template-columns: 300px 1fr;
               align-items: start;
             }
           }
@@ -676,58 +677,163 @@ const timelineItems = useMemo<TimelineItems>(() => {
         <div className="panel-grid">
 
           {/* ══ COLUMNA PRINCIPAL (izquierda/centro) ══ */}
-          <div className="panel-main">
-
-            {/* Qué tenés que hacer */}
-            {perfilCompleto && (timelineItems.hoy.length > 0 || timelineItems.pronto.length > 0 || timelineItems.semana.length > 0) && (
-              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
-                <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, padding:'12px 18px', display:'flex', alignItems:'center', gap:8 }}>
-                  <span style={{ fontSize:18 }}>📌</span>
-                  <span style={{ fontSize:14, fontWeight:800, color:'#fff' }}>Qué tenés que hacer</span>
+          {/* ══ SIDEBAR izquierda ══ */}
+          <div className="panel-sidebar">
+            {/* Score fiscal */}
+            {perfilCompleto && (
+              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🎯 Score fiscal</div>
+                    <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>Tu situación impositiva</div>
+                  </div>
+                  <div style={{ textAlign:'center' }}>
+                    <div style={{ fontSize:40, fontWeight:900, color:scoreColor, lineHeight:1 }}>{score}</div>
+                    <div style={{ fontSize:10, fontWeight:700, color:scoreColor, textTransform:'uppercase' as const, letterSpacing:'.05em' }}>{scoreLabel}</div>
+                  </div>
                 </div>
-                <div style={{ padding:'16px 18px', display:'flex', flexDirection:'column', gap:12 }}>
-                  {timelineItems.hoy.length > 0 && (
-                    <div>
-                      <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', color:V.red, marginBottom:8 }}>🔴 Hoy</div>
-                      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                        {timelineItems.hoy.map((t,i) => (
-                          <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', background:V.redBg, border:`1px solid ${V.redRing}`, borderRadius:10 }}>
-                            <span style={{ fontSize:16 }}>⚠️</span>
-                            <span style={{ fontSize:13, fontWeight:700, color:V.red }}>{t}</span>
-                          </div>
-                        ))}
+                <div style={{ height:8, background:V.border, borderRadius:999, marginBottom:14, overflow:'hidden' }}>
+                  <div style={{ height:'100%', borderRadius:999, width:`${score}%`, transition:'width .6s ease', background: score>=80?`linear-gradient(90deg,${V.green},#4ade80)`:score>=50?`linear-gradient(90deg,${V.amber},#fbbf24)`:`linear-gradient(90deg,${V.red},#f87171)` }} />
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  {scoreItems.map((item, i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'8px 12px', borderRadius:8, background: item.nivel==='ok'?V.greenBg:item.nivel==='warn'?V.amberBg:V.redBg, border:`1px solid ${item.nivel==='ok'?V.greenRing:item.nivel==='warn'?V.amberRing:V.redRing}` }}>
+                      <span style={{ fontSize:12, flexShrink:0 }}>{item.nivel==='ok'?'✅':item.nivel==='warn'?'⚠️':'🔴'}</span>
+                      <div>
+                        <div style={{ fontSize:12, fontWeight:700, color: item.nivel==='ok'?V.green:item.nivel==='warn'?V.amber:V.red }}>{item.texto}</div>
+                        {item.detalle && <div style={{ fontSize:10, fontWeight:600, color:V.ink3, marginTop:2, lineHeight:1.4 }}>{item.detalle}</div>}
                       </div>
                     </div>
-                  )}
-                  {timelineItems.pronto.length > 0 && (
-                    <div>
-                      <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', color:V.amber, marginBottom:8 }}>🟡 En los próximos días</div>
-                      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                        {timelineItems.pronto.map((t,i) => (
-                          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10 }}>
-                            <span style={{ fontSize:13, fontWeight:700, color:V.amber }}>{t.texto}</span>
-                            <span style={{ fontSize:11, fontWeight:800, color:V.amber }}>en {t.dias} día{t.dias!==1?'s':''}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {timelineItems.semana.length > 0 && (
-                    <div>
-                      <div style={{ fontSize:10, fontWeight:800, textTransform:'uppercase', letterSpacing:'.1em', color:V.teal, marginBottom:8 }}>🟢 Esta semana</div>
-                      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                        {timelineItems.semana.map((t,i) => (
-                          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:V.tealLight, border:`1px solid ${V.tealRing}`, borderRadius:10 }}>
-                            <span style={{ fontSize:13, fontWeight:700, color:V.tealDark }}>{t.texto}</span>
-                            <span style={{ fontSize:11, fontWeight:800, color:V.teal }}>en {t.dias} días</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </div>
             )}
+
+            {/* Widget financiero */}
+            <WidgetFinanciero userId={userId} perfil={perfil} />
+
+            {/* Recordatorios */}
+            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+              <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:4 }}>⏰ Recordatorios</div>
+              <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginBottom:14, lineHeight:1.5 }}>¿Con cuántos días de anticipación querés recibir el aviso?</div>
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
+                {[{value:'1',label:'1 día'},{value:'3',label:'3 días'},{value:'5',label:'5 días'},{value:'7',label:'1 semana'}].map(op => (
+                  <button key={op.value} onClick={() => setRecordatorioAnticipacion(op.value)} style={{ padding:'7px 12px', borderRadius:8, border:`2px solid ${recordatorioAnticipacion===op.value?V.teal:V.border}`, background:recordatorioAnticipacion===op.value?V.tealLight:V.surface, color:recordatorioAnticipacion===op.value?V.tealDark:V.ink3, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{op.label}</button>
+                ))}
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <button onClick={guardarRecordatorio} disabled={recordatorioLoading||!tasks.find(t=>t.id==='alertas')?.done} style={{ background:tasks.find(t=>t.id==='alertas')?.done?`linear-gradient(135deg,${V.tealDark},${V.teal})`:V.border, color:tasks.find(t=>t.id==='alertas')?.done?'#fff':V.ink3, border:'none', borderRadius:8, padding:'9px 16px', fontSize:12, fontWeight:800, cursor:tasks.find(t=>t.id==='alertas')?.done&&!recordatorioLoading?'pointer':'not-allowed', fontFamily:"'Nunito',sans-serif", opacity:recordatorioLoading ? .6 : 1 }}>
+                  {recordatorioLoading?'Guardando...':'Guardar'}
+                </button>
+                {!tasks.find(t=>t.id==='alertas')?.done && <span style={{ fontSize:11, color:V.ink3, fontWeight:600 }}>🔒 Activá las alertas primero</span>}
+                {recordatorioGuardado && <span style={{ fontSize:12, color:V.green, fontWeight:700 }}>✓ Guardado</span>}
+              </div>
+            </div>
+
+            {/* Accesos rápidos */}
+            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+              <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:14 }}>💡 Accesos rápidos</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                {[
+                  { icon:'💼', label:'Panel financiero',  href:'/mipanel/financiero',  destacado:true },
+                  { icon:'🧾', label:'Facturación',       href:'/mipanel/facturacion', destacado:true },
+                  { icon:'📊', label:'Mi categoría',      href:'/mi-categoria' },
+                  { icon:'📄', label:'Cómo facturar',     href:'/como-facturar' },
+                  { icon:'📅', label:'Calendario fiscal',  href:'/calendario-fiscal' },
+                  { icon:'🗺️', label:'Por provincia',      href:'/impuestos-por-provincia' },
+                ].map(c => (
+                  <Link key={c.label} href={c.href} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', border:`1.5px solid ${c.destacado?V.tealRing:V.border}`, borderRadius:10, textDecoration:'none', color:c.destacado?V.tealDark:V.ink, fontSize:13, fontWeight:700, background:c.destacado?V.tealLight:V.surface }}>
+                    <span style={{ fontSize:16 }}>{c.icon}</span>{c.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Checklist — solo si NO está completo */}
+            {!allDone && (
+              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                  <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>✅ Lo que tenés que hacer</div>
+                  <span style={{ fontSize:11, fontWeight:600, color:V.ink3 }}>{completedCount}/{totalCount}</span>
+                </div>
+                <div style={{ height:5, background:V.border, borderRadius:999, marginBottom:14, overflow:'hidden' }}>
+                  <div style={{ height:'100%', borderRadius:999, background:`linear-gradient(90deg,${V.teal},${V.gold})`, width:`${progressPct}%`, transition:'width .4s ease' }} />
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  {tasks.filter(t=>!t.done).map(task => (
+                    <div key={task.id} style={{ border:`1.5px solid ${V.border}`, borderRadius:10, overflow:'hidden' }}>
+                      <div onClick={() => !task.bloqueada && toggleTask(task.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', cursor:task.bloqueada?'default':'pointer' }}>
+                        <div style={{ width:20, height:20, borderRadius:6, flexShrink:0, border:`2px solid ${task.bloqueada?V.border:V.border2}`, background:'transparent', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          {task.bloqueada && <span style={{ fontSize:9 }}>🔒</span>}
+                        </div>
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <div style={{ fontSize:12, fontWeight:700, color:V.ink }}>{task.label}</div>
+                          <div style={{ fontSize:10, color:V.ink3, fontWeight:600, marginTop:1 }}>{task.descripcion}</div>
+                        </div>
+                      </div>
+                      {task.accion_href && (
+                        <div style={{ borderTop:`1px solid ${V.border}`, padding:'7px 14px', background:V.bg, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                          <span style={{ fontSize:10, color:V.ink3, fontWeight:600 }}>{task.bloqueada?'🔒 Completá en tu perfil':'Pendiente'}</span>
+                          {task.id==='alertas' ? (
+                            <button onClick={()=>setShowAlertasForm(true)} style={{ fontSize:11, fontWeight:800, color:V.teal, background:'none', border:'none', cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>Activar →</button>
+                          ) : (
+                            <Link href={task.accion_href} style={{ fontSize:11, fontWeight:800, color:V.teal, textDecoration:'none' }}>{task.accion_label} →</Link>
+                          )}
+                        </div>
+                      )}
+                      {task.id==='alertas' && showAlertasForm && !task.done && (
+                        <div style={{ borderTop:`1px solid ${V.border}`, padding:'12px 14px', background:V.tealLight, display:'flex', flexDirection:'column', gap:8 }}>
+                          <div style={{ display:'flex', gap:8 }}>
+                            <input type="email" placeholder="tu@email.com" value={alertasEmail} onChange={e=>{setAlertasEmail(e.target.value);setAlertasError('')}} onKeyDown={e=>e.key==='Enter'&&suscribirAlertas()} style={{ flex:1, border:`1.5px solid ${V.border}`, borderRadius:8, padding:'7px 10px', fontSize:12, fontWeight:600, color:V.ink, background:V.surface, outline:'none', fontFamily:"'Nunito',sans-serif" }} />
+                            <button onClick={suscribirAlertas} disabled={alertasLoading} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:800, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{alertasLoading?'...':'Activar →'}</button>
+                          </div>
+                          {alertasError && <div style={{ fontSize:11, color:V.red, fontWeight:600 }}>⚠️ {alertasError}</div>}
+                          <button onClick={()=>setShowAlertasForm(false)} style={{ fontSize:10, color:V.ink3, background:'none', border:'none', cursor:'pointer', textAlign:'left', fontFamily:"'Nunito',sans-serif" }}>Cancelar</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+
+          </div>{/* fin panel-sidebar */}
+
+          {/* ══ MAIN derecha ══ */}
+          <div className="panel-main">
+            {/* Vencimientos */}
+            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+              <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:14 }}>📅 Tus próximos vencimientos</div>
+              {!perfilCompleto ? (
+                <div style={{ textAlign:'center', padding:'12px 0 4px' }}>
+                  <span style={{ fontSize:28, opacity:.25 }}>🔒</span>
+                  <p style={{ fontSize:12, fontWeight:600, color:V.ink3, maxWidth:220, lineHeight:1.6, margin:'8px auto 10px' }}>Completá tu perfil con la terminación de CUIT para ver tus fechas exactas.</p>
+                  <Link href="/mipanel/perfil" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none' }}>Completar perfil →</Link>
+                </div>
+              ) : vencimientos.length === 0 ? (
+                <div style={{ fontSize:13, color:V.ink3, fontWeight:600 }}>Sin vencimientos próximos.</div>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                  {vencimientos.map((v,i) => {
+                    const dias = getDias(v.dia)
+                    const urgente = dias <= 5
+                    return (
+                      <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', border:`1.5px solid ${urgente?'#fca5a5':V.border}`, borderRadius:10, background:urgente?V.redBg:V.surface }}>
+                        <div>
+                          <div style={{ fontSize:12, fontWeight:700, color:V.ink }}>{v.titulo}</div>
+                          <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:1 }}>{fmtFecha(v.dia)}</div>
+                        </div>
+                        <div style={{ fontSize:11, fontWeight:800, padding:'3px 9px', borderRadius:20, whiteSpace:'nowrap' as const, background:urgente?V.redBg:V.tealLight, color:urgente?V.red:V.teal, border:`1px solid ${urgente?'#fca5a5':V.tealRing}` }}>
+                          {dias===0?'¡Hoy!':dias===1?'Mañana':`En ${dias}d`}
+                        </div>
+                      </div>
+                    )
+                  })}
+                  <Link href="/calendario-fiscal" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:4, display:'block' }}>Ver calendario completo →</Link>
+                </div>
+              )}
+            </div>
 
             {/* Novedades fiscales */}
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
@@ -739,7 +845,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
                   </div>
                 </div>
                 {!noticiasLoaded && (
-                  <button onClick={cargarNoticias} disabled={noticiasLoading} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:8, padding:'8px 14px', fontSize:12, fontWeight:800, cursor:noticiasLoading?'not-allowed':'pointer', opacity:noticiasLoading?.6:1, fontFamily:"'Nunito',sans-serif", whiteSpace:'nowrap' }}>
+                  <button onClick={cargarNoticias} disabled={noticiasLoading} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:8, padding:'8px 14px', fontSize:12, fontWeight:800, cursor:noticiasLoading?'not-allowed':'pointer', opacity:noticiasLoading ? .6 : 1, fontFamily:"'Nunito',sans-serif", whiteSpace:'nowrap' }}>
                     {noticiasLoading ? 'Cargando...' : 'Ver novedades →'}
                   </button>
                 )}
@@ -859,46 +965,6 @@ const timelineItems = useMemo<TimelineItems>(() => {
               </div>
             </div>
 
-            {/* Asistente IA */}
-            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
-              <div style={{ background:'#0a0a1a', padding:'12px 18px', display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:8, height:8, borderRadius:'50%', background:'#4caf50', boxShadow:'0 0 0 3px rgba(76,175,80,.2)' }} />
-                <span style={{ fontSize:12, fontWeight:800, color:'#fff', letterSpacing:'1.2px', textTransform:'uppercase' as const }}>Asistente fiscal IA</span>
-                {perfilCompleto && tipoLabel && <span style={{ marginLeft:'auto', fontSize:11, color:'rgba(255,255,255,.4)', fontWeight:600 }}>{tipoLabel} · CUIT …{perfil?.terminacion_cuit}</span>}
-              </div>
-              <div style={{ padding:'16px 18px', maxHeight:320, overflowY:'auto' as const, display:'flex', flexDirection:'column', gap:12 }}>
-                {aiHistory.length===0 && (
-                  <div style={{ textAlign:'center', padding:'16px 0' }}>
-                    <div style={{ fontSize:32, marginBottom:8 }}>🤖</div>
-                    <p style={{ fontSize:13, color:V.ink3, fontWeight:600, margin:0, lineHeight:1.6 }}>
-                      {perfilCompleto ? `Hola${perfil?.nombre ? ` ${perfil.nombre}` : ''}! Ya tengo tu perfil. Preguntame sobre tu situación fiscal.` : 'Hola! Soy tu asistente fiscal. Preguntame sobre impuestos y trámites en Argentina.'}
-                    </p>
-                  </div>
-                )}
-                {aiHistory.map((msg,i) => (
-                  <div key={i} style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start' }}>
-                    <div style={{ maxWidth:'82%', padding:'10px 14px', borderRadius:msg.role==='user'?'16px 16px 4px 16px':'16px 16px 16px 4px', background:msg.role==='user'?V.teal:V.bg, color:msg.role==='user'?'#fff':V.ink2, fontSize:13, fontWeight:600, lineHeight:1.7, whiteSpace:'pre-wrap' as const, border:msg.role==='assistant'?`1px solid ${V.border}`:'none' }}>
-                      {msg.text}
-                    </div>
-                  </div>
-                ))}
-                {aiLoading && <div style={{ display:'flex', justifyContent:'flex-start' }}><div style={{ padding:'10px 14px', borderRadius:'16px 16px 16px 4px', background:V.bg, border:`1px solid ${V.border}`, fontSize:13, color:V.ink3, fontWeight:600 }}>Consultando...</div></div>}
-                <div ref={aiEndRef} />
-              </div>
-              {aiHistory.length===0 && (
-                <div style={{ padding:'0 18px 12px', display:'flex', flexWrap:'wrap', gap:6 }}>
-                  {sugerencias.map(s => (
-                    <button key={s} onClick={()=>askAI(s)} style={{ background:V.bg, border:`1px solid ${V.border}`, borderRadius:20, padding:'5px 12px', fontSize:11, fontWeight:700, color:V.ink3, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{s}</button>
-                  ))}
-                </div>
-              )}
-              <div style={{ padding:'12px 18px', borderTop:`1px solid ${V.border}`, display:'flex', gap:8 }}>
-                <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&!e.shiftKey&&askAI()} placeholder="Preguntame sobre tu situación fiscal..."
-                  style={{ flex:1, border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif" }} />
-                <button onClick={()=>askAI()} disabled={aiLoading||!aiQuery.trim()} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:10, padding:'10px 18px', fontSize:13, fontWeight:800, cursor:aiLoading||!aiQuery.trim()?'not-allowed':'pointer', opacity:aiLoading||!aiQuery.trim()?.5:1, fontFamily:"'Nunito',sans-serif" }}>Enviar →</button>
-              </div>
-            </div>
-
             {/* Recupero saldo a favor */}
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
               <div style={{ padding:'14px 20px', borderBottom:`1px solid ${V.border}` }}>
@@ -929,7 +995,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
                       style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:10, padding:'10px 14px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif", boxSizing:'border-box' as const }} />
                   </div>
                 )}
-                <button onClick={consultarRecupero} disabled={!recuperoTipo||recuperoLoading} style={{ background:recuperoTipo?`linear-gradient(135deg,${V.tealDark},${V.teal})`:V.border, color:recuperoTipo?'#fff':V.ink3, border:'none', borderRadius:10, padding:'11px 20px', fontSize:13, fontWeight:800, cursor:recuperoTipo&&!recuperoLoading?'pointer':'not-allowed', fontFamily:"'Nunito',sans-serif", opacity:recuperoLoading?.6:1 }}>
+                <button onClick={consultarRecupero} disabled={!recuperoTipo||recuperoLoading} style={{ background:recuperoTipo?`linear-gradient(135deg,${V.tealDark},${V.teal})`:V.border, color:recuperoTipo?'#fff':V.ink3, border:'none', borderRadius:10, padding:'11px 20px', fontSize:13, fontWeight:800, cursor:recuperoTipo&&!recuperoLoading?'pointer':'not-allowed', fontFamily:"'Nunito',sans-serif", opacity:recuperoLoading ? .6 : 1 }}>
                   {recuperoLoading ? 'Consultando...' : '¿Cómo recuperarlo? →'}
                 </button>
                 {recuperoRespuesta && (
@@ -940,165 +1006,73 @@ const timelineItems = useMemo<TimelineItems>(() => {
               </div>
             </div>
 
+
           </div>{/* fin panel-main */}
+        </div>{/* fin panel-grid */}
 
-          {/* ══ SIDEBAR (derecha) ══ */}
-          <div className="panel-sidebar">
-
-            {/* Score fiscal */}
-            {perfilCompleto && (
-              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-                  <div>
-                    <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🎯 Score fiscal</div>
-                    <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>Tu situación impositiva</div>
-                  </div>
-                  <div style={{ textAlign:'center' }}>
-                    <div style={{ fontSize:40, fontWeight:900, color:scoreColor, lineHeight:1 }}>{score}</div>
-                    <div style={{ fontSize:10, fontWeight:700, color:scoreColor, textTransform:'uppercase' as const, letterSpacing:'.05em' }}>{scoreLabel}</div>
-                  </div>
+        {/* ══ BURBUJA ASISTENTE IA FLOTANTE ══ */}
+        <div style={{ position:'fixed', bottom:24, right:24, zIndex:1000, display:'flex', flexDirection:'column', alignItems:'flex-end', gap:12 }}>
+          {/* Chat expandido */}
+          {aiOpen && (
+            <div style={{ width:360, maxHeight:520, background:V.surface, borderRadius:20, boxShadow:'0 8px 40px rgba(13,92,120,.25)', border:`1.5px solid ${V.border}`, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+              {/* Header */}
+              <div style={{ background:'#0a0a1a', padding:'12px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <div style={{ width:8, height:8, borderRadius:'50%', background:'#4caf50', boxShadow:'0 0 0 3px rgba(76,175,80,.2)' }} />
+                  <span style={{ fontSize:12, fontWeight:800, color:'#fff', letterSpacing:'1.2px', textTransform:'uppercase' as const }}>Asistente fiscal IA</span>
                 </div>
-                <div style={{ height:8, background:V.border, borderRadius:999, marginBottom:14, overflow:'hidden' }}>
-                  <div style={{ height:'100%', borderRadius:999, width:`${score}%`, transition:'width .6s ease', background: score>=80?`linear-gradient(90deg,${V.green},#4ade80)`:score>=50?`linear-gradient(90deg,${V.amber},#fbbf24)`:`linear-gradient(90deg,${V.red},#f87171)` }} />
-                </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  {scoreItems.map((item, i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'8px 12px', borderRadius:8, background: item.nivel==='ok'?V.greenBg:item.nivel==='warn'?V.amberBg:V.redBg, border:`1px solid ${item.nivel==='ok'?V.greenRing:item.nivel==='warn'?V.amberRing:V.redRing}` }}>
-                      <span style={{ fontSize:12, flexShrink:0 }}>{item.nivel==='ok'?'✅':item.nivel==='warn'?'⚠️':'🔴'}</span>
-                      <div>
-                        <div style={{ fontSize:12, fontWeight:700, color: item.nivel==='ok'?V.green:item.nivel==='warn'?V.amber:V.red }}>{item.texto}</div>
-                        {item.detalle && <div style={{ fontSize:10, fontWeight:600, color:V.ink3, marginTop:2, lineHeight:1.4 }}>{item.detalle}</div>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <button onClick={()=>setAiOpen(false)} style={{ background:'rgba(255,255,255,.1)', border:'none', borderRadius:6, width:24, height:24, cursor:'pointer', color:'#fff', fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Nunito',sans-serif" }}>×</button>
               </div>
-            )}
-
-            {/* Vencimientos */}
-            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
-              <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:14 }}>📅 Tus próximos vencimientos</div>
-              {!perfilCompleto ? (
-                <div style={{ textAlign:'center', padding:'12px 0 4px' }}>
-                  <span style={{ fontSize:28, opacity:.25 }}>🔒</span>
-                  <p style={{ fontSize:12, fontWeight:600, color:V.ink3, maxWidth:220, lineHeight:1.6, margin:'8px auto 10px' }}>Completá tu perfil con la terminación de CUIT para ver tus fechas exactas.</p>
-                  <Link href="/mipanel/perfil" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none' }}>Completar perfil →</Link>
-                </div>
-              ) : vencimientos.length === 0 ? (
-                <div style={{ fontSize:13, color:V.ink3, fontWeight:600 }}>Sin vencimientos próximos.</div>
-              ) : (
-                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                  {vencimientos.map((v,i) => {
-                    const dias = getDias(v.dia)
-                    const urgente = dias <= 5
-                    return (
-                      <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', border:`1.5px solid ${urgente?'#fca5a5':V.border}`, borderRadius:10, background:urgente?V.redBg:V.surface }}>
-                        <div>
-                          <div style={{ fontSize:12, fontWeight:700, color:V.ink }}>{v.titulo}</div>
-                          <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:1 }}>{fmtFecha(v.dia)}</div>
-                        </div>
-                        <div style={{ fontSize:11, fontWeight:800, padding:'3px 9px', borderRadius:20, whiteSpace:'nowrap' as const, background:urgente?V.redBg:V.tealLight, color:urgente?V.red:V.teal, border:`1px solid ${urgente?'#fca5a5':V.tealRing}` }}>
-                          {dias===0?'¡Hoy!':dias===1?'Mañana':`En ${dias}d`}
-                        </div>
-                      </div>
-                    )
-                  })}
-                  <Link href="/calendario-fiscal" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:4, display:'block' }}>Ver calendario completo →</Link>
+              {/* Historial */}
+              <div style={{ flex:1, padding:'14px 16px', overflowY:'auto' as const, display:'flex', flexDirection:'column', gap:10, maxHeight:320 }}>
+                {aiHistory.length===0 && (
+                  <div style={{ textAlign:'center', padding:'16px 0' }}>
+                    <div style={{ fontSize:32, marginBottom:8 }}>🤖</div>
+                    <p style={{ fontSize:13, color:V.ink3, fontWeight:600, margin:0, lineHeight:1.6 }}>
+                      {perfilCompleto ? `Hola${perfil?.nombre ? ` ${perfil.nombre}` : ''}! Ya tengo tu perfil. Preguntame sobre tu situación fiscal.` : 'Hola! Preguntame sobre impuestos y trámites en Argentina.'}
+                    </p>
+                  </div>
+                )}
+                {aiHistory.map((msg,i) => (
+                  <div key={i} style={{ display:'flex', justifyContent:msg.role==='user'?'flex-end':'flex-start' }}>
+                    <div style={{ maxWidth:'85%', padding:'9px 13px', borderRadius:msg.role==='user'?'16px 16px 4px 16px':'16px 16px 16px 4px', background:msg.role==='user'?V.teal:V.bg, color:msg.role==='user'?'#fff':V.ink2, fontSize:12, fontWeight:600, lineHeight:1.7, whiteSpace:'pre-wrap' as const, border:msg.role==='assistant'?`1px solid ${V.border}`:'none' }}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {aiLoading && (
+                  <div style={{ display:'flex', justifyContent:'flex-start' }}>
+                    <div style={{ padding:'9px 13px', borderRadius:'16px 16px 16px 4px', background:V.bg, border:`1px solid ${V.border}`, fontSize:12, color:V.ink3, fontWeight:600 }}>Consultando...</div>
+                  </div>
+                )}
+                <div ref={aiEndRef} />
+              </div>
+              {/* Sugerencias */}
+              {aiHistory.length===0 && (
+                <div style={{ padding:'0 14px 10px', display:'flex', flexWrap:'wrap', gap:5 }}>
+                  {sugerencias.slice(0,3).map(s => (
+                    <button key={s} onClick={()=>askAI(s)} style={{ background:V.bg, border:`1px solid ${V.border}`, borderRadius:20, padding:'4px 10px', fontSize:10, fontWeight:700, color:V.ink3, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{s}</button>
+                  ))}
                 </div>
               )}
-            </div>
-
-            {/* Widget financiero */}
-            <WidgetFinanciero userId={userId} perfil={perfil} />
-
-            {/* Recordatorios */}
-            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
-              <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:4 }}>⏰ Recordatorios</div>
-              <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginBottom:14, lineHeight:1.5 }}>¿Con cuántos días de anticipación querés recibir el aviso?</div>
-              <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
-                {[{value:'1',label:'1 día'},{value:'3',label:'3 días'},{value:'5',label:'5 días'},{value:'7',label:'1 semana'}].map(op => (
-                  <button key={op.value} onClick={() => setRecordatorioAnticipacion(op.value)} style={{ padding:'7px 12px', borderRadius:8, border:`2px solid ${recordatorioAnticipacion===op.value?V.teal:V.border}`, background:recordatorioAnticipacion===op.value?V.tealLight:V.surface, color:recordatorioAnticipacion===op.value?V.tealDark:V.ink3, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{op.label}</button>
-                ))}
-              </div>
-              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                <button onClick={guardarRecordatorio} disabled={recordatorioLoading||!tasks.find(t=>t.id==='alertas')?.done} style={{ background:tasks.find(t=>t.id==='alertas')?.done?`linear-gradient(135deg,${V.tealDark},${V.teal})`:V.border, color:tasks.find(t=>t.id==='alertas')?.done?'#fff':V.ink3, border:'none', borderRadius:8, padding:'9px 16px', fontSize:12, fontWeight:800, cursor:tasks.find(t=>t.id==='alertas')?.done&&!recordatorioLoading?'pointer':'not-allowed', fontFamily:"'Nunito',sans-serif", opacity:recordatorioLoading?.6:1 }}>
-                  {recordatorioLoading?'Guardando...':'Guardar'}
-                </button>
-                {!tasks.find(t=>t.id==='alertas')?.done && <span style={{ fontSize:11, color:V.ink3, fontWeight:600 }}>🔒 Activá las alertas primero</span>}
-                {recordatorioGuardado && <span style={{ fontSize:12, color:V.green, fontWeight:700 }}>✓ Guardado</span>}
+              {/* Input */}
+              <div style={{ padding:'10px 14px', borderTop:`1px solid ${V.border}`, display:'flex', gap:8 }}>
+                <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} onKeyDown={e=>e.key==='Enter'&&!e.shiftKey&&askAI()} placeholder="Preguntame..."
+                  style={{ flex:1, border:`1.5px solid ${V.border}`, borderRadius:10, padding:'8px 12px', fontSize:12, fontWeight:600, color:V.ink, background:V.bg, outline:'none', fontFamily:"'Nunito',sans-serif" }} />
+                <button onClick={()=>askAI()} disabled={aiLoading||!aiQuery.trim()} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:10, padding:'8px 14px', fontSize:12, fontWeight:800, cursor:aiLoading||!aiQuery.trim()?'not-allowed':'pointer', opacity:aiLoading||!aiQuery.trim() ? .5 : 1, fontFamily:"'Nunito',sans-serif" }}>→</button>
               </div>
             </div>
-
-            {/* Accesos rápidos */}
-            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
-              <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:14 }}>💡 Accesos rápidos</div>
-              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                {[
-                  { icon:'💼', label:'Panel financiero',  href:'/mipanel/financiero',  destacado:true },
-                  { icon:'🧾', label:'Facturación',       href:'/mipanel/facturacion', destacado:true },
-                  { icon:'📊', label:'Mi categoría',      href:'/mi-categoria' },
-                  { icon:'📄', label:'Cómo facturar',     href:'/como-facturar' },
-                  { icon:'📅', label:'Calendario fiscal',  href:'/calendario-fiscal' },
-                  { icon:'🗺️', label:'Por provincia',      href:'/impuestos-por-provincia' },
-                ].map(c => (
-                  <Link key={c.label} href={c.href} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', border:`1.5px solid ${c.destacado?V.tealRing:V.border}`, borderRadius:10, textDecoration:'none', color:c.destacado?V.tealDark:V.ink, fontSize:13, fontWeight:700, background:c.destacado?V.tealLight:V.surface }}>
-                    <span style={{ fontSize:16 }}>{c.icon}</span>{c.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Checklist — solo si NO está completo */}
-            {!allDone && (
-              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-                  <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>✅ Lo que tenés que hacer</div>
-                  <span style={{ fontSize:11, fontWeight:600, color:V.ink3 }}>{completedCount}/{totalCount}</span>
-                </div>
-                <div style={{ height:5, background:V.border, borderRadius:999, marginBottom:14, overflow:'hidden' }}>
-                  <div style={{ height:'100%', borderRadius:999, background:`linear-gradient(90deg,${V.teal},${V.gold})`, width:`${progressPct}%`, transition:'width .4s ease' }} />
-                </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  {tasks.filter(t=>!t.done).map(task => (
-                    <div key={task.id} style={{ border:`1.5px solid ${V.border}`, borderRadius:10, overflow:'hidden' }}>
-                      <div onClick={() => !task.bloqueada && toggleTask(task.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 14px', cursor:task.bloqueada?'default':'pointer' }}>
-                        <div style={{ width:20, height:20, borderRadius:6, flexShrink:0, border:`2px solid ${task.bloqueada?V.border:V.border2}`, background:'transparent', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                          {task.bloqueada && <span style={{ fontSize:9 }}>🔒</span>}
-                        </div>
-                        <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ fontSize:12, fontWeight:700, color:V.ink }}>{task.label}</div>
-                          <div style={{ fontSize:10, color:V.ink3, fontWeight:600, marginTop:1 }}>{task.descripcion}</div>
-                        </div>
-                      </div>
-                      {task.accion_href && (
-                        <div style={{ borderTop:`1px solid ${V.border}`, padding:'7px 14px', background:V.bg, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                          <span style={{ fontSize:10, color:V.ink3, fontWeight:600 }}>{task.bloqueada?'🔒 Completá en tu perfil':'Pendiente'}</span>
-                          {task.id==='alertas' ? (
-                            <button onClick={()=>setShowAlertasForm(true)} style={{ fontSize:11, fontWeight:800, color:V.teal, background:'none', border:'none', cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>Activar →</button>
-                          ) : (
-                            <Link href={task.accion_href} style={{ fontSize:11, fontWeight:800, color:V.teal, textDecoration:'none' }}>{task.accion_label} →</Link>
-                          )}
-                        </div>
-                      )}
-                      {task.id==='alertas' && showAlertasForm && !task.done && (
-                        <div style={{ borderTop:`1px solid ${V.border}`, padding:'12px 14px', background:V.tealLight, display:'flex', flexDirection:'column', gap:8 }}>
-                          <div style={{ display:'flex', gap:8 }}>
-                            <input type="email" placeholder="tu@email.com" value={alertasEmail} onChange={e=>{setAlertasEmail(e.target.value);setAlertasError('')}} onKeyDown={e=>e.key==='Enter'&&suscribirAlertas()} style={{ flex:1, border:`1.5px solid ${V.border}`, borderRadius:8, padding:'7px 10px', fontSize:12, fontWeight:600, color:V.ink, background:V.surface, outline:'none', fontFamily:"'Nunito',sans-serif" }} />
-                            <button onClick={suscribirAlertas} disabled={alertasLoading} style={{ background:V.teal, color:'#fff', border:'none', borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:800, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{alertasLoading?'...':'Activar →'}</button>
-                          </div>
-                          {alertasError && <div style={{ fontSize:11, color:V.red, fontWeight:600 }}>⚠️ {alertasError}</div>}
-                          <button onClick={()=>setShowAlertasForm(false)} style={{ fontSize:10, color:V.ink3, background:'none', border:'none', cursor:'pointer', textAlign:'left', fontFamily:"'Nunito',sans-serif" }}>Cancelar</button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
+          )}
+          {/* Burbuja */}
+          <button onClick={()=>setAiOpen(v=>!v)} style={{ width:60, height:60, borderRadius:'50%', background:`linear-gradient(135deg,${V.tealDark},${V.teal})`, border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 20px rgba(13,92,120,.4)', fontSize:28, transition:'transform .2s', position:'relative' }}
+            onMouseEnter={e=>(e.currentTarget.style.transform='scale(1.1)')}
+            onMouseLeave={e=>(e.currentTarget.style.transform='scale(1)')}>
+            🤖
+            {!aiOpen && aiHistory.length === 0 && (
+              <div style={{ position:'absolute', top:-2, right:-2, width:14, height:14, borderRadius:'50%', background:'#4caf50', border:'2px solid #fff' }} />
             )}
-
-          </div>{/* fin panel-sidebar */}
-
-        </div>{/* fin panel-grid */}
+          </button>
+        </div>
 
       </main>
     </div>
