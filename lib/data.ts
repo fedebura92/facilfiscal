@@ -7,27 +7,34 @@ export const TERMINACION_DIAS: Record<string, number> = {
 }
 
 // ── Categorías de Monotributo (A–K) ─────────────────────
+// Fuente: ARCA — Valores vigentes desde el 01/02/2026
+// https://www.afip.gob.ar/monotributo/categorias.asp
+// Última actualización: febrero 2026
+
+export const VIGENCIA_MONTOS = 'Vigente desde el 01/02/2026 — Fuente: ARCA'
+
 export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
-  { letra: 'A', limite_anual: 6450000,  imp: 11000, prev: 28000 },
-  { letra: 'B', limite_anual: 9450000,  imp: 12400, prev: 28000 },
-  { letra: 'C', limite_anual: 13250000, imp: 13900, prev: 28000 },
-  { letra: 'D', limite_anual: 16450000, imp: 17000, prev: 28000 },
-  { letra: 'E', limite_anual: 19350000, imp: 20500, prev: 28000 },
-  { letra: 'F', limite_anual: 24250000, imp: 25000, prev: 28000 },
-  { letra: 'G', limite_anual: 29000000, imp: 30000, prev: 28000 },
-  { letra: 'H', limite_anual: 44000000, imp: 42000, prev: 28000 },
-  { letra: 'I', limite_anual: 52000000, imp: 55000, prev: 28000 },
-  { letra: 'J', limite_anual: 62000000, imp: 70000, prev: 28000 },
-  { letra: 'K', limite_anual: 72000000, imp: 85000, prev: 28000 },
+  // imp = impuesto integrado (servicios), prev = aportes SIPA, os se suma aparte
+  { letra: 'A', limite_anual: 10277988,  imp: 4780,    prev: 15616  },
+  { letra: 'B', limite_anual: 15058447,  imp: 9083,    prev: 17178  },
+  { letra: 'C', limite_anual: 21113696,  imp: 15616,   prev: 18896  },
+  { letra: 'D', limite_anual: 26212853,  imp: 25496,   prev: 20785  },
+  { letra: 'E', limite_anual: 30833964,  imp: 47805,   prev: 22864  },
+  { letra: 'F', limite_anual: 38642048,  imp: 67245,   prev: 25150  },
+  { letra: 'G', limite_anual: 46211109,  imp: 122380,  prev: 35210  },
+  { letra: 'H', limite_anual: 70113407,  imp: 350567,  prev: 49294  },
+  { letra: 'I', limite_anual: 78479211,  imp: 697150,  prev: 69012  },
+  { letra: 'J', limite_anual: 89872640,  imp: 836580,  prev: 96616  },
+  { letra: 'K', limite_anual: 108357084, imp: 1171213, prev: 135263 },
 ]
 
-export const OS_EXTRA = 14000
+export const OS_EXTRA = 21990 // Aportes obra social vigentes 01/02/2026
 
 // ── Tabla de montos (FUENTE ÚNICA) ──────────────────────
 export const MONTOS = {
   mono: {
     cats:    CATEGORIAS_MONO.map(c => c.letra),
-    limites: ['$6,4M','$9,4M','$13,2M','$16,4M','$19,3M','$24,2M','$29M','$44M','$52M','$62M','$72M'],
+    limites: ['$10,3M','$15,1M','$21,1M','$26,2M','$30,8M','$38,6M','$46,2M','$70,1M','$78,5M','$89,9M','$108,4M'],
     imp:     CATEGORIAS_MONO.map(c => c.imp),
     prev:    CATEGORIAS_MONO.map(c => c.prev),
     os:      OS_EXTRA,
