@@ -15,20 +15,20 @@ export const VIGENCIA_MONTOS = 'Vigente desde el 01/02/2026 — Fuente: ARCA'
 
 export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
   // imp = impuesto integrado (servicios), prev = aportes SIPA, os se suma aparte
-  { letra: 'A', limite_anual: 10277988,  imp: 4780,    prev: 15616  },
-  { letra: 'B', limite_anual: 15058447,  imp: 9083,    prev: 17178  },
-  { letra: 'C', limite_anual: 21113696,  imp: 15616,   prev: 18896  },
-  { letra: 'D', limite_anual: 26212853,  imp: 25496,   prev: 20785  },
-  { letra: 'E', limite_anual: 30833964,  imp: 47805,   prev: 22864  },
-  { letra: 'F', limite_anual: 38642048,  imp: 67245,   prev: 25150  },
-  { letra: 'G', limite_anual: 46211109,  imp: 122380,  prev: 35210  },
-  { letra: 'H', limite_anual: 70113407,  imp: 350567,  prev: 49294  },
-  { letra: 'I', limite_anual: 78479211,  imp: 697150,  prev: 69012  },
-  { letra: 'J', limite_anual: 89872640,  imp: 836580,  prev: 96616  },
-  { letra: 'K', limite_anual: 108357084, imp: 1171213, prev: 135263 },
+  { letra: 'A', limite_anual: 10277988.13,  imp: 4780.46,    prev: 15616.17  },
+  { letra: 'B', limite_anual: 15058447.71,  imp: 9082.88,    prev: 17177.79  },
+  { letra: 'C', limite_anual: 21113696.52,  imp: 15616.17,   prev: 18895.57  },
+  { letra: 'D', limite_anual: 26212853.42,  imp: 25495.79,   prev: 20785.13  },
+  { letra: 'E', limite_anual: 30833964.37,  imp: 47804.60,   prev: 22863.64  },
+  { letra: 'F', limite_anual: 38642048.36,  imp: 67245.13,   prev: 25150.00  },
+  { letra: 'G', limite_anual: 46211109.37,  imp: 122379.76,  prev: 35210.00  },
+  { letra: 'H', limite_anual: 70113407.33,  imp: 350567.04,  prev: 49294.00  },
+  { letra: 'I', limite_anual: 78479211.62,  imp: 697150.35,  prev: 69011.60  },
+  { letra: 'J', limite_anual: 89872640.30,  imp: 836580.42,  prev: 96616.24  },
+  { letra: 'K', limite_anual: 108357084.05, imp: 1171212.59, prev: 135262.74 },
 ]
 
-export const OS_EXTRA = 21990 // Aportes obra social vigentes 01/02/2026
+export const OS_EXTRA = 21990.11 // Aportes obra social vigentes 01/02/2026
 
 // ── Tabla de montos (FUENTE ÚNICA) ──────────────────────
 export const MONTOS = {

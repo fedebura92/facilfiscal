@@ -1,21 +1,14 @@
 'use client'
 import { useState, useEffect } from 'react'
 import SiteHeader from '@/components/SiteHeader'
+import { CATEGORIAS_MONO, OS_EXTRA } from '@/lib/data'
 
-const CATEGORIAS = [
-  { letra:'A', limite:6450000,   imp:11000,  prev:28000 },
-  { letra:'B', limite:9450000,   imp:12400,  prev:28000 },
-  { letra:'C', limite:13250000,  imp:13900,  prev:28000 },
-  { letra:'D', limite:16450000,  imp:17000,  prev:28000 },
-  { letra:'E', limite:19350000,  imp:20500,  prev:28000 },
-  { letra:'F', limite:24250000,  imp:25000,  prev:28000 },
-  { letra:'G', limite:29000000,  imp:30000,  prev:28000 },
-  { letra:'H', limite:44000000,  imp:42000,  prev:28000 },
-  { letra:'I', limite:52000000,  imp:55000,  prev:28000 },
-  { letra:'J', limite:62000000,  imp:70000,  prev:28000 },
-  { letra:'K', limite:72000000,  imp:85000,  prev:28000 },
-]
-const OS_EXTRA = 14000
+const CATEGORIAS = CATEGORIAS_MONO.map(c => ({
+  letra: c.letra,
+  limite: c.limite_anual,
+  imp: c.imp,
+  prev: c.prev,
+}))
 
 export default function MiCategoria() {
   const [facturacion, setFacturacion] = useState('')
@@ -178,7 +171,7 @@ export default function MiCategoria() {
               <div style={{background:V.redBg,border:`1.5px solid ${V.redRing}`,borderRadius:12,padding:'20px',textAlign:'center'}}>
                 <div style={{fontSize:20,fontWeight:900,color:V.red,marginBottom:6}}>⚠️ Superás el límite del Monotributo</div>
                 <div style={{fontSize:13,color:'#7a2020',fontWeight:600,lineHeight:1.6}}>
-                  Tu facturación anual supera los $72.000.000.<br/>Debés pasar al régimen general como <strong>Responsable Inscripto</strong>.
+                  Tu facturación anual supera los {money(CATEGORIAS[CATEGORIAS.length - 1].limite)}.<br/>Debés pasar al régimen general como <strong>Responsable Inscripto</strong>.
                 </div>
               </div>
             ) : resultado ? (
