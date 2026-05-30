@@ -214,7 +214,7 @@ export default function MiCategoria() {
             <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
               <thead>
                 <tr style={{background:V.bg}}>
-                  {['Cat.','Límite anual','Impositivo','Previsional','Con OS','Sin OS'].map(h=>(
+                  {['Cat.','Límite anual','Impositivo','Previsional','Total con OS','Total sin OS'].map(h=>(
                     <th key={h} style={{padding:'10px 14px',textAlign:'left',fontSize:10,fontWeight:800,letterSpacing:'1px',textTransform:'uppercase',color:V.ink3,borderBottom:`1px solid ${V.border}`}}>{h}</th>
                   ))}
                 </tr>
