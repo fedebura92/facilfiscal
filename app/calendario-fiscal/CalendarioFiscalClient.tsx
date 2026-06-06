@@ -74,15 +74,15 @@ const CAT_CONFIG: Record<Categoria, { label: string; bg: string; color: string }
 //   - MyContador Blog: blog.mycontador.com.ar/arca-publico-el-calendario-de-vencimientos-de-abril-de-2026
 //   - El Cronista: cronista.com (calendario ARCA 2026)
 //
-// VERIFICADOS con fechas exactas: Enero, Febrero, Marzo, Abril, Mayo 2026
-// PENDIENTES de publicación oficial ARCA: Junio a Diciembre 2026
+// VERIFICADOS con fechas exactas: Enero, Febrero, Marzo, Abril, Mayo, Junio 2026
+// PENDIENTES de publicación oficial ARCA: Julio a Diciembre 2026
 //
 // Autónomos: vence los primeros días hábiles de cada mes según terminación CUIT
 //   CUIT 0-1-2-3 / CUIT 4-5-6 / CUIT 7-8-9
 // Empleadores F.931: vence entre días 9 y 11 del mes siguiente según CUIT
 // Monotributo: día 20 de cada mes (o siguiente hábil si cae finde/feriado)
 // IVA: segunda quincena del mes siguiente, escalonado por terminación de CUIT
-// Recategorización: enero, mayo y septiembre (cuatrimestres)
+// Recategorización Monotributo: dos veces por año, en febrero y agosto.
 
 const CALENDARIO_2026: MesData[] = [
   // ── ENERO (verificado) ──────────────────────────────────────────────────
@@ -144,6 +144,12 @@ const CALENDARIO_2026: MesData[] = [
         descripcion: "Presentación del F.931 y pago de cargas sociales: CUIT 0-1-2-3 → 9/feb · CUIT 4-5-6 → 10/feb · CUIT 7-8-9 → 11/feb.",
         categoria: ["empleador"], tipo: "pago",
       },
+      {
+        dia: 5,
+        titulo: "Recategorización Monotributo — semestre julio-diciembre",
+        descripcion: "Primer período anual de recategorización. Se evalúan los últimos 12 meses de actividad y, si corresponde cambiar de categoría, el trámite puede realizarse hasta el 5 de febrero. La nueva categoría rige desde el período devengado febrero.",
+        categoria: ["monotributo"], tipo: "recategorizacion",
+      },
     ],
   },
 
@@ -174,12 +180,6 @@ const CALENDARIO_2026: MesData[] = [
         titulo: "Cargas sociales — F.931 (período febrero 2026)",
         descripcion: "Presentación del F.931 y pago de cargas sociales: CUIT 0-1-2-3 → 9/mar · CUIT 4-5-6 → 10/mar · CUIT 7-8-9 → 11/mar.",
         categoria: ["empleador"], tipo: "pago",
-      },
-      {
-        dia: 31,
-        titulo: "Recategorización Monotributo — 1° cuatrimestre",
-        descripcion: "Si en los últimos 12 meses tus ingresos brutos, energía eléctrica consumida o superficie afectada superaron los parámetros de tu categoría actual, debés recategorizarte antes del 31 de marzo.",
-        categoria: ["monotributo"], tipo: "recategorizacion",
       },
     ],
   },
@@ -258,27 +258,21 @@ const CALENDARIO_2026: MesData[] = [
     ],
   },
 
-  // ── JUNIO (pendiente) ───────────────────────────────────────────────────
+  // ── JUNIO (verificado) ───────────────────────────────────────────────────
   {
-    mes: 6, nombre: "Junio", verificado: false,
+    mes: 6, nombre: "Junio", verificado: true,
     vencimientos: [
       {
         rango: "5, 8 y 9",
         titulo: "Autónomos — cuota mayo 2026",
-        descripcion: "Pago de aportes previsionales (período mayo 2026). Fechas aproximadas: primeros días hábiles de junio según terminación de CUIT. Confirmá en arca.gob.ar.",
-        categoria: ["autonomo"], tipo: "pago", pendiente: true,
+        descripcion: "Pago de aportes previsionales (período mayo 2026) según terminación de CUIT: CUIT 0-1-2-3 → 5/jun · CUIT 4-5-6 → 8/jun · CUIT 7-8-9 → 9/jun. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["autonomo"], tipo: "pago",
       },
       {
         rango: "9, 10 y 11",
         titulo: "Cargas sociales — F.931 (período mayo 2026)",
-        descripcion: "Presentación del F.931 y pago de cargas sociales. Fecha aproximada: entre el 9 y 11 de junio. Confirmá en arca.gob.ar.",
-        categoria: ["empleador"], tipo: "pago", pendiente: true,
-      },
-      {
-        rango: "11 al 16",
-        titulo: "Ganancias — DJ anual personas humanas (período 2025)",
-        descripcion: "Presentación de la declaración jurada anual de Ganancias y Bienes Personales (período fiscal 2025): CUIT 0-1-2-3 → presentación 11/jun, pago 12/jun · CUIT 4-5-6 → presentación 12/jun, pago 15/jun · CUIT 7-8-9 → presentación 15/jun, pago 16/jun. Fuente: El Cronista / ARCA.",
-        categoria: ["autonomo", "responsable"], tipo: "presentacion",
+        descripcion: "Presentación del F.931 y pago de cargas sociales: CUIT 0-1-2-3 → 9/jun · CUIT 4-5-6 → 10/jun · CUIT 7-8-9 → 11/jun. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["empleador"], tipo: "pago",
       },
       {
         dia: 22,
@@ -289,8 +283,8 @@ const CALENDARIO_2026: MesData[] = [
       {
         rango: "18 al 24",
         titulo: "IVA — DJ mensual (período mayo 2026)",
-        descripcion: "Presentación y pago del IVA. Fechas aproximadas en la segunda quincena de junio, escalonadas por terminación de CUIT. Confirmá en arca.gob.ar.",
-        categoria: ["responsable"], tipo: "declaracion", pendiente: true,
+        descripcion: "Presentación y pago del IVA escalonado por terminación de CUIT: CUIT 0-1 → 18/jun · CUIT 2-3 → 19/jun · CUIT 4-5 → 22/jun · CUIT 6-7 → 23/jun · CUIT 8-9 → 24/jun. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["responsable"], tipo: "declaracion",
       },
     ],
   },
@@ -316,6 +310,12 @@ const CALENDARIO_2026: MesData[] = [
         titulo: "Monotributo — cuota julio 2026",
         descripcion: "Pago de la cuota mensual de monotributo.",
         categoria: ["monotributo"], tipo: "pago",
+      },
+      {
+        dia: 27,
+        titulo: "Ganancias y Bienes Personales — DJ anual personas humanas (período 2025)",
+        descripcion: "Presentación y pago de las declaraciones juradas de Ganancias, Bienes Personales e Impuesto Cedular del período fiscal 2025. ARCA prorrogó excepcionalmente el vencimiento hasta el 27 de julio de 2026 para personas humanas y sucesiones indivisas.",
+        categoria: ["autonomo", "responsable"], tipo: "presentacion",
       },
       {
         rango: "18 al 24",
@@ -361,10 +361,10 @@ const CALENDARIO_2026: MesData[] = [
         categoria: ["responsable"], tipo: "declaracion", pendiente: true,
       },
       {
-        rango: "fines de agosto",
-        titulo: "Recategorización Monotributo — 3° cuatrimestre",
-        descripcion: "Tercer período de recategorización obligatoria del año. Revisá tus ventas, energía eléctrica y superficie de los últimos 12 meses. Fecha exacta a confirmar en ARCA.",
-        categoria: ["monotributo"], tipo: "recategorizacion", pendiente: true,
+        dia: 5,
+        titulo: "Recategorización Monotributo — semestre enero-junio",
+        descripcion: "Segundo período anual de recategorización. Se evalúan los últimos 12 meses de actividad y, si corresponde cambiar de categoría, el trámite puede realizarse hasta el 5 de agosto. La nueva categoría rige desde el período devengado agosto.",
+        categoria: ["monotributo"], tipo: "recategorizacion",
       },
     ],
   },
