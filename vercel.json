@@ -8,7 +8,13 @@
       "path": "/api/cron/resumen-semanal",
       "schedule": "0 11 * * 1"
     },
-    { "path": "/api/cron/actualizar-montos",
-     "schedule": "0 9 1 * *" }
+    {
+      "path": "/api/cron/actualizar-montos",
+      "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/actualizar-calendario",
+      "schedule": "0 8 * * *"
+    }
   ]
 }

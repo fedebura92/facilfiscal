@@ -24,14 +24,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  // Calcular el mes siguiente
-  const hoy = new Date()
-  const mesIdx = (hoy.getMonth() + 1) % 12  // 0-indexed del mes siguiente
-  const anio = hoy.getMonth() === 11 ? hoy.getFullYear() + 1 : hoy.getFullYear()
-  const mesNombre = MESES[mesIdx]
-  const mesNum = mesIdx + 1
+  let mesNombre = ''
+  let mesNum = 0
+  let anio = new Date().getFullYear()
 
   try {
+    // Determinar el mes a actualizar. Si el mes actual todavía no tiene datos,
+    // lo cargamos primero; si ya está cargado, avanzamos al siguiente.
+    const hoy = new Date()
+    const anioActual = hoy.getFullYear()
+    const mesActual = hoy.getMonth() + 1
+    const mesSiguiente = mesActual === 12 ? 1 : mesActual + 1
+    const anioSiguiente = mesActual === 12 ? anioActual + 1 : anioActual
+
+    const { data: mesActualExistente, error: checkError } = await supabase
+      .from('vencimientos_fiscales')
+      .select('id')
+      .eq('mes', mesActual)
+      .eq('anio', anioActual)
+      .limit(1)
+
+    if (checkError) throw new Error(checkError.message)
+
+    const target = mesActualExistente && mesActualExistente.length > 0
+      ? { mes: mesSiguiente, anio: anioSiguiente }
+      : { mes: mesActual, anio: anioActual }
+
+    mesNombre = MESES[target.mes - 1]
+    mesNum = target.mes
+    anio = target.anio
     // ── 1. Scrapear el calendario fiscal ──────────────────────────────────
     const url = `https://www.calendariofiscal.com.ar/vencimientos/${mesNombre}-${anio}`
     const response = await fetch(url, {
