@@ -17,7 +17,7 @@ const MESES = [
   'julio','agosto','septiembre','octubre','noviembre','diciembre'
 ]
 
-export async function POST(req: Request) {
+export async function GET (req: Request) {
   // Verificar cron secret para que solo Vercel pueda llamar esta ruta
   const authHeader = req.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
