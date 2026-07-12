@@ -57,7 +57,13 @@ HTML: ${tablaHtml}`
     })
 
     const texto = message.content.filter(b => b.type === 'text').map(b => b.text).join('')
-    const datos = JSON.parse(texto)
+    const textoLimpio = texto
+      .trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/, '')
+      .replace(/```\s*$/, '')
+      .trim()
+    const datos = JSON.parse(textoLimpio)
 
     if (!datos.categorias || datos.categorias.length < 11) {
       throw new Error('Claude no devolvió todas las categorías')

@@ -122,9 +122,17 @@ ${htmlRecortado}`
       .map(b => b.text)
       .join('')
 
+// Claude a veces envuelve el JSON en ```json ... ``` — lo limpiamos antes de parsear
+    const textoLimpio = respuestaTexto
+      .trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/, '')
+      .replace(/```\s*$/, '')
+      .trim()
+
     let vencimientos: any[]
     try {
-      const parsed = JSON.parse(respuestaTexto)
+      const parsed = JSON.parse(textoLimpio)
       vencimientos = parsed.vencimientos
     } catch {
       throw new Error(`Claude devolvió JSON inválido: ${respuestaTexto.slice(0, 200)}`)
