@@ -3,15 +3,18 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { CATEGORIAS_MONO } from '@/lib/data'
+import { calcularDiagnostico, calcularCompletitud, type Obligacion } from '@/lib/reglas-fiscales'
+import type { PerfilFiscal } from '@/lib/types'
 
-interface Perfil {
-  nombre: string
-  provincia: string
-  actividad: string
-  tipo_contribuyente: string
-  facturacion_estimada: number | null
-  terminacion_cuit: string
-}
+// Fuente única de límites de categoría (lib/data.ts) — antes había 4 copias
+// hardcodeadas y desactualizadas de este mismo array en este archivo.
+const LIMITES_MONO = CATEGORIAS_MONO.map(c => c.limite_anual)
+const CATS_MONO    = CATEGORIAS_MONO.map(c => c.letra)
+
+// Perfil = alias de PerfilFiscal (Mi Perfil v2). Se mantiene el nombre local
+// para no tocar cada referencia de "Perfil" en este archivo.
+type Perfil = PerfilFiscal
 
 interface Task {
   id: string
@@ -72,8 +75,8 @@ function WidgetFinanciero({ userId, perfil }: { userId: string|null; perfil: any
   const [data, setData] = useState<{ totalAnio:number; disponible:number; porCobrar:number; pct:number; cat:string } | null>(null)
   const anio = new Date().getFullYear()
 
-  const LIMITES = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
-  const CATS    = ['A','B','C','D','E','F','G','H','I','J','K']
+  const LIMITES = LIMITES_MONO
+  const CATS    = CATS_MONO
 
   useEffect(() => {
     if (!userId) return
@@ -200,20 +203,16 @@ export default function MiPanel() {
       setUserId(user.id)
 
       // ── Lee de profiles (tabla correcta) ──────────────────────────────
+      // select('*') trae también los campos de Mi Perfil v2 (situacion_fiscal,
+      // tiene_empleados, inscripto_iibb, perfil_data, perfil_completitud, etc.)
+      // que alimentan el diagnóstico de abajo.
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('nombre, provincia, actividad, tipo_contribuyente, facturacion_estimada, terminacion_cuit')
+        .select('*')
         .eq('id', user.id)
         .single()
 
-      const p: Perfil = {
-        nombre:               profileData?.nombre               || '',
-        provincia:            profileData?.provincia            || '',
-        actividad:            profileData?.actividad            || '',
-        tipo_contribuyente:   profileData?.tipo_contribuyente   || '',
-        facturacion_estimada: profileData?.facturacion_estimada || null,
-        terminacion_cuit:     profileData?.terminacion_cuit     || '',
-      }
+      const p: Perfil = { id: user.id, ...(profileData || {}) }
       setPerfil(p)
 
       // ── Checklist ─────────────────────────────────────────────────────
@@ -275,10 +274,7 @@ export default function MiPanel() {
     finally { setAlertasLoading(false) }
   }
 
-  // ── Simulador ────────────────────────────────────────────────────────────
-  const LIMITES_MONO = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
-  const CATS_MONO    = ['A','B','C','D','E','F','G','H','I','J','K']
-
+  // ── Simulador (usa LIMITES_MONO / CATS_MONO de lib/data.ts, fuente única) ─
   const simular = () => {
     const facAnual = parseFloat(simFacturacion) * 12
     if (!simFacturacion || isNaN(facAnual)) return
@@ -461,6 +457,14 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   }
 
   const perfilCompleto = !!(perfil?.tipo_contribuyente && perfil?.actividad && perfil?.provincia && perfil?.terminacion_cuit)
+
+  // ── Diagnóstico fiscal (Nivel 2, calculado en base a Mi Perfil) ──────────
+  // Mismo motor de reglas que /mipanel/perfil — un usuario que llenó
+  // situación fiscal, jurisdicción y empleados ve acá qué le corresponde.
+  const diagnostico: Obligacion[] = useMemo(() => perfil ? calcularDiagnostico(perfil) : [], [perfil])
+  const completitudPerfil = useMemo(() => perfil?.perfil_completitud ?? (perfil ? calcularCompletitud(perfil) : 0), [perfil])
+  const obligacionesPendientes = diagnostico.filter(o => o.aplica === true).length
+  const obligacionesPorConfirmar = diagnostico.filter(o => o.aplica === null).length
   const completedCount = tasks.filter(t=>t.done).length
   const totalCount     = tasks.length
   const progressPct    = Math.round((completedCount/totalCount)*100)
@@ -492,13 +496,11 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     // Facturación vs límite de categoría
     if (perfil.facturacion_estimada && tipo === 'mono') {
       const anual = perfil.facturacion_estimada * 12
-      // Límites 2026 aproximados por categoría (A=2.700.000 ... K=68.000.000)
-      const LIMITES = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
-      const limiteH = LIMITES[LIMITES.length - 1]
+      const limiteH = LIMITES_MONO[LIMITES_MONO.length - 1]
       const pct = Math.round((anual / limiteH) * 100)
       // Buscar qué categoría le toca
-      const catIdx = LIMITES.findIndex(l => anual <= l)
-      const limiteActual = catIdx >= 0 ? LIMITES[catIdx] : limiteH
+      const catIdx = LIMITES_MONO.findIndex(l => anual <= l)
+      const limiteActual = catIdx >= 0 ? LIMITES_MONO[catIdx] : limiteH
       const pctCat = Math.round((anual / limiteActual) * 100)
       if (pctCat >= 90) items.push({ texto: `Facturación al ${pctCat}% del límite de tu categoría`, nivel: 'danger', detalle: 'Estás muy cerca del tope. Si lo superás, debés recategorizarte o pasarte a RI.' })
       else if (pctCat >= 75) items.push({ texto: `Facturación al ${pctCat}% del límite de tu categoría`, nivel: 'warn', detalle: 'Empezá a planificar si es necesario recategorizarte.' })
@@ -832,6 +834,54 @@ const timelineItems = useMemo<TimelineItems>(() => {
                   })}
                   <Link href="/calendario-fiscal" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:4, display:'block' }}>Ver calendario completo →</Link>
                 </div>
+              )}
+            </div>
+
+            {/* Diagnóstico fiscal — Nivel 2, calculado a partir de Mi Perfil */}
+            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+                <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🧾 Tus obligaciones fiscales</div>
+                <span style={{ fontSize:11, fontWeight:800, color: completitudPerfil===100?V.green:V.teal }}>{completitudPerfil}% del perfil</span>
+              </div>
+
+              {diagnostico.length === 0 ? (
+                <div style={{ textAlign:'center', padding:'12px 0 4px' }}>
+                  <span style={{ fontSize:28, opacity:.25 }}>🧾</span>
+                  <p style={{ fontSize:12, fontWeight:600, color:V.ink3, maxWidth:260, lineHeight:1.6, margin:'8px auto 10px' }}>Contanos tu situación fiscal en Mi Perfil y acá te mostramos qué obligaciones te corresponden.</p>
+                  <Link href="/mipanel/perfil" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none' }}>Completar perfil →</Link>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display:'flex', gap:8, marginBottom:14, marginTop:10 }}>
+                    <div style={{ flex:1, background:V.greenBg, border:`1px solid ${V.greenRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
+                      <div style={{ fontSize:17, fontWeight:900, color:V.green }}>{obligacionesPendientes}</div>
+                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>te corresponden</div>
+                    </div>
+                    <div style={{ flex:1, background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
+                      <div style={{ fontSize:17, fontWeight:900, color:V.amber }}>{obligacionesPorConfirmar}</div>
+                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>por confirmar</div>
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+                    {diagnostico.map(o => {
+                      const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
+                      const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
+                      const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                      return (
+                        <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
+                          <div style={{ fontSize:13 }}>{icon}</div>
+                          <div>
+                            <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                            <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {completitudPerfil < 100 && (
+                    <Link href="/mipanel/perfil" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:12, display:'block' }}>Completar perfil para afinar el diagnóstico →</Link>
+                  )}
+                </>
               )}
             </div>
 

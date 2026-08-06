@@ -114,6 +114,12 @@ export interface PerfilFiscal {
   // Identificación/vencimientos
   terminacion_cuit?: string
 
+  // Legado: 'mono' | 'ri' | 'aut'. Se sigue escribiendo desde Mi Perfil
+  // (derivado de situacion_fiscal + inscripto_autonomos) para no romper
+  // el resto de la app (checklist, vencimientos, panel financiero) que
+  // todavía no migró al nuevo modelo.
+  tipo_contribuyente?: string
+
   // Meta
   perfil_completitud?: number
   perfil_onboarding_step?: string
