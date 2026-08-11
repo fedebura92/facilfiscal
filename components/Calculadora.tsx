@@ -1,19 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { TipoContribuyente } from '@/lib/types'
-import { CATEGORIAS_MONO, OS_EXTRA, formatMoney } from '@/lib/data'
-
-const CATS_RI = [
-  { label: 'Pequeño RI',  imp: 18000, prev: 28000 },
-  { label: 'Mediano RI',  imp: 35000, prev: 40000 },
-  { label: 'Gran RI',     imp: 60000, prev: 50000 },
-]
-const CATS_AUT = [
-  { label: 'Categoría I',   imp: 15000, prev: 22000 },
-  { label: 'Categoría II',  imp: 22000, prev: 28000 },
-  { label: 'Categoría III', imp: 32000, prev: 35000 },
-  { label: 'Categoría IV',  imp: 48000, prev: 45000 },
-]
+import { CATEGORIAS_MONO, OS_EXTRA, MONTOS, formatMoney } from '@/lib/data'
 
 export default function Calculadora({ tipo }: { tipo: TipoContribuyente }) {
   const [catIdx, setCatIdx] = useState<string>('')
@@ -21,8 +9,8 @@ export default function Calculadora({ tipo }: { tipo: TipoContribuyente }) {
 
   const cats =
     tipo === 'mono' ? CATEGORIAS_MONO.map((c, i) => ({ label: `Categoría ${c.letra} — hasta $${(c.limite_anual/1000000).toFixed(1)}M/año`, imp: c.imp, prev: c.prev, idx: i }))
-    : tipo === 'ri' ? CATS_RI.map((c, i) => ({ ...c, idx: i }))
-    : CATS_AUT.map((c, i) => ({ ...c, idx: i }))
+    : tipo === 'ri' ? MONTOS.ri.cats.map((label, i) => ({ label, imp: MONTOS.ri.imp[i], prev: MONTOS.ri.prev[i], idx: i }))
+    : MONTOS.aut.cats.map((label, i) => ({ label, imp: MONTOS.aut.imp[i], prev: MONTOS.aut.prev[i], idx: i }))
 
   const selected = catIdx !== '' ? cats[parseInt(catIdx)] : null
   const os    = conOS && tipo === 'mono' ? OS_EXTRA : 0
