@@ -1,26 +1,27 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 export default function AuthCallback() {
-  const router = useRouter()
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        router.push('/mipanel')
+        // window.location.href (no router.push): fuerza un reload completo
+        // para que la cookie de sesión de Supabase se propague antes de que
+        // /mipanel intente leerla. Es justo el flujo más sensible a esto
+        // (primera vez que el usuario confirma su cuenta).
+        window.location.href = '/mipanel'
       } else {
         // Escucha el evento de login por hash
         supabase.auth.onAuthStateChange((event, session) => {
           if (event === 'SIGNED_IN' && session) {
-            router.push('/mipanel')
+            window.location.href = '/mipanel'
           }
         })
       }
     })
-  }, [router])
+  }, [])
 
   return (
     <div style={{
