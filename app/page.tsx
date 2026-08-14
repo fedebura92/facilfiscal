@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
+import CapturaEmail from '@/components/CapturaEmail'
 import { SEOMonotributo } from '@/components/SEOContent/SEOContent'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
@@ -37,14 +38,8 @@ export default function Home() {
   const [aiQuery, setAiQuery]     = useState('')
   const [aiResp, setAiResp]       = useState('')
   const [aiLoading, setAiLoading] = useState(false)
-  const [email, setEmail]         = useState('')
-  const [emailOk, setEmailOk]     = useState(false)
-  const [tiposSel, setTiposSel]   = useState<string[]>(['mono'])
-  const [suscError, setSuscError] = useState('')
-  const [toast, setToast]         = useState('')
   const [mounted, setMounted]     = useState(false)
   const capturaRef = useRef<HTMLInputElement>(null)
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { setMounted(true) }, [])
   useEffect(() => {
@@ -55,21 +50,6 @@ export default function Home() {
       .then(r => r.json()).then(d => setAlertas(d.alerts || FALLBACK_ALERTAS[TIPO]))
       .catch(() => setAlertas(FALLBACK_ALERTAS[TIPO]))
   }, [])
-
-  function showToast(msg: string) {
-    setToast(msg)
-    if (toastTimer.current) clearTimeout(toastTimer.current)
-    toastTimer.current = setTimeout(() => setToast(''), 2800)
-  }
-  function toggleTipo(t: string) {
-    setSuscError('')
-    setTiposSel(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])
-  }
-  function tipoDisabled(t: string) {
-    if (t === 'mono') return tiposSel.includes('ri')
-    if (t === 'ri')   return tiposSel.includes('mono')
-    return false
-  }
 
   async function askAI(q?: string) {
     const query = q || aiQuery
@@ -82,18 +62,6 @@ export default function Home() {
       setAiResp(d.response || 'Sin respuesta.')
     } catch { setAiResp('Error de conexión.') }
     finally { setAiLoading(false) }
-  }
-
-  async function suscribir() {
-    if (!email || !email.includes('@')) { showToast('Ingresá un email válido'); return }
-    if (tiposSel.length === 0) { showToast('Seleccioná al menos una categoría'); return }
-    setSuscError('')
-    try {
-      const res = await fetch('/api/suscribir', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, tipos: tiposSel }) })
-      const data = await res.json()
-      if (!res.ok) { setSuscError(data.error || 'Error al guardar'); return }
-      setEmailOk(true); showToast('✓ ¡Suscripción activada!')
-    } catch { setSuscError('Error de conexión.') }
   }
 
   const vencOrd = useMemo(() => [...venc].filter(v => diffDias(v.fecha) >= 0).sort((a, b) => diffDias(a.fecha) - diffDias(b.fecha)), [venc])
@@ -311,44 +279,11 @@ export default function Home() {
 
 
           {/* CAPTURA EMAIL */}
-          <div className="ff-captura" style={{ marginTop: 24, background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden', boxShadow:`0 8px 32px rgba(13,92,120,.25)` }}>
-            <div style={{ position:'absolute', right:-50, top:-50, width:200, height:200, borderRadius:'50%', background:'rgba(255,255,255,.05)' }} />
-            <div style={{ position:'relative', zIndex:1 }}>
-              <div style={{ fontSize:10, fontWeight:800, letterSpacing:'2px', textTransform:'uppercase', color:V.gold, marginBottom:5 }}>Recordatorios gratis</div>
-              <div style={{ fontSize:20, fontWeight:900, color:'white', letterSpacing:'-0.3px', lineHeight:1.2, marginBottom:5 }}>Recibí alertas antes<br/>de cada vencimiento</div>
-              <div style={{ fontSize:13, color:'rgba(255,255,255,.6)', fontWeight:600 }}>Sin spam. Solo cuando importa.</div>
-            </div>
-            <div className="ff-cap-form" style={{ position:'relative', zIndex:1 }}>
-              {emailOk
-                ? <div style={{ color:V.gold, fontSize:15, fontWeight:800 }}>✓ ¡Listo! Revisá tu email.</div>
-                : <>
-                    <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-                      {[{key:'mono',label:'Monotributista'},{key:'ri',label:'Resp. Inscripto'},{key:'aut',label:'Autónomo'}].map(op => (
-                        <label key={op.key} style={{ display:'flex', alignItems:'center', gap:5, cursor:tipoDisabled(op.key)?'not-allowed':'pointer', opacity:tipoDisabled(op.key)?.4:1 }}>
-                          <input type="checkbox" checked={tiposSel.includes(op.key)} disabled={tipoDisabled(op.key)} onChange={() => toggleTipo(op.key)} style={{ width:15, height:15, accentColor:V.gold }}/>
-                          <span style={{ fontSize:12, fontWeight:700, color:'white' }}>{op.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {suscError && <div style={{ fontSize:12, color:'#fca5a5', fontWeight:600 }}>{suscError}</div>}
-                    <div className="ff-cap-input-row">
-                      <input ref={capturaRef} type="email" placeholder="tu@email.com" value={email}
-                        onChange={e => { setEmail(e.target.value); setSuscError('') }}
-                        onKeyDown={e => e.key==='Enter'&&suscribir()}
-                        style={{ background:'rgba(255,255,255,.25)', border:'1.5px solid rgba(255,255,255,.6)', borderRadius:8, padding:'10px 14px', fontSize:13, fontWeight:600, color:'white', outline:'none', flex:1, minWidth:0 }}/>
-                      <button onClick={suscribir} style={{ background:V.gold, color:V.ink, border:'none', borderRadius:8, padding:'10px 16px', fontSize:13, fontWeight:900, whiteSpace:'nowrap', boxShadow:`0 2px 8px rgba(245,166,35,.4)`, flexShrink:0 }}>
-                        Activar →
-                      </button>
-                    </div>
-                  </>
-              }
-            </div>
-          </div>
+          <CapturaEmail ref={capturaRef} tipoDefault="mono" />
 
         </main>
       </div>
 
-      {toast && <div style={{ position:'fixed', bottom:16, right:16, left:16, background:V.ink, color:'white', borderRadius:10, padding:'12px 16px', fontSize:13, fontWeight:700, boxShadow:`0 4px 16px rgba(13,92,120,.2)`, zIndex:999, textAlign:'center', animation:'cardUp .3s ease' }}>{toast}</div>}
     </>
   )
 }
