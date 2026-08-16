@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 type Mode = 'login' | 'register'
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams()
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -15,6 +17,12 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'confirmacion') {
+      setError('El link de confirmación venció o ya se usó. Iniciá sesión, o registrate de nuevo si hace falta.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async () => {
     setError('')
@@ -183,5 +191,13 @@ export default function LoginPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }
