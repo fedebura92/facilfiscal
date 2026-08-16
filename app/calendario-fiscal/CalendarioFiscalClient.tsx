@@ -575,7 +575,6 @@ export default function CalendarioFiscalClient() {
       <SiteHeader currentPath="/calendario-fiscal" />
       <div className="ff-page-content">
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Nunito', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');`}</style>
 
       {/* HERO */}
       <section style={{ background: `linear-gradient(135deg, ${C.teal} 0%, ${C.tealDark} 100%)`, padding: "52px 24px 44px", color: C.white }}>

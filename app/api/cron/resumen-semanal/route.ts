@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { generarTokenUnsub } from '@/lib/unsubscribe'
 
 // Corre cada lunes a las 8am (ver vercel.json)
 export async function GET(req: NextRequest) {
@@ -82,7 +83,7 @@ async function sendResumenEmail({ to, nombre, vencimientos, tipo }: {
     </div>
     <div style="background:#f4f7f9;padding:16px 28px;text-align:center;">
       <p style="font-size:11px;color:#7a9aaa;margin:0;">
-        <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(to)}" style="color:#7a9aaa;">Cancelar suscripción</a>
+        <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(to)}&token=${generarTokenUnsub(to)}" style="color:#7a9aaa;">Cancelar suscripción</a>
       </p>
     </div>
   </div></body></html>`

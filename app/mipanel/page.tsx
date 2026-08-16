@@ -614,7 +614,6 @@ const timelineItems = useMemo<TimelineItems>(() => {
 
   return (
     <div style={{ minHeight:'100vh', background:V.bg, fontFamily:"'Nunito',sans-serif", color:V.ink }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');`}</style>
 
       {/* Topbar */}
       <header style={{ position:'sticky', top:0, zIndex:100, background:V.surface, borderBottom:`1px solid ${V.border}`, boxShadow:'0 1px 4px rgba(13,92,120,.07)', padding:'0 24px', height:64, display:'flex', alignItems:'center', justifyContent:'space-between' }}>

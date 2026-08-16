@@ -4,22 +4,31 @@ import { useState, useEffect } from 'react'
 export default function Unsubscribe({
   searchParams,
 }: {
-  searchParams: { email?: string }
+  searchParams: { email?: string; token?: string }
 }) {
-  const [estado, setEstado] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
+  const [estado, setEstado] = useState<'idle' | 'loading' | 'ok' | 'error' | 'sin-token'>('idle')
   const [email, setEmail] = useState(searchParams.email || '')
   const [mounted, setMounted] = useState(false)
+
+  const tokenDelLink = searchParams.token || ''
+  const emailDelLink  = searchParams.email || ''
 
   useEffect(() => { setMounted(true) }, [])
 
   async function desuscribir() {
     if (!email || !email.includes('@')) return
+
+    // El token solo es válido para el email exacto con el que vino el link.
+    // Si lo tocaron a mano, no mandamos un token que sabemos que va a fallar.
+    const token = email.trim().toLowerCase() === emailDelLink.trim().toLowerCase() ? tokenDelLink : ''
+    if (!token) { setEstado('sin-token'); return }
+
     setEstado('loading')
     try {
       const res = await fetch('/api/unsubscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, token }),
       })
       if (res.ok) setEstado('ok')
       else setEstado('error')
@@ -40,7 +49,6 @@ export default function Unsubscribe({
       fontFamily: 'Nunito, sans-serif',
       padding: 24,
     }}>
-      <style dangerouslySetInnerHTML={{__html:`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');`}}/>
       
       <div style={{
         background: 'white',
@@ -102,6 +110,11 @@ export default function Unsubscribe({
               {estado === 'error' && (
                 <div style={{ background: '#fff1f1', border: '1px solid #ffc8c8', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#e53535', marginBottom: 14 }}>
                   No encontramos ese email. Verificá que sea el correcto.
+                </div>
+              )}
+              {estado === 'sin-token' && (
+                <div style={{ background: '#fff8ec', border: '1px solid #fde4a0', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#a06000', marginBottom: 14 }}>
+                  Por seguridad, para cancelar necesitás abrir el link de "Cancelar suscripción" que viene en el email — no alcanza con escribir tu email acá.
                 </div>
               )}
 

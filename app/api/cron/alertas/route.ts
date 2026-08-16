@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { generarTokenUnsub } from '@/lib/unsubscribe'
 
 // ── Este endpoint lo llama Vercel Cron todos los días a las 8am ──
 // Configurar en vercel.json (ver abajo)
@@ -157,7 +158,7 @@ async function sendAlertEmail({
         <div style="background:#f4f7f9;padding:16px 28px;text-align:center;">
           <p style="font-size:11px;color:#7a9aaa;margin:0;">
             Recibís este email porque te suscribiste en facilfiscal.com.ar como ${tipoLabel[tipo] || tipo}.<br>
-            <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(to)}" style="color:#7a9aaa;">Cancelar suscripción</a>
+            <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(to)}&token=${generarTokenUnsub(to)}" style="color:#7a9aaa;">Cancelar suscripción</a>
           </p>
         </div>
       </div>

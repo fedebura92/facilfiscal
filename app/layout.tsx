@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   },
 
   title: {
-    default: 'FacilFiscal — Monotributo fácil en Argentina',
-    template: '%s | FacilFiscal',
+    default: 'Fácil Fiscal — Monotributo fácil en Argentina',
+    template: '%s | Fácil Fiscal',
   },
 
   description:
@@ -26,15 +26,15 @@ export const metadata: Metadata = {
     'recategorizacion monotributo',
   ],
 
-  authors: [{ name: 'FacilFiscal' }],
+  authors: [{ name: 'Fácil Fiscal' }],
 
   openGraph: {
     type: 'website',
     locale: 'es_AR',
     url: 'https://www.facilfiscal.com.ar',
-    siteName: 'FacilFiscal',
+    siteName: 'Fácil Fiscal',
 
-    title: 'FacilFiscal — Monotributo fácil en Argentina',
+    title: 'Fácil Fiscal — Monotributo fácil en Argentina',
     description:
       'Calculá tu categoría, aprendé a facturar y recibí alertas automáticas de vencimientos.',
 
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    title: 'FacilFiscal — Monotributo fácil en Argentina',
+    title: 'Fácil Fiscal — Monotributo fácil en Argentina',
     description:
       'Calculá tu categoría, aprendé a facturar y recibí alertas automáticas de vencimientos.',
     images: ['/og-image.png'],

@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { generarTokenUnsub } from '@/lib/unsubscribe'
 
 // Combinaciones válidas
 function validarCombinacion(tipos: string[]): { valido: boolean; mensaje?: string } {
   if (tipos.includes('mono') && tipos.includes('ri')) {
     return { valido: false, mensaje: 'Monotributo y Responsable Inscripto son regímenes excluyentes.' }
-  }
-  if (tipos.includes('mono') && tipos.includes('ri') && tipos.includes('aut')) {
-    return { valido: false, mensaje: 'No podés combinar los tres regímenes.' }
   }
   return { valido: true }
 }
@@ -76,6 +74,7 @@ if (updateError) {
 async function sendBienvenidaEmail(email: string, tipos: string[]) {
   const tiposLabel = tipos.map(t => TIPO_LABEL[t] || t).join(' y ')
   const esPlurar = tipos.length > 1
+  const tokenUnsub = generarTokenUnsub(email)
 
   const html = `<!DOCTYPE html>
 <html lang="es">
@@ -120,7 +119,7 @@ async function sendBienvenidaEmail(email: string, tipos: string[]) {
     <div style="background:#f4f7f9;padding:14px 28px;text-align:center;">
       <p style="font-size:11px;color:#7a9aaa;margin:0;">
         Recibís este email porque te suscribiste en facilfiscal.com.ar.<br>
-        <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(email)}" style="color:#7a9aaa;">
+        <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(email)}&token=${tokenUnsub}" style="color:#7a9aaa;">
           Cancelar suscripción
         </a>
       </p>
