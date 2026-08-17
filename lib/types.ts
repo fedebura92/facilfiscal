@@ -138,3 +138,64 @@ export interface DiagnosticoObligacion {
   falta_info: string[]
   calculado_at?: string
 }
+
+// ── Crear Mi Negocio ─────────────────────────────────────────────────────
+export type EstadoProyecto = 'simulacion' | 'proyecto' | 'activo'
+export type Certeza = 'clara' | 'requiere_analisis' | 'insuficiente'
+export type AlternativaKey = 'monotributo' | 'regimen_general' | 'sociedad'
+export type Nivel = 'alta' | 'media' | 'baja'
+export type ExpectativaCrecimiento = 'baja' | 'media' | 'alta'
+
+// Respuestas del wizard — igual que PerfilDataExtra, estructura libre para
+// lo condicional (no todos los campos aplican a todos los proyectos).
+export interface DatosNegocio {
+  actividad?: string
+  forma_operacion?: string[]           // 'local_fisico' | 'oficina' | 'fabrica' | 'domicilio' | 'online' | 'mixto'
+  facturacion_estimada?: number | null // mensual, en pesos
+  inversion_inicial?: number | null
+  cantidad_socios?: number             // 1 = individual, sin socios
+  socios_detalle?: { participaciones?: number[] }
+  tiene_empleados?: boolean | null
+  cantidad_empleados?: number | null
+  tipo_clientes?: string[]             // 'consumidor_final' | 'monotributistas' | 'responsables_inscriptos' | 'empresas' | 'exterior'
+  provincia?: string
+  provincias_operacion?: string[]      // más de una => Convenio Multilateral
+  venta_online?: boolean | null
+  importaciones?: boolean | null
+  exportaciones?: boolean | null
+  expectativa_crecimiento?: ExpectativaCrecimiento
+  otras_circunstancias?: string
+}
+
+export interface NegocioProyecto {
+  id: string
+  user_id: string
+  estado: EstadoProyecto
+  nombre?: string
+  datos: DatosNegocio
+  completitud: number
+  certeza?: Certeza | null
+  falta_info?: string[]
+  alternativa_recomendada?: AlternativaKey | null
+  created_at?: string
+  updated_at?: string
+}
+
+// Criterios de la tabla comparativa (spec punto 7)
+export interface CriteriosAlternativa {
+  simplicidad?: Nivel
+  costos_administrativos?: Nivel
+  escalabilidad?: Nivel
+  complejidad?: Nivel
+}
+
+export interface AnalisisAlternativa {
+  proyecto_id?: string
+  alternativa_key: AlternativaKey
+  label: string
+  adecuacion: Nivel | null           // null = sin info suficiente para esta alternativa puntual
+  explicacion: string
+  desventajas: string[]
+  criterios: CriteriosAlternativa
+  es_recomendada: boolean
+}
