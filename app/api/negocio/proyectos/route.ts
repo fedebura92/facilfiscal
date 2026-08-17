@@ -165,3 +165,21 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ id: proyectoId, resultados, certeza, faltaInfo, completitud })
 }
+
+export async function DELETE(req: NextRequest) {
+  const user = await getUser(req)
+  if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+
+  const id = req.nextUrl.searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'Falta el id del proyecto' }, { status: 400 })
+
+  const admin = supabaseAdmin()
+  const { error } = await admin
+    .from('negocio_proyectos')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id) // admin bypassea RLS: filtro manual para no borrar de otro usuario
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}

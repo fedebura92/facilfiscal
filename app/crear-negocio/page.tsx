@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { analizarProyecto } from '@/lib/comparador-negocio'
-import type { DatosNegocio, AlternativaKey, Nivel } from '@/lib/types'
+import type { DatosNegocio, AlternativaKey, Nivel, NegocioProyecto } from '@/lib/types'
 
 const PROVINCIAS = [
   'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes',
@@ -119,18 +119,66 @@ const field = (label: string, node: React.ReactNode, help?: string) => (
 
 export default function CrearNegocioPage() {
   const router = useRouter()
+  const [vista, setVista] = useState<'lista' | 'wizard'>('wizard')
+  const [proyectos, setProyectos] = useState<NegocioProyecto[]>([])
+  const [loadingLista, setLoadingLista] = useState(true)
   const [datos, setDatos] = useState<DatosNegocio>({ cantidad_socios: 1 })
+  const [nombreProyecto, setNombreProyecto] = useState('')
   const [openSection, setOpenSection] = useState('proyecto')
   const [userId, setUserId] = useState<string | null>(null)
   const [proyectoId, setProyectoId] = useState<string | undefined>(undefined)
   const [alternativaElegida, setAlternativaElegida] = useState<AlternativaKey | ''>('')
+  const [disclaimerOk, setDisclaimerOk] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null))
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUserId(user?.id ?? null)
+      if (!user) { setLoadingLista(false); return }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { setLoadingLista(false); return }
+      try {
+        const res = await fetch('/api/negocio/proyectos', { headers: { Authorization: `Bearer ${session.access_token}` } })
+        const json = await res.json()
+        const lista: NegocioProyecto[] = json.proyectos || []
+        setProyectos(lista)
+        setVista(lista.length > 0 ? 'lista' : 'wizard')
+      } finally {
+        setLoadingLista(false)
+      }
+    })
   }, [])
+
+  function nuevoProyecto() {
+    setDatos({ cantidad_socios: 1 })
+    setNombreProyecto('')
+    setProyectoId(undefined)
+    setAlternativaElegida('')
+    setDisclaimerOk(false)
+    setOpenSection('proyecto')
+    setError(''); setSuccess('')
+    setVista('wizard')
+  }
+
+  function abrirProyecto(p: NegocioProyecto) {
+    setDatos(p.datos || { cantidad_socios: 1 })
+    setNombreProyecto(p.nombre || '')
+    setProyectoId(p.id)
+    setAlternativaElegida((p.alternativa_recomendada as AlternativaKey) || '')
+    setDisclaimerOk(p.estado === 'activo') // ya lo aceptó la vez que lo activó
+    setOpenSection('proyecto')
+    setError(''); setSuccess('')
+    setVista('wizard')
+  }
+
+  async function borrarProyecto(id: string) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    await fetch(`/api/negocio/proyectos?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${session.access_token}` } })
+    setProyectos(prev => prev.filter(p => p.id !== id))
+  }
 
   const set = <K extends keyof DatosNegocio>(k: K, v: DatosNegocio[K]) => setDatos(prev => ({ ...prev, [k]: v }))
   const toggleArr = (arr: string[] | undefined, v: string) => (arr || []).includes(v) ? (arr || []).filter(x => x !== v) : [...(arr || []), v]
@@ -153,6 +201,10 @@ export default function CrearNegocioPage() {
       setError('Elegí qué alternativa vas a usar antes de agregarla a Mi Perfil.')
       return
     }
+    if (estado === 'activo' && !disclaimerOk) {
+      setError('Tenés que marcar que entendiste el aviso antes de agregar el negocio a Mi Perfil.')
+      return
+    }
     setSaving(true); setError(''); setSuccess('')
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { setError('Tu sesión expiró.'); setSaving(false); return }
@@ -161,7 +213,7 @@ export default function CrearNegocioPage() {
       const res = await fetch('/api/negocio/proyectos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ id: proyectoId, datos, estado, alternativa_elegida: alternativaElegida || undefined }),
+        body: JSON.stringify({ id: proyectoId, nombre: nombreProyecto || undefined, datos, estado, alternativa_elegida: alternativaElegida || undefined }),
       })
       const json = await res.json()
       if (!res.ok) { setError(json.error || 'Error al guardar'); setSaving(false); return }
@@ -186,12 +238,83 @@ export default function CrearNegocioPage() {
       </header>
 
       <main style={{ maxWidth: 680, margin: '0 auto', padding: '32px 20px 100px' }}>
-        <div style={{ marginBottom: 20 }}>
+        {loadingLista ? (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: V.ink3, fontSize: 13, fontWeight: 600 }}>Cargando…</div>
+        ) : vista === 'lista' ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: V.ink, marginBottom: 4 }}>Tus proyectos 💡</div>
+                <div style={{ fontSize: 13, color: V.ink3, fontWeight: 600 }}>Simulaciones y negocios que guardaste antes.</div>
+              </div>
+            </div>
+
+            <button onClick={nuevoProyecto} style={{
+              width: '100%', padding: 14, marginBottom: 16, borderRadius: 12, border: `1.5px dashed ${V.teal}`,
+              background: V.tealLight, color: V.tealDark, fontSize: 13, fontWeight: 800,
+              fontFamily: "'Nunito',sans-serif", cursor: 'pointer',
+            }}>
+              + Nuevo proyecto
+            </button>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {proyectos.map(p => (
+                <div key={p.id} style={{ ...cardStyle, margin: 0, padding: 16, cursor: 'pointer' }} onClick={() => abrirProyecto(p)}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: V.ink }}>
+                      {p.nombre || p.datos?.actividad || 'Proyecto sin nombre'}
+                    </div>
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
+                      background: p.estado === 'activo' ? V.greenBg : V.amberBg,
+                      color: p.estado === 'activo' ? V.green : V.amber,
+                    }}>
+                      {p.estado === 'activo' ? '🟢 Negocio activo' : '📋 Proyecto'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: V.ink3, fontWeight: 600 }}>
+                    {p.datos?.actividad || 'Sin actividad definida'}
+                    {p.alternativa_recomendada && ` · Orientación: ${ALTERNATIVA_LABEL[p.alternativa_recomendada as AlternativaKey]}`}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                    <button
+                      onClick={e => { e.stopPropagation(); if (confirm('¿Borrar este proyecto?')) borrarProyecto(p.id) }}
+                      style={{ fontSize: 11, fontWeight: 700, color: V.red, background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+        <>
+        {proyectos.length > 0 && (
+          <button onClick={() => setVista('lista')} style={{ background: 'none', border: 'none', color: V.ink3, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 14 }}>
+            ← Volver a tus proyectos
+          </button>
+        )}
+        <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 22, fontWeight: 900, color: V.ink, marginBottom: 6 }}>Crear mi negocio 💡</div>
           <div style={{ fontSize: 13, color: V.ink3, fontWeight: 600 }}>
             Contanos qué querés hacer. Comparamos Monotributo, Régimen General y Sociedad para tu caso — sin dar nada por sentado.
           </div>
         </div>
+
+        {/* Aviso legal — visible siempre, no solo al activar */}
+        <div style={{ background: V.amberBg, border: `1px solid #fde4a0`, borderRadius: 12, padding: '12px 14px', marginBottom: 20, display: 'flex', gap: 10 }}>
+          <div style={{ fontSize: 16 }}>⚠️</div>
+          <div style={{ fontSize: 11.5, color: '#8a5a00', fontWeight: 600, lineHeight: 1.6 }}>
+            Esto es una <strong>orientación general</strong>, no un asesoramiento profesional ni una determinación legal o impositiva vinculante.
+            Las alternativas se basan únicamente en lo que nos contás. La decisión final sobre cómo formalizar tu negocio, y sus consecuencias
+            fiscales y legales, es tuya — te recomendamos confirmarla con un contador o asesor antes de inscribirte ante AFIP/ARCA.
+          </div>
+        </div>
+
+        {field('Nombre del proyecto (opcional)', (
+          <input style={inp} value={nombreProyecto} onChange={e => setNombreProyecto(e.target.value)} placeholder='Ej: "Cafetería en Palermo"' />
+        ))}
 
         <Section title="Tu proyecto" open={openSection === 'proyecto'} onToggle={() => toggle('proyecto')}>
           {field('¿A qué actividad se dedica?', (
@@ -332,6 +455,13 @@ export default function CrearNegocioPage() {
             {success && <div style={{ background: V.greenBg, borderRadius: 8, padding: '9px 12px', fontSize: 12.5, color: V.green, fontWeight: 700, marginBottom: 10 }}>{success}</div>}
             {!userId && <div style={{ background: V.amberBg, borderRadius: 8, padding: '9px 12px', fontSize: 12, color: V.amber, fontWeight: 600, marginBottom: 10 }}>Necesitás iniciar sesión para guardar esto — por ahora es solo una simulación.</div>}
 
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14, cursor: 'pointer' }}>
+              <input type="checkbox" checked={disclaimerOk} onChange={e => setDisclaimerOk(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, accentColor: V.teal, flexShrink: 0 }} />
+              <span style={{ fontSize: 11.5, color: V.ink2, fontWeight: 600, lineHeight: 1.5 }}>
+                Entiendo que esto es una orientación general, no un asesoramiento profesional, y que la decisión de cómo formalizar mi negocio es mi responsabilidad.
+              </span>
+            </label>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button onClick={() => guardar('proyecto')} disabled={saving} style={{
                 padding: 12, borderRadius: 10, border: `1.5px solid ${V.teal}`, background: '#fff', color: V.teal,
@@ -339,11 +469,11 @@ export default function CrearNegocioPage() {
               }}>
                 💾 Guardar como proyecto
               </button>
-              <button onClick={() => guardar('activo')} disabled={saving} style={{
+              <button onClick={() => guardar('activo')} disabled={saving || !disclaimerOk} style={{
                 padding: 12, borderRadius: 10, border: 'none',
-                background: `linear-gradient(135deg, ${V.tealDark}, ${V.teal})`, color: '#fff',
+                background: !disclaimerOk ? V.border2 : `linear-gradient(135deg, ${V.tealDark}, ${V.teal})`, color: '#fff',
                 fontSize: 13, fontWeight: 900, fontFamily: "'Nunito',sans-serif",
-                cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .6 : 1,
+                cursor: (saving || !disclaimerOk) ? 'not-allowed' : 'pointer', opacity: saving ? .6 : 1,
               }}>
                 {saving ? 'Guardando…' : '➕ Agregar a Mi Perfil'}
               </button>
@@ -352,6 +482,8 @@ export default function CrearNegocioPage() {
               </div>
             </div>
           </div>
+        )}
+        </>
         )}
       </main>
     </div>
