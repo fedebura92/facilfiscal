@@ -42,7 +42,6 @@ const ALTERNATIVA_LABEL: Record<AlternativaKey, string> = {
   sociedad: '🤝 Sociedad',
 }
 
-const NIVEL_COLOR: Record<Nivel, string> = { alta: 'var(--ok, #16a34a)', media: '#d97706', baja: '#94a3b8' }
 const NIVEL_ICON: Record<Nivel, string> = { alta: '🟢', media: '🟡', baja: '⚪' }
 
 const V = {
@@ -134,9 +133,14 @@ export default function CrearNegocioPage() {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
+    // ?ver=proyectos (link "Mis proyectos" del menú del panel): fuerza la
+    // pantalla de lista aunque todavía no haya ningún proyecto guardado, en
+    // vez de mandar directo al wizard.
+    const forzarLista = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('ver') === 'proyectos'
+
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUserId(user?.id ?? null)
-      if (!user) { setLoadingLista(false); return }
+      if (!user) { setLoadingLista(false); if (forzarLista) setVista('wizard'); return }
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setLoadingLista(false); return }
       try {
@@ -144,7 +148,7 @@ export default function CrearNegocioPage() {
         const json = await res.json()
         const lista: NegocioProyecto[] = json.proyectos || []
         setProyectos(lista)
-        setVista(lista.length > 0 ? 'lista' : 'wizard')
+        setVista(forzarLista || lista.length > 0 ? 'lista' : 'wizard')
       } finally {
         setLoadingLista(false)
       }
@@ -257,36 +261,42 @@ export default function CrearNegocioPage() {
               + Nuevo proyecto
             </button>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {proyectos.map(p => (
-                <div key={p.id} style={{ ...cardStyle, margin: 0, padding: 16, cursor: 'pointer' }} onClick={() => abrirProyecto(p)}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: V.ink }}>
-                      {p.nombre || p.datos?.actividad || 'Proyecto sin nombre'}
+            {proyectos.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '30px 20px', color: V.ink3, fontSize: 12.5, fontWeight: 600, lineHeight: 1.6 }}>
+                Todavía no guardaste ningún proyecto. Cuando simules un negocio, vas a poder guardarlo acá para retomarlo después.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {proyectos.map(p => (
+                  <div key={p.id} style={{ ...cardStyle, margin: 0, padding: 16, cursor: 'pointer' }} onClick={() => abrirProyecto(p)}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: V.ink }}>
+                        {p.nombre || p.datos?.actividad || 'Proyecto sin nombre'}
+                      </div>
+                      <span style={{
+                        fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
+                        background: p.estado === 'activo' ? V.greenBg : V.amberBg,
+                        color: p.estado === 'activo' ? V.green : V.amber,
+                      }}>
+                        {p.estado === 'activo' ? '🟢 Negocio activo' : '📋 Proyecto'}
+                      </span>
                     </div>
-                    <span style={{
-                      fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 20,
-                      background: p.estado === 'activo' ? V.greenBg : V.amberBg,
-                      color: p.estado === 'activo' ? V.green : V.amber,
-                    }}>
-                      {p.estado === 'activo' ? '🟢 Negocio activo' : '📋 Proyecto'}
-                    </span>
+                    <div style={{ fontSize: 12, color: V.ink3, fontWeight: 600 }}>
+                      {p.datos?.actividad || 'Sin actividad definida'}
+                      {p.alternativa_recomendada && ` · Orientación: ${ALTERNATIVA_LABEL[p.alternativa_recomendada as AlternativaKey]}`}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                      <button
+                        onClick={e => { e.stopPropagation(); if (confirm('¿Borrar este proyecto?')) borrarProyecto(p.id) }}
+                        style={{ fontSize: 11, fontWeight: 700, color: V.red, background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+                      >
+                        Borrar
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 12, color: V.ink3, fontWeight: 600 }}>
-                    {p.datos?.actividad || 'Sin actividad definida'}
-                    {p.alternativa_recomendada && ` · Orientación: ${ALTERNATIVA_LABEL[p.alternativa_recomendada as AlternativaKey]}`}
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-                    <button
-                      onClick={e => { e.stopPropagation(); if (confirm('¿Borrar este proyecto?')) borrarProyecto(p.id) }}
-                      style={{ fontSize: 11, fontWeight: 700, color: V.red, background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-                    >
-                      Borrar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </>
         ) : (
         <>
