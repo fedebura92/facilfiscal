@@ -629,6 +629,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
             {menuOpen && (
               <div style={{ position:'absolute', top:44, right:0, background:V.surface, border:`1px solid ${V.border}`, borderRadius:12, boxShadow:'0 8px 24px rgba(13,92,120,.12)', minWidth:160, overflow:'hidden', zIndex:200 }}>
                 <Link href="/mipanel/perfil" onClick={()=>setMenuOpen(false)} style={{ display:'block', padding:'11px 16px', fontSize:13, fontWeight:700, color:V.ink, textDecoration:'none' }}>⚙️ Mi perfil</Link>
+                <Link href="/crear-negocio?ver=proyectos" onClick={()=>setMenuOpen(false)} style={{ display:'block', padding:'11px 16px', fontSize:13, fontWeight:700, color:V.ink, textDecoration:'none' }}>🗂️ Mis proyectos</Link>
                 <button onClick={async()=>{ setMenuOpen(false); await supabase.auth.signOut(); window.location.href='/login' }} style={{ display:'block', width:'100%', textAlign:'left', padding:'11px 16px', fontSize:13, fontWeight:700, color:V.red, background:'none', border:'none', cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>→ Cerrar sesión</button>
               </div>
             )}
