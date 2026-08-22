@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { CATEGORIAS_MONO } from '@/lib/data'
 import { calcularDiagnostico, calcularCompletitud, type Obligacion } from '@/lib/reglas-fiscales'
-import type { PerfilFiscal } from '@/lib/types'
+import type { PerfilFiscal, NegocioProyecto } from '@/lib/types'
 
 // Fuente única de límites de categoría (lib/data.ts) — antes había 4 copias
 // hardcodeadas y desactualizadas de este mismo array en este archivo.
@@ -225,6 +225,23 @@ export default function MiPanel() {
       for (const row of checklistData || []) db[row.task_id] = { done:row.done, done_at:row.done_at }
 
       setTasks(buildTasks(p, db))
+
+      // ── Negocios activos (Crear Mi Negocio) ────────────────────────────
+      // Cada uno puede tener su propia situación fiscal (ej: RI para un
+      // local y Monotributo para otra actividad, al mismo tiempo) — por eso
+      // el diagnóstico se calcula por negocio, no solo con el perfil.
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        try {
+          const res = await fetch('/api/negocio/proyectos', { headers: { Authorization: `Bearer ${session.access_token}` } })
+          const json = await res.json()
+          const activos = (json.proyectos || []).filter((pr: NegocioProyecto) => pr.estado === 'activo')
+          setNegociosActivos(activos)
+        } catch {
+          // Si falla, el panel sigue funcionando con la situación general.
+        }
+      }
+
       setAuthChecked(true)
     }
     load()
@@ -465,6 +482,12 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   const completitudPerfil = useMemo(() => perfil?.perfil_completitud ?? (perfil ? calcularCompletitud(perfil) : 0), [perfil])
   const obligacionesPendientes = diagnostico.filter(o => o.aplica === true).length
   const obligacionesPorConfirmar = diagnostico.filter(o => o.aplica === null).length
+
+  const [negociosActivos, setNegociosActivos] = useState<NegocioProyecto[]>([])
+  const diagnosticosPorNegocio = useMemo(
+    () => negociosActivos.map(n => ({ negocio: n, diagnostico: calcularDiagnostico(n.datos) })),
+    [negociosActivos]
+  )
   const completedCount = tasks.filter(t=>t.done).length
   const totalCount     = tasks.length
   const progressPct    = Math.round((completedCount/totalCount)*100)
@@ -837,10 +860,63 @@ const timelineItems = useMemo<TimelineItems>(() => {
               )}
             </div>
 
-            {/* Diagnóstico fiscal — Nivel 2, calculado a partir de Mi Perfil */}
+            {/* Negocios activos (Crear Mi Negocio) — cada uno con su propio
+                diagnóstico, porque una persona puede ser RI para un negocio
+                y Monotributista para otro al mismo tiempo. */}
+            {diagnosticosPorNegocio.length > 0 && diagnosticosPorNegocio.map(({ negocio, diagnostico: diagNeg }) => {
+              const pend = diagNeg.filter(o => o.aplica === true).length
+              const porConfirmar = diagNeg.filter(o => o.aplica === null).length
+              const nombreNegocio = negocio.nombre || negocio.datos?.actividad || 'Negocio sin nombre'
+              return (
+                <div key={negocio.id} style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+                    <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🏷️ {nombreNegocio}</div>
+                    <span style={{ fontSize:10, fontWeight:800, padding:'2px 8px', borderRadius:20, background:V.greenBg, color:V.green }}>🟢 Activo</span>
+                  </div>
+                  {negocio.datos?.situacion_fiscal && (
+                    <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginBottom:12 }}>
+                      {negocio.datos.situacion_fiscal === 'mono' ? '📋 Monotributo' : negocio.datos.situacion_fiscal === 'ri' ? '🏢 Responsable Inscripto' : negocio.datos.situacion_fiscal}
+                      {negocio.datos.provincia && ` · ${negocio.datos.provincia}`}
+                    </div>
+                  )}
+                  <div style={{ display:'flex', gap:8, marginBottom:14 }}>
+                    <div style={{ flex:1, background:V.greenBg, border:`1px solid ${V.greenRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
+                      <div style={{ fontSize:17, fontWeight:900, color:V.green }}>{pend}</div>
+                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>te corresponden</div>
+                    </div>
+                    <div style={{ flex:1, background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
+                      <div style={{ fontSize:17, fontWeight:900, color:V.amber }}>{porConfirmar}</div>
+                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>por confirmar</div>
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+                    {diagNeg.map(o => {
+                      const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
+                      const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
+                      const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                      return (
+                        <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
+                          <div style={{ fontSize:13 }}>{icon}</div>
+                          <div>
+                            <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                            <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <Link href="/crear-negocio?ver=proyectos" style={{ fontSize:11, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:12, display:'block' }}>Editar este negocio →</Link>
+                </div>
+              )
+            })}
+
+            {/* Diagnóstico general — Nivel 2, calculado a partir de Mi Perfil.
+                Si ya tenés negocios activos arriba, esto queda como tu
+                situación general (por si cargaste algo directo en Mi Perfil
+                sin pasar por Crear Mi Negocio). */}
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
-                <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🧾 Tus obligaciones fiscales</div>
+                <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🧾 {diagnosticosPorNegocio.length > 0 ? 'Situación general (Mi Perfil)' : 'Tus obligaciones fiscales'}</div>
                 <span style={{ fontSize:11, fontWeight:800, color: completitudPerfil===100?V.green:V.teal }}>{completitudPerfil}% del perfil</span>
               </div>
 

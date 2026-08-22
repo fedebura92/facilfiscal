@@ -32,7 +32,31 @@ export async function GET(req: NextRequest) {
     .order('updated_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ proyectos: data })
+
+  const proyectos = data || []
+  const idsActivos = proyectos.filter(p => p.estado === 'activo').map(p => p.id)
+
+  // Traer el diagnóstico de todos los negocios activos en una sola consulta
+  // y agruparlo por proyecto, para que el panel pueda mostrar las
+  // obligaciones de cada negocio sin pegarle a la API una vez por cada uno.
+  let diagnosticoPorProyecto: Record<string, any[]> = {}
+  if (idsActivos.length > 0) {
+    const { data: diagRows } = await admin
+      .from('negocio_diagnostico')
+      .select('*')
+      .in('proyecto_id', idsActivos)
+    for (const row of diagRows || []) {
+      if (!diagnosticoPorProyecto[row.proyecto_id]) diagnosticoPorProyecto[row.proyecto_id] = []
+      diagnosticoPorProyecto[row.proyecto_id].push(row)
+    }
+  }
+
+  const proyectosConDiagnostico = proyectos.map(p => ({
+    ...p,
+    diagnostico: diagnosticoPorProyecto[p.id] || [],
+  }))
+
+  return NextResponse.json({ proyectos: proyectosConDiagnostico })
 }
 
 export async function POST(req: NextRequest) {
