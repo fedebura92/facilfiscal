@@ -165,6 +165,26 @@ export interface DatosNegocio {
   exportaciones?: boolean | null
   expectativa_crecimiento?: ExpectativaCrecimiento
   otras_circunstancias?: string
+
+  // ── Situación fiscal de ESTE negocio. Antes vivía una sola vez en
+  // profiles (una persona = una situación fiscal); ahora cada negocio tiene
+  // la propia, porque una misma persona puede ser Responsable Inscripto
+  // para un local Y Monotributista para otra actividad al mismo tiempo. ──
+  nombre_fantasia?: string
+  cuit?: string                          // puede ser propio (sociedad) o el de la persona
+  terminacion_cuit?: string
+  situacion_fiscal?: SituacionFiscal
+  categoria_monotributo?: string
+  fecha_alta_fiscal?: string
+  inscripto_iva?: boolean | null
+  inscripto_ganancias?: boolean | null
+  inscripto_autonomos?: boolean | null
+  inscripto_iibb?: boolean | null
+  convenio_multilateral?: boolean | null
+  // Mismo shape que PerfilFiscal.perfil_data, para que lib/reglas-fiscales.ts
+  // funcione igual sobre un negocio que sobre un perfil de persona, sin
+  // necesitar un adaptador.
+  perfil_data?: PerfilDataExtra
 }
 
 export interface NegocioProyecto {
@@ -198,4 +218,21 @@ export interface AnalisisAlternativa {
   desventajas: string[]
   criterios: CriteriosAlternativa
   es_recomendada: boolean
+}
+
+// ── Motor de reglas fiscales ─────────────────────────────────────────────
+// Forma mínima que necesita lib/reglas-fiscales.ts para calcular
+// obligaciones. Tanto PerfilFiscal (una persona) como DatosNegocio (un
+// negocio puntual) la satisfacen estructuralmente, así que el mismo
+// calcularDiagnostico() sirve para los dos casos sin adaptador.
+export interface SituacionFiscalInput {
+  situacion_fiscal?: SituacionFiscal
+  inscripto_autonomos?: boolean | null
+  provincia?: string
+  inscripto_iibb?: boolean | null
+  otras_jurisdicciones?: string[]
+  provincias_operacion?: string[]
+  tiene_empleados?: boolean | null
+  cantidad_empleados?: number | null
+  perfil_data?: PerfilDataExtra
 }

@@ -10,7 +10,7 @@
 // lógica en componentes: importar desde acá.
 // ============================================================================
 
-import type { PerfilFiscal } from './types'
+import type { SituacionFiscalInput, PerfilFiscal } from './types'
 
 export type Obligacion = {
   key: string
@@ -30,7 +30,7 @@ function ob(
   return { key, label, aplica, motivo, faltaInfo }
 }
 
-export function calcularDiagnostico(p: PerfilFiscal): Obligacion[] {
+export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
   const out: Obligacion[] = []
   const sit = p.situacion_fiscal
 
@@ -75,7 +75,12 @@ export function calcularDiagnostico(p: PerfilFiscal): Obligacion[] {
   if (!p.provincia) {
     out.push(ob('iibb', 'Ingresos Brutos', null, 'Falta saber en qué provincia operás.', ['provincia']))
   } else if (p.inscripto_iibb === true) {
-    const otras = p.otras_jurisdicciones?.length ?? 0
+    // PerfilFiscal ya trae otras_jurisdicciones armado. DatosNegocio (un
+    // negocio de Crear Mi Negocio) en cambio trae provincias_operacion, que
+    // incluye la provincia principal — hay que restarla para contar "otras".
+    const otras = p.otras_jurisdicciones?.length
+      ?? p.provincias_operacion?.filter(prov => prov !== p.provincia).length
+      ?? 0
     if (otras > 0) {
       out.push(ob('iibb', 'Ingresos Brutos', true, `Operás en ${p.provincia} y en ${otras} jurisdicción(es) más: te corresponde Convenio Multilateral.`))
     } else {
@@ -130,6 +135,23 @@ export function calcularCompletitud(p: PerfilFiscal): number {
     'provincia',
     'actividad_principal',
     'terminacion_cuit',
+    'tiene_empleados',
+    'inscripto_iibb',
+  ]
+  const respondidos = campos.filter(c => {
+    const v = p[c]
+    return v !== null && v !== undefined && v !== ''
+  }).length
+  return Math.round((respondidos / campos.length) * 100)
+}
+
+// Completitud fiscal de UN negocio (Crear Mi Negocio, una vez activo).
+// Campos más chicos a propósito: solo lo que hace falta para que el motor
+// de reglas deje de decir "falta info" en cada obligación.
+export function calcularCompletitudFiscal(p: SituacionFiscalInput): number {
+  const campos: (keyof SituacionFiscalInput)[] = [
+    'situacion_fiscal',
+    'provincia',
     'tiene_empleados',
     'inscripto_iibb',
   ]

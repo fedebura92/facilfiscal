@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { analizarProyecto } from '@/lib/comparador-negocio'
-import { calcularDiagnostico, calcularCompletitud } from '@/lib/reglas-fiscales'
+import { calcularDiagnostico, calcularCompletitud, calcularCompletitudFiscal } from '@/lib/reglas-fiscales'
 import type { DatosNegocio, EstadoProyecto, AlternativaKey } from '@/lib/types'
 
 async function getUser(req: NextRequest) {
@@ -64,6 +64,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Falta indicar qué alternativa elegiste para activar el negocio.' }, { status: 400 })
   }
 
+  // Si se activa, la situación fiscal elegida pasa a ser parte de LOS DATOS
+  // de este negocio (no de profiles) — así cada negocio guarda la suya.
+  if (estado === 'activo' && alternativa_elegida) {
+    datos.situacion_fiscal = mapearASituacionFiscal(alternativa_elegida)
+  }
+
   const admin = supabaseAdmin()
   const { resultados, certeza, faltaInfo, completitud } = analizarProyecto(datos)
   const recomendada = resultados.find(r => r.es_recomendada)?.alternativa_key ?? null
@@ -122,15 +128,44 @@ export async function POST(req: NextRequest) {
 
   // ── Activación: conectar con Mi Perfil (spec punto 12 y 13) ────────────
   if (estado === 'activo' && alternativa_elegida) {
-    const situacionFiscal = mapearASituacionFiscal(alternativa_elegida)
+    // 1) Diagnóstico PROPIO de este negocio — corre el motor de reglas
+    // sobre los datos de ESTE negocio puntual, no sobre "la persona". Esto
+    // es lo que permite que alguien sea RI para un local Y Monotributista
+    // para otra actividad al mismo tiempo, cada uno con su propio cálculo.
+    const diagnosticoNegocio = calcularDiagnostico(datos)
+    const completitudFiscal = calcularCompletitudFiscal(datos)
+
+    const filasDiagNegocio = diagnosticoNegocio.map(d => ({
+      proyecto_id: proyectoId,
+      obligacion_key: d.key,
+      aplica: d.aplica,
+      motivo: d.motivo,
+      falta_info: d.faltaInfo,
+      calculado_at: new Date().toISOString(),
+    }))
+    if (filasDiagNegocio.length > 0) {
+      const { error: diagNegErr } = await admin
+        .from('negocio_diagnostico')
+        .upsert(filasDiagNegocio, { onConflict: 'proyecto_id,obligacion_key' })
+      if (diagNegErr) return NextResponse.json({ error: diagNegErr.message }, { status: 500 })
+    }
+    await admin.from('negocio_proyectos').update({ completitud_fiscal: completitudFiscal }).eq('id', proyectoId)
+
+    // 2) Compat legado: seguimos escribiendo en profiles/profile_diagnostico
+    // para no romper vencimientos-por-CUIT y el checklist, que todavía
+    // asumen "una sola situación fiscal por usuario". Si el usuario tiene
+    // más de un negocio activo, esto refleja el ÚLTIMO que activó — es una
+    // limitación conocida, a resolver cuando el panel muestre obligaciones
+    // agrupadas por negocio (fase 2).
+    const situacionFiscal = datos.situacion_fiscal!
 
     const perfilUpdate: Record<string, any> = {
       situacion_fiscal: situacionFiscal,
-      tipo_contribuyente: situacionFiscal, // compat legado, igual que Mi Perfil
+      tipo_contribuyente: situacionFiscal,
     }
     if (datos.actividad) {
       perfilUpdate.actividad_principal = datos.actividad
-      perfilUpdate.actividad = datos.actividad // compat legado
+      perfilUpdate.actividad = datos.actividad
     }
     if (datos.provincia) perfilUpdate.provincia = datos.provincia
     if (datos.tiene_empleados != null) perfilUpdate.tiene_empleados = datos.tiene_empleados
@@ -141,14 +176,11 @@ export async function POST(req: NextRequest) {
     const { error: perfilErr } = await admin.from('profiles').update(perfilUpdate).eq('id', user.id)
     if (perfilErr) return NextResponse.json({ error: `Proyecto activado, pero no se pudo actualizar Mi Perfil: ${perfilErr.message}` }, { status: 500 })
 
-    // Recalcular el diagnóstico fiscal con los datos nuevos (misma lógica
-    // que /api/perfil/recalcular, inline para no depender de un segundo
-    // request HTTP dentro del mismo handler).
     const { data: perfilActualizado } = await admin.from('profiles').select('*').eq('id', user.id).single()
     if (perfilActualizado) {
-      const diagnostico = calcularDiagnostico(perfilActualizado as any)
+      const diagnosticoPerfil = calcularDiagnostico(perfilActualizado as any)
       const completitudPerfil = calcularCompletitud(perfilActualizado as any)
-      const filasDiag = diagnostico.map(d => ({
+      const filasDiagPerfil = diagnosticoPerfil.map(d => ({
         user_id: user.id,
         obligacion_key: d.key,
         aplica: d.aplica,
@@ -156,8 +188,8 @@ export async function POST(req: NextRequest) {
         falta_info: d.faltaInfo,
         calculado_at: new Date().toISOString(),
       }))
-      if (filasDiag.length > 0) {
-        await admin.from('profile_diagnostico').upsert(filasDiag, { onConflict: 'user_id,obligacion_key' })
+      if (filasDiagPerfil.length > 0) {
+        await admin.from('profile_diagnostico').upsert(filasDiagPerfil, { onConflict: 'user_id,obligacion_key' })
       }
       await admin.from('profiles').update({ perfil_completitud: completitudPerfil }).eq('id', user.id)
     }
