@@ -313,7 +313,7 @@ export default function CrearNegocioPage() {
         </div>
 
         {/* Aviso legal — visible siempre, no solo al activar */}
-        <div style={{ background: V.amberBg, border: `1px solid #fde4a0`, borderRadius: 12, padding: '12px 14px', marginBottom: 20, display: 'flex', gap: 10 }}>
+        <div style={{ background: V.amberBg, border: `1px solid #fde4a0`, borderRadius: 12, padding: '12px 14px', marginBottom: 12, display: 'flex', gap: 10 }}>
           <div style={{ fontSize: 16 }}>⚠️</div>
           <div style={{ fontSize: 11.5, color: '#8a5a00', fontWeight: 600, lineHeight: 1.6 }}>
             Esto es una <strong>orientación general</strong>, no un asesoramiento profesional ni una determinación legal o impositiva vinculante.
@@ -321,6 +321,16 @@ export default function CrearNegocioPage() {
             fiscales y legales, es tuya — te recomendamos confirmarla con un contador o asesor antes de inscribirte ante AFIP/ARCA.
           </div>
         </div>
+
+        {!userId && (
+          <div style={{ background: V.tealLight, border: `1px solid ${V.border2}`, borderRadius: 12, padding: '12px 14px', marginBottom: 20, display: 'flex', gap: 10 }}>
+            <div style={{ fontSize: 16 }}>👤</div>
+            <div style={{ fontSize: 11.5, color: V.tealDark, fontWeight: 600, lineHeight: 1.6 }}>
+              No estás logueado — podés simular libremente y ver la comparación completa, pero <strong>nada se guarda hasta que inicies sesión</strong>.
+              Si recargás la página o cerrás la pestaña sin loguearte, vas a perder lo que cargaste acá.
+            </div>
+          </div>
+        )}
 
         {field('Nombre del proyecto (opcional)', (
           <input style={inp} value={nombreProyecto} onChange={e => setNombreProyecto(e.target.value)} placeholder='Ej: "Cafetería en Palermo"' />
