@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { analizarProyecto } from '@/lib/comparador-negocio'
-import { calcularDiagnostico, calcularCompletitud, calcularCompletitudFiscal } from '@/lib/reglas-fiscales'
+import { calcularDiagnostico, calcularCompletitudFiscal } from '@/lib/reglas-fiscales'
 import type { DatosNegocio, EstadoProyecto, AlternativaKey } from '@/lib/types'
 
 async function getUser(req: NextRequest) {
@@ -189,48 +189,20 @@ export async function POST(req: NextRequest) {
     }
     await admin.from('negocio_proyectos').update({ completitud_fiscal: completitudFiscal }).eq('id', proyectoId)
 
-    // 2) Compat legado: seguimos escribiendo en profiles/profile_diagnostico
-    // para no romper vencimientos-por-CUIT y el checklist, que todavía
-    // asumen "una sola situación fiscal por usuario". Si el usuario tiene
-    // más de un negocio activo, esto refleja el ÚLTIMO que activó — es una
-    // limitación conocida, a resolver cuando el panel muestre obligaciones
-    // agrupadas por negocio (fase 2).
-    const situacionFiscal = datos.situacion_fiscal!
-
-    const perfilUpdate: Record<string, any> = {
-      situacion_fiscal: situacionFiscal,
-      tipo_contribuyente: situacionFiscal,
-    }
-    if (datos.actividad) {
-      perfilUpdate.actividad_principal = datos.actividad
-      perfilUpdate.actividad = datos.actividad
-    }
-    if (datos.provincia) perfilUpdate.provincia = datos.provincia
-    if (datos.tiene_empleados != null) perfilUpdate.tiene_empleados = datos.tiene_empleados
-    if (datos.cantidad_empleados != null) perfilUpdate.cantidad_empleados = datos.cantidad_empleados
-    if (datos.facturacion_estimada != null) perfilUpdate.facturacion_estimada = datos.facturacion_estimada
-    if ((datos.provincias_operacion?.length ?? 0) > 1) perfilUpdate.otras_jurisdicciones = datos.provincias_operacion!.filter(p => p !== datos.provincia)
-
-    const { error: perfilErr } = await admin.from('profiles').update(perfilUpdate).eq('id', user.id)
-    if (perfilErr) return NextResponse.json({ error: `Proyecto activado, pero no se pudo actualizar Mi Perfil: ${perfilErr.message}` }, { status: 500 })
-
-    const { data: perfilActualizado } = await admin.from('profiles').select('*').eq('id', user.id).single()
-    if (perfilActualizado) {
-      const diagnosticoPerfil = calcularDiagnostico(perfilActualizado as any)
-      const completitudPerfil = calcularCompletitud(perfilActualizado as any)
-      const filasDiagPerfil = diagnosticoPerfil.map(d => ({
-        user_id: user.id,
-        obligacion_key: d.key,
-        aplica: d.aplica,
-        motivo: d.motivo,
-        falta_info: d.faltaInfo,
-        calculado_at: new Date().toISOString(),
-      }))
-      if (filasDiagPerfil.length > 0) {
-        await admin.from('profile_diagnostico').upsert(filasDiagPerfil, { onConflict: 'user_id,obligacion_key' })
-      }
-      await admin.from('profiles').update({ perfil_completitud: completitudPerfil }).eq('id', user.id)
-    }
+    // NOTA: hasta acá escribíamos también en `profiles` (situacion_fiscal,
+    // actividad, provincia, etc.) para que el resto de la app siguiera
+    // funcionando con "una sola situación fiscal por usuario". Eso es
+    // justo lo que generaba la contradicción: el negocio decía "sos RI"
+    // mientras Mi Perfil (que responde la persona por su cuenta) podía
+    // decir otra cosa distinta, o el último negocio activado pisaba al
+    // anterior. Ahora cada negocio tiene SU PROPIO diagnóstico (arriba) y
+    // Mi Perfil queda como la situación de la PERSONA, sin que un negocio
+    // se la pise.
+    //
+    // Pendiente (fase siguiente): vencimientos por terminación de CUIT
+    // todavía leen `profiles.tipo_contribuyente`/`terminacion_cuit`, que ya
+    // no se actualiza automáticamente acá — hoy solo reflejan lo que la
+    // persona haya cargado directamente en Mi Perfil.
   }
 
   return NextResponse.json({ id: proyectoId, resultados, certeza, faltaInfo, completitud })

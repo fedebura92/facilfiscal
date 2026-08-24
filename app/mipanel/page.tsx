@@ -484,8 +484,17 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   const obligacionesPorConfirmar = diagnostico.filter(o => o.aplica === null).length
 
   const [negociosActivos, setNegociosActivos] = useState<NegocioProyecto[]>([])
+
+  // Obligaciones de la PERSONA (ej: Autónomos, Ganancias) — no dependen de
+  // cuántos negocios tenga, así que se calculan una sola vez desde Mi
+  // Perfil, nunca desde un negocio puntual.
+  const obligacionesPersona = useMemo(() => diagnostico.filter(o => o.nivel === 'persona'), [diagnostico])
+
+  // Cada negocio muestra SOLO sus propias obligaciones (nivel 'negocio'):
+  // Autónomos/Ganancias no se repiten acá, porque ya se muestran una vez
+  // en "Tu situación personal".
   const diagnosticosPorNegocio = useMemo(
-    () => negociosActivos.map(n => ({ negocio: n, diagnostico: calcularDiagnostico(n.datos) })),
+    () => negociosActivos.map(n => ({ negocio: n, diagnostico: calcularDiagnostico(n.datos).filter(o => o.nivel === 'negocio') })),
     [negociosActivos]
   )
   const completedCount = tasks.filter(t=>t.done).length
@@ -860,6 +869,34 @@ const timelineItems = useMemo<TimelineItems>(() => {
               )}
             </div>
 
+            {/* Tu situación personal — obligaciones que son de VOS, no de
+                ningún negocio en particular (ej: Autónomos, Ganancias).
+                Solo se muestra si ya tenés al menos un negocio activo: si
+                todavía no usaste Crear Mi Negocio, la tarjeta general de
+                abajo ya cubre esto sin necesidad de separarlo. */}
+            {diagnosticosPorNegocio.length > 0 && (
+              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+                <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:12 }}>👤 Tu situación personal</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+                  {obligacionesPersona.map(o => {
+                    const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
+                    const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
+                    const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                    return (
+                      <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
+                        <div style={{ fontSize:13 }}>{icon}</div>
+                        <div>
+                          <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                          <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                <Link href="/mipanel/perfil" style={{ fontSize:11, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:12, display:'block' }}>Editar Mi Perfil →</Link>
+              </div>
+            )}
+
             {/* Negocios activos (Crear Mi Negocio) — cada uno con su propio
                 diagnóstico, porque una persona puede ser RI para un negocio
                 y Monotributista para otro al mismo tiempo. */}
@@ -911,12 +948,13 @@ const timelineItems = useMemo<TimelineItems>(() => {
             })}
 
             {/* Diagnóstico general — Nivel 2, calculado a partir de Mi Perfil.
-                Si ya tenés negocios activos arriba, esto queda como tu
-                situación general (por si cargaste algo directo en Mi Perfil
-                sin pasar por Crear Mi Negocio). */}
+                Solo se muestra si TODAVÍA NO hay negocios activos (spec:
+                cada negocio ya tiene su propia tarjeta arriba, y mostrar
+                esto también generaría contradicciones/duplicados). */}
+            {diagnosticosPorNegocio.length === 0 && (
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
-                <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🧾 {diagnosticosPorNegocio.length > 0 ? 'Situación general (Mi Perfil)' : 'Tus obligaciones fiscales'}</div>
+                <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🧾 Tus obligaciones fiscales</div>
                 <span style={{ fontSize:11, fontWeight:800, color: completitudPerfil===100?V.green:V.teal }}>{completitudPerfil}% del perfil</span>
               </div>
 
@@ -960,6 +998,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
                 </>
               )}
             </div>
+            )}
 
             {/* Novedades fiscales */}
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, overflow:'hidden' }}>
