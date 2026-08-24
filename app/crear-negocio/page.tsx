@@ -401,6 +401,14 @@ export default function CrearNegocioPage() {
               onChange={e => set('provincias_operacion', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
               placeholder="Ej: Córdoba, Santa Fe (dejalo vacío si es solo una)" />
           ))}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: V.ink2, display: 'block', marginBottom: 8 }}>¿Estás (o vas a estar) inscripto en Ingresos Brutos?</label>
+            <TriState value={datos.inscripto_iibb} onChange={v => set('inscripto_iibb', v)} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 700, color: V.ink2, display: 'block', marginBottom: 8 }}>¿Hacés (o vas a hacer) aportes como Autónomo?</label>
+            <TriState value={datos.inscripto_autonomos} onChange={v => set('inscripto_autonomos', v)} />
+          </div>
         </Section>
 
         <Section title="Comercio exterior" subtitle="Solo si aplica" open={openSection === 'exterior'} onToggle={() => toggle('exterior')}>

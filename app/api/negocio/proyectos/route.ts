@@ -92,6 +92,20 @@ export async function POST(req: NextRequest) {
   // de este negocio (no de profiles) — así cada negocio guarda la suya.
   if (estado === 'activo' && alternativa_elegida) {
     datos.situacion_fiscal = mapearASituacionFiscal(alternativa_elegida)
+
+    // El motor de reglas (lib/reglas-fiscales.ts) lee las situaciones
+    // especiales desde perfil_data.situaciones_especiales, pero el wizard
+    // de Crear Mi Negocio las carga como datos.importaciones/exportaciones
+    // (booleans sueltos, usados también por el comparador de alternativas).
+    // Las sincronizamos acá para que también aparezcan como "requiere
+    // revisión" en las obligaciones corrientes del negocio, no solo en la
+    // comparación inicial.
+    const especiales = new Set(datos.perfil_data?.situaciones_especiales ?? [])
+    if (datos.importaciones) especiales.add('importaciones')
+    if (datos.exportaciones) especiales.add('exportaciones')
+    if (especiales.size > 0) {
+      datos.perfil_data = { ...(datos.perfil_data ?? {}), situaciones_especiales: Array.from(especiales) }
+    }
   }
 
   const admin = supabaseAdmin()
