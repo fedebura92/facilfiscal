@@ -904,44 +904,57 @@ const timelineItems = useMemo<TimelineItems>(() => {
               const pend = diagNeg.filter(o => o.aplica === true).length
               const porConfirmar = diagNeg.filter(o => o.aplica === null).length
               const nombreNegocio = negocio.nombre || negocio.datos?.actividad || 'Negocio sin nombre'
+              const esEmpleado = negocio.datos?.relacion === 'empleado'
+              const RELACION_LABEL: Record<string,string> = { titular:'👤 Titular', socio:'🤝 Socio/a', administrador:'🗂️ Administrador/a', empleado:'💼 Empleado/a', otro:'Otra relación' }
               return (
                 <div key={negocio.id} style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
                     <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🏷️ {nombreNegocio}</div>
                     <span style={{ fontSize:10, fontWeight:800, padding:'2px 8px', borderRadius:20, background:V.greenBg, color:V.green }}>🟢 Activo</span>
                   </div>
-                  {negocio.datos?.situacion_fiscal && (
-                    <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginBottom:12 }}>
-                      {negocio.datos.situacion_fiscal === 'mono' ? '📋 Monotributo' : negocio.datos.situacion_fiscal === 'ri' ? '🏢 Responsable Inscripto' : negocio.datos.situacion_fiscal}
-                      {negocio.datos.provincia && ` · ${negocio.datos.provincia}`}
-                    </div>
-                  )}
-                  <div style={{ display:'flex', gap:8, marginBottom:14 }}>
-                    <div style={{ flex:1, background:V.greenBg, border:`1px solid ${V.greenRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
-                      <div style={{ fontSize:17, fontWeight:900, color:V.green }}>{pend}</div>
-                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>te corresponden</div>
-                    </div>
-                    <div style={{ flex:1, background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
-                      <div style={{ fontSize:17, fontWeight:900, color:V.amber }}>{porConfirmar}</div>
-                      <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>por confirmar</div>
-                    </div>
+                  <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginBottom:12, display:'flex', gap:6, flexWrap:'wrap' }}>
+                    {negocio.datos?.situacion_fiscal && (
+                      <span>{negocio.datos.situacion_fiscal === 'mono' ? '📋 Monotributo' : negocio.datos.situacion_fiscal === 'ri' ? '🏢 Responsable Inscripto' : negocio.datos.situacion_fiscal}{negocio.datos.provincia && ` · ${negocio.datos.provincia}`}</span>
+                    )}
+                    {negocio.datos?.relacion && <span>· {RELACION_LABEL[negocio.datos.relacion]}</span>}
                   </div>
-                  <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
-                    {diagNeg.map(o => {
-                      const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
-                      const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
-                      const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
-                      return (
-                        <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
-                          <div style={{ fontSize:13 }}>{icon}</div>
-                          <div>
-                            <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
-                            <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
-                          </div>
+
+                  {esEmpleado ? (
+                    <div style={{ background:V.bg, borderRadius:10, padding:'12px 14px' }}>
+                      <div style={{ fontSize:12, color:V.ink2, fontWeight:600, lineHeight:1.6 }}>
+                        Marcaste que sos <strong>empleado/a</strong> acá, no dueño/a — las obligaciones fiscales de este negocio le corresponden al empleador, no a vos personalmente. Si además hacés aportes por tu cuenta, los vas a ver en "Tu situación personal" arriba.
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display:'flex', gap:8, marginBottom:14 }}>
+                        <div style={{ flex:1, background:V.greenBg, border:`1px solid ${V.greenRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
+                          <div style={{ fontSize:17, fontWeight:900, color:V.green }}>{pend}</div>
+                          <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>te corresponden</div>
                         </div>
-                      )
-                    })}
-                  </div>
+                        <div style={{ flex:1, background:V.amberBg, border:`1px solid ${V.amberRing}`, borderRadius:10, padding:'8px 10px', textAlign:'center' }}>
+                          <div style={{ fontSize:17, fontWeight:900, color:V.amber }}>{porConfirmar}</div>
+                          <div style={{ fontSize:10, fontWeight:700, color:V.ink3 }}>por confirmar</div>
+                        </div>
+                      </div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+                        {diagNeg.map(o => {
+                          const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
+                          const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
+                          const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                          return (
+                            <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
+                              <div style={{ fontSize:13 }}>{icon}</div>
+                              <div>
+                                <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                                <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
                   <Link href="/crear-negocio?ver=proyectos" style={{ fontSize:11, fontWeight:800, color:V.teal, textDecoration:'none', marginTop:12, display:'block' }}>Editar este negocio →</Link>
                 </div>
               )

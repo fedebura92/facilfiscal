@@ -185,7 +185,16 @@ export interface DatosNegocio {
   // funcione igual sobre un negocio que sobre un perfil de persona, sin
   // necesitar un adaptador.
   perfil_data?: PerfilDataExtra
+
+  // ── Relación de la persona con este negocio ──────────────────────────
+  // Importa para saber a quién le corresponde cada obligación: si sos
+  // 'empleado' de este negocio (no dueño/socio), las obligaciones fiscales
+  // del negocio no son tuyas personalmente — trabajás en relación de
+  // dependencia para otra persona/entidad que sí es la responsable.
+  relacion?: RelacionNegocio
 }
+
+export type RelacionNegocio = 'titular' | 'socio' | 'administrador' | 'empleado' | 'otro'
 
 export interface NegocioProyecto {
   id: string

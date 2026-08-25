@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { analizarProyecto } from '@/lib/comparador-negocio'
-import type { DatosNegocio, AlternativaKey, Nivel, NegocioProyecto } from '@/lib/types'
+import type { DatosNegocio, AlternativaKey, Nivel, NegocioProyecto, RelacionNegocio } from '@/lib/types'
 
 const PROVINCIAS = [
   'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes',
@@ -26,6 +26,14 @@ const FORMA_OPERACION_OPTS = [
   { value: 'domicilio', label: '🚚 A domicilio' },
   { value: 'online', label: '💻 Online' },
   { value: 'mixto', label: '🔀 Mixto' },
+]
+
+const RELACION_OPTS: { value: RelacionNegocio; label: string }[] = [
+  { value: 'titular', label: '👤 Titular (soy yo solo)' },
+  { value: 'socio', label: '🤝 Socio/a' },
+  { value: 'administrador', label: '🗂️ Administrador/a (no soy dueño)' },
+  { value: 'empleado', label: '💼 Empleado/a' },
+  { value: 'otro', label: 'Otra relación' },
 ]
 
 const TIPO_CLIENTES_OPTS = [
@@ -372,6 +380,17 @@ export default function CrearNegocioPage() {
           {field('¿Cuántas personas van a ser titulares del negocio?', (
             <input type="number" min={1} style={inp} value={datos.cantidad_socios ?? 1} onChange={e => set('cantidad_socios', Math.max(1, Number(e.target.value) || 1))} />
           ), '1 = vas a estar solo/a. Si son varios, hay que evaluar una estructura societaria.')}
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 700, color: V.ink2, display: 'block', marginBottom: 8 }}>¿Cuál es tu relación con este negocio?</label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {RELACION_OPTS.map(r => (
+                <Chip key={r.value} active={datos.relacion === r.value} onClick={() => set('relacion', r.value)}>{r.label}</Chip>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: V.ink3, fontWeight: 600, lineHeight: 1.5, marginTop: 8 }}>
+              Si sos empleado/a de este negocio (no dueño ni socio), sus obligaciones fiscales no son tuyas personalmente.
+            </div>
+          </div>
         </Section>
 
         <Section title="Empleados" open={openSection === 'empleados'} onToggle={() => toggle('empleados')}>
