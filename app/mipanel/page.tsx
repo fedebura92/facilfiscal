@@ -7,6 +7,14 @@ import { CATEGORIAS_MONO } from '@/lib/data'
 import { calcularDiagnostico, calcularCompletitud, type Obligacion } from '@/lib/reglas-fiscales'
 import type { PerfilFiscal, NegocioProyecto } from '@/lib/types'
 
+// Cómo llegamos a cada obligación — ver lib/reglas-fiscales.ts
+const CONFIANZA_LABEL: Record<string, string> = {
+  confirmado: 'Confirmado',
+  inferido: 'Inferido',
+  heredado: 'Heredado',
+  por_confirmar: 'Por confirmar',
+}
+
 // Fuente única de límites de categoría (lib/data.ts) — antes había 4 copias
 // hardcodeadas y desactualizadas de este mismo array en este archivo.
 const LIMITES_MONO = CATEGORIAS_MONO.map(c => c.limite_anual)
@@ -881,12 +889,12 @@ const timelineItems = useMemo<TimelineItems>(() => {
                   {obligacionesPersona.map(o => {
                     const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
                     const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
-                    const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                    const icon = o.confianza === 'confirmado' ? '🟢' : o.confianza === 'inferido' ? '🟡' : o.confianza === 'heredado' ? '🔵' : '🟠'
                     return (
                       <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
                         <div style={{ fontSize:13 }}>{icon}</div>
                         <div>
-                          <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                          <div style={{ display:'flex', alignItems:'center', gap:6 }}><div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div><span style={{ fontSize:9, fontWeight:800, color:V.ink3, textTransform:'uppercase' as const, letterSpacing:'.03em' }}>{CONFIANZA_LABEL[o.confianza]}</span></div>
                           <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
                         </div>
                       </div>
@@ -941,12 +949,12 @@ const timelineItems = useMemo<TimelineItems>(() => {
                         {diagNeg.map(o => {
                           const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
                           const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
-                          const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                          const icon = o.confianza === 'confirmado' ? '🟢' : o.confianza === 'inferido' ? '🟡' : o.confianza === 'heredado' ? '🔵' : '🟠'
                           return (
                             <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
                               <div style={{ fontSize:13 }}>{icon}</div>
                               <div>
-                                <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                                <div style={{ display:'flex', alignItems:'center', gap:6 }}><div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div><span style={{ fontSize:9, fontWeight:800, color:V.ink3, textTransform:'uppercase' as const, letterSpacing:'.03em' }}>{CONFIANZA_LABEL[o.confianza]}</span></div>
                                 <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
                               </div>
                             </div>
@@ -993,12 +1001,12 @@ const timelineItems = useMemo<TimelineItems>(() => {
                     {diagnostico.map(o => {
                       const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
                       const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
-                      const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                      const icon = o.confianza === 'confirmado' ? '🟢' : o.confianza === 'inferido' ? '🟡' : o.confianza === 'heredado' ? '🔵' : '🟠'
                       return (
                         <div key={o.key} style={{ display:'flex', gap:9, padding:'8px 10px', borderRadius:9, background:bg }}>
                           <div style={{ fontSize:13 }}>{icon}</div>
                           <div>
-                            <div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div>
+                            <div style={{ display:'flex', alignItems:'center', gap:6 }}><div style={{ fontSize:12, fontWeight:800, color }}>{o.label}</div><span style={{ fontSize:9, fontWeight:800, color:V.ink3, textTransform:'uppercase' as const, letterSpacing:'.03em' }}>{CONFIANZA_LABEL[o.confianza]}</span></div>
                             <div style={{ fontSize:11, color:V.ink2, fontWeight:600, marginTop:1, lineHeight:1.4 }}>{o.motivo}</div>
                           </div>
                         </div>

@@ -8,6 +8,14 @@ import { CATEGORIAS_MONO } from '@/lib/data'
 import { calcularDiagnostico, calcularCompletitud, type Obligacion } from '@/lib/reglas-fiscales'
 import type { PerfilFiscal, SituacionFiscal, FormaOperacion } from '@/lib/types'
 
+// Cómo llegamos a cada obligación — ver lib/reglas-fiscales.ts
+const CONFIANZA_LABEL: Record<string, string> = {
+  confirmado: 'Confirmado',
+  inferido: 'Inferido',
+  heredado: 'Heredado',
+  por_confirmar: 'Por confirmar',
+}
+
 // ── Datos de referencia ───────────────────────────────────────────────────
 const PROVINCIAS = [
   'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba','Corrientes',
@@ -524,12 +532,12 @@ export default function PerfilPage() {
               {diagnostico.map(o => {
                 const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
                 const bg = o.aplica === true ? V.greenBg : o.aplica === false ? V.bg : V.amberBg
-                const icon = o.aplica === true ? '✅' : o.aplica === false ? '⬜' : '❓'
+                const icon = o.confianza === 'confirmado' ? '🟢' : o.confianza === 'inferido' ? '🟡' : o.confianza === 'heredado' ? '🔵' : '🟠'
                 return (
                   <div key={o.key} style={{ display:'flex', gap:10, padding:'10px 12px', borderRadius:10, background:bg }}>
                     <div style={{ fontSize:15 }}>{icon}</div>
                     <div>
-                      <div style={{ fontSize:12.5, fontWeight:800, color }}>{o.label}</div>
+                      <div style={{ display:'flex', alignItems:'center', gap:6 }}><div style={{ fontSize:12.5, fontWeight:800, color }}>{o.label}</div><span style={{ fontSize:9, fontWeight:800, color:V.ink3, textTransform:'uppercase' as const, letterSpacing:'.03em' }}>{CONFIANZA_LABEL[o.confianza]}</span></div>
                       <div style={{ fontSize:11.5, color:V.ink2, fontWeight:600, marginTop:2, lineHeight:1.4 }}>{o.motivo}</div>
                     </div>
                   </div>

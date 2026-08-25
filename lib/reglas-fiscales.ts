@@ -8,9 +8,20 @@
 //
 // Cada obligación tiene un `nivel`: 'persona' (le corresponde a vos como
 // individuo, sin importar cuántos negocios tengas — ej: Autónomos) o
-// 'negocio' (le corresponde a ESE negocio puntual — ej: IVA, IIBB). Esto
-// existe para que Mi Panel pueda mostrar "tu situación personal" separada
-// de "las obligaciones de cada negocio", sin duplicar ni contradecirse.
+// 'negocio' (le corresponde a ESE negocio puntual — ej: IVA, IIBB).
+//
+// Y una `confianza`, que explica CÓMO llegamos a esa respuesta:
+//   'confirmado'     → lo contestaste vos directamente (ej: "¿tenés
+//                       empleados?" → si/no, eso es el dato en sí).
+//   'inferido'       → lo dedujimos de otra respuesta tuya (ej: IVA no se
+//                       pregunta directo, se infiere de tu régimen fiscal).
+//   'por_confirmar'  → todavía no lo sabemos.
+//   'heredado'       → vendría de otro contexto relacionado (ej: un dato de
+//                       un negocio aplicado a la persona, o viceversa). Hoy
+//                       ningún caso lo usa a propósito: evitar heredar entre
+//                       persona y negocio es justo lo que resolvimos para
+//                       que no se contradigan. Se activa el día que haya un
+//                       caso real que lo necesite.
 //
 // Esta es la única fuente de verdad para el diagnóstico. No duplicar esta
 // lógica en componentes: importar desde acá.
@@ -19,6 +30,7 @@
 import type { SituacionFiscalInput, PerfilFiscal } from './types'
 
 export type NivelObligacion = 'persona' | 'negocio'
+export type NivelConfianza = 'confirmado' | 'inferido' | 'heredado' | 'por_confirmar'
 
 export type Obligacion = {
   key: string
@@ -27,6 +39,7 @@ export type Obligacion = {
   motivo: string
   faltaInfo: string[]
   nivel: NivelObligacion
+  confianza: NivelConfianza
 }
 
 function ob(
@@ -35,9 +48,10 @@ function ob(
   aplica: boolean | null,
   motivo: string,
   nivel: NivelObligacion,
+  confianza: NivelConfianza,
   faltaInfo: string[] = []
 ): Obligacion {
-  return { key, label, aplica, motivo, faltaInfo, nivel }
+  return { key, label, aplica, motivo, faltaInfo, nivel, confianza }
 }
 
 export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
@@ -53,6 +67,7 @@ export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
         null,
         'Todavía no sabemos qué régimen tenés (Monotributo, Responsable Inscripto, u otro).',
         'negocio',
+        'por_confirmar',
         ['situacion_fiscal']
       )
     )
@@ -64,24 +79,28 @@ export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
   // ── Autónomos ────────────────────────────────────────────────────────────
   // Es de la PERSONA, no del negocio: ser titular/socio de una empresa no
   // significa que "el negocio" pague Autónomos — lo paga el individuo.
+  // Confianza 'confirmado': es una pregunta directa (sí/no/no sé), no una
+  // que dedujimos de otra cosa.
   if (p.inscripto_autonomos === true) {
-    out.push(ob('autonomos', 'Aportes como Autónomo', true, 'Nos dijiste que hacés aportes como Autónomo.', 'persona'))
+    out.push(ob('autonomos', 'Aportes como Autónomo', true, 'Nos dijiste que hacés aportes como Autónomo.', 'persona', 'confirmado'))
   } else if (p.inscripto_autonomos === false) {
-    out.push(ob('autonomos', 'Aportes como Autónomo', false, 'No hacés aportes como Autónomo.', 'persona'))
+    out.push(ob('autonomos', 'Aportes como Autónomo', false, 'No hacés aportes como Autónomo.', 'persona', 'confirmado'))
   } else {
-    out.push(ob('autonomos', 'Aportes como Autónomo', null, 'Falta confirmar si hacés aportes como Autónomo.', 'persona', ['inscripto_autonomos']))
+    out.push(ob('autonomos', 'Aportes como Autónomo', null, 'Falta confirmar si hacés aportes como Autónomo.', 'persona', 'por_confirmar', ['inscripto_autonomos']))
   }
 
   // ── IVA ───────────────────────────────────────────────────────────────────
+  // Confianza 'inferido': nunca te preguntamos "¿pagás IVA?" directo — lo
+  // deducimos de tu régimen fiscal (situacion_fiscal).
   if (sit === 'ri') {
-    out.push(ob('iva', 'IVA', true, 'Sos Responsable Inscripto: liquidás IVA todos los meses.', 'negocio'))
+    out.push(ob('iva', 'IVA', true, 'Sos Responsable Inscripto: liquidás IVA todos los meses.', 'negocio', 'inferido'))
   } else if (sit === 'mono') {
-    out.push(ob('iva', 'IVA', false, 'El Monotributo incluye el IVA dentro de la cuota mensual; no liquidás IVA por separado.', 'negocio'))
+    out.push(ob('iva', 'IVA', false, 'El Monotributo incluye el IVA dentro de la cuota mensual; no liquidás IVA por separado.', 'negocio', 'inferido'))
   } else if (sit === 'exento') {
     // TODO-VERIFICAR: confirmar tratamiento exacto según tipo de exención (objetiva/subjetiva)
-    out.push(ob('iva', 'IVA', null, 'Depende del tipo de exención que tengas.', 'negocio', ['tipo_exencion']))
+    out.push(ob('iva', 'IVA', null, 'Depende del tipo de exención que tengas.', 'negocio', 'por_confirmar', ['tipo_exencion']))
   } else {
-    out.push(ob('iva', 'IVA', null, 'Necesitamos saber tu régimen fiscal para determinar esto.', 'negocio', ['situacion_fiscal']))
+    out.push(ob('iva', 'IVA', null, 'Necesitamos saber tu régimen fiscal para determinar esto.', 'negocio', 'por_confirmar', ['situacion_fiscal']))
   }
 
   // ── Ganancias ────────────────────────────────────────────────────────────
@@ -89,17 +108,20 @@ export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
   // por la actividad de un negocio) — TODO-VERIFICAR: si el negocio es una
   // sociedad, Ganancias puede corresponderle a la sociedad en vez de (o
   // además de) a la persona; por ahora lo simplificamos como personal.
+  // Confianza 'inferido': se deduce del régimen + de si sos Autónomo.
   if (sit === 'ri' || p.inscripto_autonomos) {
-    out.push(ob('ganancias', 'Impuesto a las Ganancias', true, 'Como Responsable Inscripto o Autónomo, en general te corresponde declarar Ganancias.', 'persona'))
+    out.push(ob('ganancias', 'Impuesto a las Ganancias', true, 'Como Responsable Inscripto o Autónomo, en general te corresponde declarar Ganancias.', 'persona', 'inferido'))
   } else if (sit === 'mono') {
-    out.push(ob('ganancias', 'Impuesto a las Ganancias', false, 'El Monotributo reemplaza a Ganancias mientras te mantengas dentro del régimen.', 'persona'))
+    out.push(ob('ganancias', 'Impuesto a las Ganancias', false, 'El Monotributo reemplaza a Ganancias mientras te mantengas dentro del régimen.', 'persona', 'inferido'))
   } else {
-    out.push(ob('ganancias', 'Impuesto a las Ganancias', null, 'Necesitamos confirmar tu régimen fiscal.', 'persona', ['situacion_fiscal']))
+    out.push(ob('ganancias', 'Impuesto a las Ganancias', null, 'Necesitamos confirmar tu régimen fiscal.', 'persona', 'por_confirmar', ['situacion_fiscal']))
   }
 
   // ── Ingresos Brutos / Convenio Multilateral ─────────────────────────────
+  // Confianza 'confirmado': es una pregunta directa (¿estás inscripto en
+  // IIBB?), no algo que dedujimos de otro dato.
   if (!p.provincia) {
-    out.push(ob('iibb', 'Ingresos Brutos', null, 'Falta saber en qué provincia operás.', 'negocio', ['provincia']))
+    out.push(ob('iibb', 'Ingresos Brutos', null, 'Falta saber en qué provincia operás.', 'negocio', 'por_confirmar', ['provincia']))
   } else if (p.inscripto_iibb === true) {
     // PerfilFiscal ya trae otras_jurisdicciones armado. DatosNegocio (un
     // negocio de Crear Mi Negocio) en cambio trae provincias_operacion, que
@@ -108,28 +130,31 @@ export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
       ?? p.provincias_operacion?.filter(prov => prov !== p.provincia).length
       ?? 0
     if (otras > 0) {
-      out.push(ob('iibb', 'Ingresos Brutos', true, `Operás en ${p.provincia} y en ${otras} jurisdicción(es) más: te corresponde Convenio Multilateral.`, 'negocio'))
+      out.push(ob('iibb', 'Ingresos Brutos', true, `Operás en ${p.provincia} y en ${otras} jurisdicción(es) más: te corresponde Convenio Multilateral.`, 'negocio', 'confirmado'))
     } else {
-      out.push(ob('iibb', 'Ingresos Brutos', true, `Estás inscripto en Ingresos Brutos de ${p.provincia}.`, 'negocio'))
+      out.push(ob('iibb', 'Ingresos Brutos', true, `Estás inscripto en Ingresos Brutos de ${p.provincia}.`, 'negocio', 'confirmado'))
     }
   } else if (p.inscripto_iibb === false) {
-    out.push(ob('iibb', 'Ingresos Brutos', false, 'Nos dijiste que no estás inscripto en Ingresos Brutos.', 'negocio', ['confirmar_iibb']))
+    out.push(ob('iibb', 'Ingresos Brutos', false, 'Nos dijiste que no estás inscripto en Ingresos Brutos.', 'negocio', 'confirmado', ['confirmar_iibb']))
   } else {
-    out.push(ob('iibb', 'Ingresos Brutos', null, 'Falta confirmar si estás inscripto en Ingresos Brutos.', 'negocio', ['inscripto_iibb']))
+    out.push(ob('iibb', 'Ingresos Brutos', null, 'Falta confirmar si estás inscripto en Ingresos Brutos.', 'negocio', 'por_confirmar', ['inscripto_iibb']))
   }
 
   // ── Empleados / cargas sociales (F.931) ─────────────────────────────────
+  // Confianza 'confirmado': pregunta directa (¿tenés empleados?).
   if (p.tiene_empleados === true) {
-    out.push(ob('empleados_931', 'Cargas sociales (F.931)', true, `Tenés ${p.cantidad_empleados ?? 'al menos un'} empleado(s): corresponde liquidar F.931 y ART todos los meses.`, 'negocio'))
+    out.push(ob('empleados_931', 'Cargas sociales (F.931)', true, `Tenés ${p.cantidad_empleados ?? 'al menos un'} empleado(s): corresponde liquidar F.931 y ART todos los meses.`, 'negocio', 'confirmado'))
   } else if (p.tiene_empleados === false) {
-    out.push(ob('empleados_931', 'Cargas sociales (F.931)', false, 'No tenés empleados en relación de dependencia.', 'negocio'))
+    out.push(ob('empleados_931', 'Cargas sociales (F.931)', false, 'No tenés empleados en relación de dependencia.', 'negocio', 'confirmado'))
   } else {
-    out.push(ob('empleados_931', 'Cargas sociales (F.931)', null, 'Falta saber si tenés empleados.', 'negocio', ['tiene_empleados']))
+    out.push(ob('empleados_931', 'Cargas sociales (F.931)', null, 'Falta saber si tenés empleados.', 'negocio', 'por_confirmar', ['tiene_empleados']))
   }
 
   // ── Recategorización de Monotributo ──────────────────────────────────────
+  // Confianza 'inferido': se deduce de estar en Monotributo, no es una
+  // pregunta aparte.
   if (sit === 'mono') {
-    out.push(ob('recategorizacion', 'Recategorización semestral', true, 'Como monotributista, tenés que recategorizarte cada enero y julio si corresponde.', 'negocio'))
+    out.push(ob('recategorizacion', 'Recategorización semestral', true, 'Como monotributista, tenés que recategorizarte cada enero y julio si corresponde.', 'negocio', 'inferido'))
   }
 
   // ── Situaciones especiales (bloque libre en perfil_data) ────────────────
@@ -147,7 +172,7 @@ export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
     // TODO-VERIFICAR: cada una de estas requiere reglas propias (percepciones
     // de importación, retenciones, factura de exportación, etc.). Por ahora
     // las marcamos como "requiere revisión" en vez de inventar una regla.
-    out.push(ob(key, label, null, 'Esta situación requiere una revisión específica de tu caso.', 'negocio', [key]))
+    out.push(ob(key, label, null, 'Esta situación requiere una revisión específica de tu caso.', 'negocio', 'por_confirmar', [key]))
   }
 
   return out
