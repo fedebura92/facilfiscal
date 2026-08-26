@@ -498,6 +498,16 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   // Perfil, nunca desde un negocio puntual.
   const obligacionesPersona = useMemo(() => diagnostico.filter(o => o.nivel === 'persona'), [diagnostico])
 
+  // Facturación combinada de tus negocios — la que en definitiva importa
+  // para evaluar Ganancias como persona (no cada negocio por separado).
+  // Solo suma los negocios donde sos titular/socio/administrador: si sos
+  // empleado/a de uno, esa facturación no es un ingreso tuyo.
+  const negociosPropios = useMemo(() => negociosActivos.filter(n => n.datos?.relacion !== 'empleado'), [negociosActivos])
+  const ingresoMensualCombinado = useMemo(
+    () => negociosPropios.reduce((sum, n) => sum + (n.datos?.facturacion_estimada || 0), 0),
+    [negociosPropios]
+  )
+
   // Cada negocio muestra SOLO sus propias obligaciones (nivel 'negocio'):
   // Autónomos/Ganancias no se repiten acá, porque ya se muestran una vez
   // en "Tu situación personal".
@@ -885,6 +895,15 @@ const timelineItems = useMemo<TimelineItems>(() => {
             {diagnosticosPorNegocio.length > 0 && (
               <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
                 <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:12 }}>👤 Tu situación personal</div>
+                {negociosPropios.length >= 2 && ingresoMensualCombinado > 0 && (
+                  <div style={{ background:V.bg, borderRadius:10, padding:'10px 12px', marginBottom:12 }}>
+                    <div style={{ fontSize:11, color:V.ink3, fontWeight:700 }}>💰 Facturación mensual combinada ({negociosPropios.length} negocios)</div>
+                    <div style={{ fontSize:16, fontWeight:900, color:V.ink, marginTop:2 }}>${ingresoMensualCombinado.toLocaleString('es-AR')}</div>
+                    <div style={{ fontSize:10.5, color:V.ink3, fontWeight:600, marginTop:4, lineHeight:1.5 }}>
+                      Es lo que en definitiva importa para evaluar Ganancias como persona — no cada negocio por separado. No calculamos el impuesto en sí, solo te mostramos el total para que lo tengas a mano.
+                    </div>
+                  </div>
+                )}
                 <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
                   {obligacionesPersona.map(o => {
                     const color = o.aplica === true ? V.green : o.aplica === false ? V.ink3 : V.amber
