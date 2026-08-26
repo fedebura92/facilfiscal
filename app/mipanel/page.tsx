@@ -521,16 +521,48 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   const allDone        = completedCount === totalCount
   const tipoLabel      = perfil?.tipo_contribuyente==='mono' ? 'Monotributista' : perfil?.tipo_contribuyente==='ri' ? 'Responsable Inscripto' : perfil?.tipo_contribuyente==='aut' ? 'Autónomo' : null
 
+  // Arma los ítems de vencimiento para un tipo/terminación de CUIT puntual
+  // — se usa una vez para Mi Perfil (si tiene datos propios cargados) y una
+  // vez por cada negocio activo, para no perder ningún vencimiento cuando
+  // hay más de una situación fiscal en juego.
+  function itemsVencimientoDe(tipo: string | undefined, t: string | undefined, etiqueta: string): {titulo:string;dia:number;negocio:string}[] {
+    if (!t || !tipo) return []
+    const items: {titulo:string;dia:number;negocio:string}[] = []
+    if (tipo==='mono') items.push({ titulo:'Monotributo — cuota mensual', dia:20, negocio:etiqueta })
+    if (tipo==='ri'||tipo==='aut') { const d=IVA_DIA[t]; if(d) items.push({ titulo:`IVA — DJ mensual (CUIT …${t})`, dia:d, negocio:etiqueta }) }
+    if (tipo==='aut') { const d=AUT_DIA[t]; if(d) items.push({ titulo:`Autónomos — cuota mensual (CUIT …${t})`, dia:d, negocio:etiqueta }) }
+    return items
+  }
+
+  // Negocios activos que aportan vencimientos propios: no los que marcaste
+  // como "empleado" (esas fechas no son tuyas) y que ya tengan situación
+  // fiscal + terminación de CUIT cargadas.
+  const negociosConVencimiento = useMemo(
+    () => negociosPropios.filter(n => n.datos?.situacion_fiscal && n.datos?.terminacion_cuit),
+    [negociosPropios]
+  )
+
   const vencimientos = useMemo(() => {
-    if (!perfil?.terminacion_cuit) return []
-    const t = perfil.terminacion_cuit
-    const tipo = perfil.tipo_contribuyente
-    const items: {titulo:string;dia:number}[] = []
-    if (tipo==='mono') items.push({ titulo:'Monotributo — cuota mensual', dia:20 })
-    if (tipo==='ri'||tipo==='aut') { const d=IVA_DIA[t]; if(d) items.push({ titulo:`IVA — DJ mensual (CUIT …${t})`, dia:d }) }
-    if (tipo==='aut') { const d=AUT_DIA[t]; if(d) items.push({ titulo:`Autónomos — cuota mensual (CUIT …${t})`, dia:d }) }
+    const items: {titulo:string;dia:number;negocio:string}[] = []
+
+    // Mi Perfil directo (para quien todavía no usa Crear Mi Negocio, o
+    // tiene una situación personal propia además de sus negocios)
+    items.push(...itemsVencimientoDe(perfil?.tipo_contribuyente, perfil?.terminacion_cuit, 'Personal'))
+
+    // Cada negocio activo, con su propia situación fiscal y CUIT
+    for (const n of negociosConVencimiento) {
+      const tipoNegocio = n.datos.situacion_fiscal === 'mono' ? 'mono' : 'ri'
+      const nombreNegocio = n.nombre || n.datos.actividad || 'Negocio'
+      items.push(...itemsVencimientoDe(tipoNegocio, n.datos.terminacion_cuit, nombreNegocio))
+    }
+
     return items.sort((a,b)=>getDias(a.dia)-getDias(b.dia))
-  }, [perfil])
+  }, [perfil, negociosConVencimiento])
+
+  // El candado de "completá tu perfil" solo tiene sentido si NO hay ninguna
+  // fuente de vencimientos — ni Mi Perfil propio, ni ningún negocio con
+  // terminación de CUIT cargada.
+  const hayFuenteVencimientos = perfilCompleto || negociosConVencimiento.length > 0
 
   // ── Score fiscal ────────────────────────────────────────────────────────
   const scoreItems = useMemo(() => {
@@ -857,10 +889,10 @@ const timelineItems = useMemo<TimelineItems>(() => {
             {/* Vencimientos */}
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
               <div style={{ fontSize:14, fontWeight:800, color:V.ink, marginBottom:14 }}>📅 Tus próximos vencimientos</div>
-              {!perfilCompleto ? (
+              {!hayFuenteVencimientos ? (
                 <div style={{ textAlign:'center', padding:'12px 0 4px' }}>
                   <span style={{ fontSize:28, opacity:.25 }}>🔒</span>
-                  <p style={{ fontSize:12, fontWeight:600, color:V.ink3, maxWidth:220, lineHeight:1.6, margin:'8px auto 10px' }}>Completá tu perfil con la terminación de CUIT para ver tus fechas exactas.</p>
+                  <p style={{ fontSize:12, fontWeight:600, color:V.ink3, maxWidth:220, lineHeight:1.6, margin:'8px auto 10px' }}>Completá tu perfil (o la terminación de CUIT de algún negocio activo) para ver tus fechas exactas.</p>
                   <Link href="/mipanel/perfil" style={{ fontSize:12, fontWeight:800, color:V.teal, textDecoration:'none' }}>Completar perfil →</Link>
                 </div>
               ) : vencimientos.length === 0 ? (
@@ -874,7 +906,10 @@ const timelineItems = useMemo<TimelineItems>(() => {
                       <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', border:`1.5px solid ${urgente?'#fca5a5':V.border}`, borderRadius:10, background:urgente?V.redBg:V.surface }}>
                         <div>
                           <div style={{ fontSize:12, fontWeight:700, color:V.ink }}>{v.titulo}</div>
-                          <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:1 }}>{fmtFecha(v.dia)}</div>
+                          <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:1 }}>
+                            {fmtFecha(v.dia)}
+                            {(negociosConVencimiento.length > 0) && <> · <span style={{ fontWeight:800 }}>{v.negocio}</span></>}
+                          </div>
                         </div>
                         <div style={{ fontSize:11, fontWeight:800, padding:'3px 9px', borderRadius:20, whiteSpace:'nowrap' as const, background:urgente?V.redBg:V.tealLight, color:urgente?V.red:V.teal, border:`1px solid ${urgente?'#fca5a5':V.tealRing}` }}>
                           {dias===0?'¡Hoy!':dias===1?'Mañana':`En ${dias}d`}

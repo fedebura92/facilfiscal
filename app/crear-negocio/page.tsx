@@ -428,6 +428,21 @@ export default function CrearNegocioPage() {
             <label style={{ fontSize: 12, fontWeight: 700, color: V.ink2, display: 'block', marginBottom: 8 }}>¿Hacés (o vas a hacer) aportes como Autónomo?</label>
             <TriState value={datos.inscripto_autonomos} onChange={v => set('inscripto_autonomos', v)} />
           </div>
+          <div style={{ marginTop: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 700, color: V.ink2, display: 'block', marginBottom: 8 }}>Terminación de CUIT de este negocio</label>
+            <div style={{ fontSize: 11, color: V.ink3, fontWeight: 600, marginBottom: 10 }}>El último dígito. Si el negocio tiene CUIT propio (ej: una sociedad), poné ese — si no, el tuyo. Lo usamos para calcular las fechas exactas de vencimiento.</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].map(d => (
+                <button key={d} type="button" onClick={() => set('terminacion_cuit', d)} style={{
+                  width: 40, height: 40, borderRadius: 10,
+                  border: `2px solid ${datos.terminacion_cuit === d ? V.teal : V.border}`,
+                  background: datos.terminacion_cuit === d ? V.teal : '#fff',
+                  color: datos.terminacion_cuit === d ? '#fff' : V.ink2,
+                  fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: "'Nunito',sans-serif",
+                }}>{d}</button>
+              ))}
+            </div>
+          </div>
         </Section>
 
         <Section title="Comercio exterior" subtitle="Solo si aplica" open={openSection === 'exterior'} onToggle={() => toggle('exterior')}>
