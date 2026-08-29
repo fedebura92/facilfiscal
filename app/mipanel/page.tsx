@@ -565,22 +565,17 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   const hayFuenteVencimientos = perfilCompleto || negociosConVencimiento.length > 0
 
   // ── Score fiscal ────────────────────────────────────────────────────────
-  const scoreItems = useMemo(() => {
-    if (!perfil) return []
+  // Arma los ítems de "salud fiscal" de UNA entidad puntual (Mi Perfil o un
+  // negocio), en base a SU propio tipo/terminación/facturación — antes esto
+  // se calculaba una sola vez para toda la cuenta, mezclando cosas de
+  // negocios distintos bajo un solo puntaje.
+  function construirScoreItems(tipo: string | undefined, t: string | undefined, facturacionEstimada: number | null | undefined) {
     const items: { texto: string; nivel: 'ok' | 'warn' | 'danger'; detalle?: string }[] = []
-    const tipo = perfil.tipo_contribuyente
-    const t    = perfil.terminacion_cuit
 
-    // Perfil completo
-    if (perfilCompleto) items.push({ texto: 'Perfil completo', nivel: 'ok' })
-    else items.push({ texto: 'Perfil incompleto', nivel: 'warn', detalle: 'Completá tu perfil para ver alertas personalizadas.' })
-
-    // Facturación vs límite de categoría
-    if (perfil.facturacion_estimada && tipo === 'mono') {
-      const anual = perfil.facturacion_estimada * 12
+    // Facturación vs límite de categoría (solo aplica a Monotributo)
+    if (facturacionEstimada && tipo === 'mono') {
+      const anual = facturacionEstimada * 12
       const limiteH = LIMITES_MONO[LIMITES_MONO.length - 1]
-      const pct = Math.round((anual / limiteH) * 100)
-      // Buscar qué categoría le toca
       const catIdx = LIMITES_MONO.findIndex(l => anual <= l)
       const limiteActual = catIdx >= 0 ? LIMITES_MONO[catIdx] : limiteH
       const pctCat = Math.round((anual / limiteActual) * 100)
@@ -611,27 +606,41 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
       else items.push({ texto: 'Recategorización al día', nivel: 'ok' })
     }
 
-    // Alertas faltantes
-    const alertaTask = tasks.find(t => t.id === 'alertas')
-    if (!alertaTask?.done) items.push({ texto: 'Alertas de vencimiento no activadas', nivel: 'warn', detalle: 'Activá las alertas para recibir avisos antes de cada vencimiento.' })
-    else items.push({ texto: 'Alertas de vencimiento activas', nivel: 'ok' })
-
     return items
-  }, [perfil, perfilCompleto, tasks, vencimientos])
+  }
 
-  const score = useMemo(() => {
-    if (scoreItems.length === 0) return 0
-    const puntos = scoreItems.reduce((acc, item) => {
-      if (item.nivel === 'ok')     return acc + 10
-      if (item.nivel === 'warn')   return acc + 5
-      if (item.nivel === 'danger') return acc + 0
-      return acc
-    }, 0)
-    return Math.round((puntos / (scoreItems.length * 10)) * 100)
-  }, [scoreItems])
+  function calcularScore(items: { nivel: 'ok'|'warn'|'danger' }[]) {
+    if (items.length === 0) return null
+    const puntos = items.reduce((acc, item) => acc + (item.nivel === 'ok' ? 10 : item.nivel === 'warn' ? 5 : 0), 0)
+    return Math.round((puntos / (items.length * 10)) * 100)
+  }
 
-  const scoreColor = score >= 80 ? V.green : score >= 50 ? V.amber : V.red
-  const scoreLabel = score >= 80 ? 'Bueno' : score >= 50 ? 'Regular' : 'Atención'
+  // Un score por CUIT/entidad: "Personal" (si cargaste tipo+terminación
+  // directo en Mi Perfil) + uno por cada negocio activo con datos propios.
+  const scoresPorEntidad = useMemo(() => {
+    const entidades: { etiqueta: string; items: ReturnType<typeof construirScoreItems> }[] = []
+
+    if (perfil?.tipo_contribuyente && perfil?.terminacion_cuit) {
+      entidades.push({ etiqueta: 'Personal', items: construirScoreItems(perfil.tipo_contribuyente, perfil.terminacion_cuit, perfil.facturacion_estimada) })
+    }
+    for (const n of negociosConVencimiento) {
+      const tipoNegocio = n.datos.situacion_fiscal === 'mono' ? 'mono' : 'ri'
+      const nombreNegocio = n.nombre || n.datos.actividad || 'Negocio'
+      entidades.push({ etiqueta: nombreNegocio, items: construirScoreItems(tipoNegocio, n.datos.terminacion_cuit, n.datos.facturacion_estimada) })
+    }
+    return entidades
+  }, [perfil, negociosConVencimiento])
+
+  // Estado general (no es por CUIT): perfil completo + alertas activadas.
+  const alertaTask = tasks.find(t => t.id === 'alertas')
+  const estadoGeneralItems = useMemo(() => {
+    const items: { texto: string; nivel: 'ok'|'warn'|'danger'; detalle?: string }[] = []
+    if (perfilCompleto) items.push({ texto: 'Perfil completo', nivel: 'ok' })
+    else items.push({ texto: 'Perfil incompleto', nivel: 'warn', detalle: 'Completá tu perfil para ver alertas personalizadas.' })
+    if (alertaTask?.done) items.push({ texto: 'Alertas de vencimiento activas', nivel: 'ok' })
+    else items.push({ texto: 'Alertas de vencimiento no activadas', nivel: 'warn', detalle: 'Activá las alertas para recibir avisos antes de cada vencimiento.' })
+    return items
+  }, [perfilCompleto, alertaTask])
 
   // ── Timeline / Qué hacer hoy ─────────────────────────────────────────────
   type TimelineItem = {
@@ -763,34 +772,61 @@ const timelineItems = useMemo<TimelineItems>(() => {
           {/* ══ COLUMNA PRINCIPAL (izquierda/centro) ══ */}
           {/* ══ SIDEBAR izquierda ══ */}
           <div className="panel-sidebar">
-            {/* Score fiscal */}
-            {perfilCompleto && (
-              <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-                  <div>
-                    <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🎯 Score fiscal</div>
-                    <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>Tu situación impositiva</div>
-                  </div>
-                  <div style={{ textAlign:'center' }}>
-                    <div style={{ fontSize:40, fontWeight:900, color:scoreColor, lineHeight:1 }}>{score}</div>
-                    <div style={{ fontSize:10, fontWeight:700, color:scoreColor, textTransform:'uppercase' as const, letterSpacing:'.05em' }}>{scoreLabel}</div>
+            {/* Score fiscal — uno por CUIT/entidad, porque cada negocio
+                tiene sus propias obligaciones y no tiene sentido mezclarlas
+                bajo un solo puntaje. */}
+            {scoresPorEntidad.length > 0 && (
+              <>
+                {/* Estado general: no es por CUIT (perfil completo + alertas) */}
+                <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:16 }}>
+                  <div style={{ fontSize:12.5, fontWeight:800, color:V.ink, marginBottom:10 }}>⚙️ Estado general</div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                    {estadoGeneralItems.map((item, i) => (
+                      <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'7px 10px', borderRadius:8, background: item.nivel==='ok'?V.greenBg:V.amberBg }}>
+                        <span style={{ fontSize:11, flexShrink:0 }}>{item.nivel==='ok'?'✅':'⚠️'}</span>
+                        <div>
+                          <div style={{ fontSize:11.5, fontWeight:700, color: item.nivel==='ok'?V.green:V.amber }}>{item.texto}</div>
+                          {item.detalle && <div style={{ fontSize:10, fontWeight:600, color:V.ink3, marginTop:1, lineHeight:1.4 }}>{item.detalle}</div>}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div style={{ height:8, background:V.border, borderRadius:999, marginBottom:14, overflow:'hidden' }}>
-                  <div style={{ height:'100%', borderRadius:999, width:`${score}%`, transition:'width .6s ease', background: score>=80?`linear-gradient(90deg,${V.green},#4ade80)`:score>=50?`linear-gradient(90deg,${V.amber},#fbbf24)`:`linear-gradient(90deg,${V.red},#f87171)` }} />
-                </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  {scoreItems.map((item, i) => (
-                    <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'8px 12px', borderRadius:8, background: item.nivel==='ok'?V.greenBg:item.nivel==='warn'?V.amberBg:V.redBg, border:`1px solid ${item.nivel==='ok'?V.greenRing:item.nivel==='warn'?V.amberRing:V.redRing}` }}>
-                      <span style={{ fontSize:12, flexShrink:0 }}>{item.nivel==='ok'?'✅':item.nivel==='warn'?'⚠️':'🔴'}</span>
-                      <div>
-                        <div style={{ fontSize:12, fontWeight:700, color: item.nivel==='ok'?V.green:item.nivel==='warn'?V.amber:V.red }}>{item.texto}</div>
-                        {item.detalle && <div style={{ fontSize:10, fontWeight:600, color:V.ink3, marginTop:2, lineHeight:1.4 }}>{item.detalle}</div>}
+
+                {scoresPorEntidad.map(({ etiqueta, items }) => {
+                  const s = calcularScore(items) ?? 0
+                  const sColor = s >= 80 ? V.green : s >= 50 ? V.amber : V.red
+                  const sLabel = s >= 80 ? 'Bueno' : s >= 50 ? 'Regular' : 'Atención'
+                  return (
+                    <div key={etiqueta} style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+                        <div>
+                          <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>🎯 Score fiscal</div>
+                          <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginTop:2 }}>{etiqueta}</div>
+                        </div>
+                        <div style={{ textAlign:'center' }}>
+                          <div style={{ fontSize:40, fontWeight:900, color:sColor, lineHeight:1 }}>{s}</div>
+                          <div style={{ fontSize:10, fontWeight:700, color:sColor, textTransform:'uppercase' as const, letterSpacing:'.05em' }}>{sLabel}</div>
+                        </div>
+                      </div>
+                      <div style={{ height:8, background:V.border, borderRadius:999, marginBottom:14, overflow:'hidden' }}>
+                        <div style={{ height:'100%', borderRadius:999, width:`${s}%`, transition:'width .6s ease', background: s>=80?`linear-gradient(90deg,${V.green},#4ade80)`:s>=50?`linear-gradient(90deg,${V.amber},#fbbf24)`:`linear-gradient(90deg,${V.red},#f87171)` }} />
+                      </div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                        {items.map((item, i) => (
+                          <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'8px 12px', borderRadius:8, background: item.nivel==='ok'?V.greenBg:item.nivel==='warn'?V.amberBg:V.redBg, border:`1px solid ${item.nivel==='ok'?V.greenRing:item.nivel==='warn'?V.amberRing:V.redRing}` }}>
+                            <span style={{ fontSize:12, flexShrink:0 }}>{item.nivel==='ok'?'✅':item.nivel==='warn'?'⚠️':'🔴'}</span>
+                            <div>
+                              <div style={{ fontSize:12, fontWeight:700, color: item.nivel==='ok'?V.green:item.nivel==='warn'?V.amber:V.red }}>{item.texto}</div>
+                              {item.detalle && <div style={{ fontSize:10, fontWeight:600, color:V.ink3, marginTop:2, lineHeight:1.4 }}>{item.detalle}</div>}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  )
+                })}
+              </>
             )}
 
             {/* Widget financiero */}
