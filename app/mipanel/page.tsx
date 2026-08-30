@@ -79,31 +79,64 @@ function buildTasks(p: Perfil | null, db: Record<string,{done:boolean;done_at:st
 }
 
 // ── Widget resumen del panel financiero ──────────────────────────────────────
-function WidgetFinanciero({ userId, perfil }: { userId: string|null; perfil: any }) {
+function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; perfil: any; negocios: NegocioProyecto[] }) {
   const [data, setData] = useState<{ totalAnio:number; disponible:number; porCobrar:number; pct:number; cat:string } | null>(null)
+  const [porEntidad, setPorEntidad] = useState<{ etiqueta:string; totalAnio:number; cat:string; pct:number }[]>([])
   const anio = new Date().getFullYear()
 
+  // Fuente única (lib/data.ts) — antes había otra copia hardcodeada y
+  // desactualizada de este mismo array acá adentro.
   const LIMITES = LIMITES_MONO
   const CATS    = CATS_MONO
 
   useEffect(() => {
     if (!userId) return
     const load = async () => {
-      const [{ data: ingresos }, { data: facturas }] = await Promise.all([
-        supabase.from('ingresos_mensuales').select('monto').eq('user_id', userId).eq('anio', anio),
-        supabase.from('facturas').select('monto, estado').eq('user_id', userId).eq('estado', 'pendiente'),
-      ])
-      const totalAnio  = (ingresos || []).reduce((a: number, r: any) => a + r.monto, 0)
-      const porCobrar  = (facturas || []).reduce((a: number, r: any) => a + r.monto, 0)
-      const catIdx     = LIMITES.findIndex(l => (totalAnio * (12 / Math.max(new Date().getMonth()+1,1))) <= l)
-      const limite     = catIdx >= 0 ? LIMITES[catIdx] : LIMITES[LIMITES.length-1]
-      const mesActual  = new Date().getMonth() + 1
-      const pct        = Math.min(Math.round((totalAnio / limite) * 100), 100)
-      const disponible = Math.max(0, limite - totalAnio)
-      setData({ totalAnio, disponible, porCobrar, pct, cat: catIdx >= 0 ? CATS[catIdx] : 'K' })
+      // Entidades a considerar: "Personal" (siempre) + cada negocio propio
+      // (no los que marcaste como empleado — esa facturación no es tuya).
+      const entidades: { etiqueta:string; negocioId: string|null; tipo: string|undefined }[] = [
+        { etiqueta:'Personal', negocioId:null, tipo: perfil?.tipo_contribuyente },
+        ...negocios.filter(n => n.datos?.relacion !== 'empleado').map(n => ({
+          etiqueta: n.nombre || n.datos?.actividad || 'Negocio',
+          negocioId: n.id,
+          tipo: n.datos?.situacion_fiscal === 'mono' ? 'mono' : n.datos?.situacion_fiscal === 'ri' ? 'ri' : undefined,
+        })),
+      ]
+
+      const resultados = await Promise.all(entidades.map(async (e) => {
+        let qIngresos = supabase.from('ingresos_mensuales').select('monto').eq('user_id', userId).eq('anio', anio)
+        qIngresos = e.negocioId ? qIngresos.eq('negocio_id', e.negocioId) : qIngresos.is('negocio_id', null)
+        let qFacturas = supabase.from('facturas').select('monto, estado').eq('user_id', userId).eq('estado', 'pendiente')
+        qFacturas = e.negocioId ? qFacturas.eq('negocio_id', e.negocioId) : qFacturas.is('negocio_id', null)
+
+        const [{ data: ingresos }, { data: facturas }] = await Promise.all([qIngresos, qFacturas])
+        const totalAnio = (ingresos || []).reduce((a: number, r: any) => a + r.monto, 0)
+        const porCobrar = (facturas || []).reduce((a: number, r: any) => a + r.monto, 0)
+        const catIdx = LIMITES.findIndex(l => (totalAnio * (12 / Math.max(new Date().getMonth()+1,1))) <= l)
+        const limite = catIdx >= 0 ? LIMITES[catIdx] : LIMITES[LIMITES.length-1]
+        const pct = Math.min(Math.round((totalAnio / limite) * 100), 100)
+        const disponible = Math.max(0, limite - totalAnio)
+        const cat = catIdx >= 0 ? CATS[catIdx] : 'K'
+        return { etiqueta: e.etiqueta, tipo: e.tipo, totalAnio, disponible, porCobrar, pct, cat }
+      }))
+
+      // KPIs de arriba: total combinado entre todas las entidades
+      const totalAnio  = resultados.reduce((a, r) => a + r.totalAnio, 0)
+      const porCobrar   = resultados.reduce((a, r) => a + r.porCobrar, 0)
+      // "Disponible" y "%" solo tienen sentido para Monotributo — se muestra
+      // el de la primera entidad monotributista que tenga datos, si hay.
+      const monoConDatos = resultados.find(r => r.tipo === 'mono' && r.totalAnio > 0) || resultados.find(r => r.tipo === 'mono')
+      setData({
+        totalAnio, porCobrar,
+        disponible: monoConDatos?.disponible ?? 0,
+        pct: monoConDatos?.pct ?? 0,
+        cat: monoConDatos?.cat ?? 'A',
+      })
+      // Desglose: solo entidades con algo cargado, para no mostrar filas vacías
+      setPorEntidad(resultados.filter(r => r.totalAnio > 0 || r.porCobrar > 0).map(r => ({ etiqueta:r.etiqueta, totalAnio:r.totalAnio, cat:r.cat, pct:r.pct })))
     }
     load()
-  }, [userId, anio])
+  }, [userId, anio, negocios])
 
   const pctColor = data ? (data.pct >= 90 ? V.red : data.pct >= 75 ? V.amber : V.green) : V.teal
 
@@ -121,7 +154,7 @@ function WidgetFinanciero({ userId, perfil }: { userId: string|null; perfil: any
         <div style={{ padding:'16px 20px', display:'flex', flexDirection:'column', gap:14 }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
             {[
-              { label:'Facturado en el año', valor: data.totalAnio >= 1000000 ? `$${(data.totalAnio/1000000).toFixed(1)}M` : `$${Math.round(data.totalAnio/1000)}K`, color:V.tealDark },
+              { label:'Facturado en el año (combinado)', valor: data.totalAnio >= 1000000 ? `$${(data.totalAnio/1000000).toFixed(1)}M` : `$${Math.round(data.totalAnio/1000)}K`, color:V.tealDark },
               { label:'Disponible cat. '+data.cat, valor: data.disponible >= 1000000 ? `$${(data.disponible/1000000).toFixed(1)}M` : `$${Math.round(data.disponible/1000)}K`, color:pctColor },
               { label:'Por cobrar', valor: data.porCobrar > 0 ? (data.porCobrar >= 1000000 ? `$${(data.porCobrar/1000000).toFixed(1)}M` : `$${Math.round(data.porCobrar/1000)}K`) : '—', color: data.porCobrar > 0 ? V.amber : V.ink3 },
             ].map((k,i) => (
@@ -131,6 +164,19 @@ function WidgetFinanciero({ userId, perfil }: { userId: string|null; perfil: any
               </div>
             ))}
           </div>
+
+          {porEntidad.length > 1 && (
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <div style={{ fontSize:10, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.04em' }}>Por negocio</div>
+              {porEntidad.map((e,i) => (
+                <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'7px 10px', background:V.bg, borderRadius:8 }}>
+                  <span style={{ fontSize:12, fontWeight:700, color:V.ink }}>{e.etiqueta}</span>
+                  <span style={{ fontSize:12, fontWeight:800, color:V.ink2 }}>{e.totalAnio >= 1000000 ? `$${(e.totalAnio/1000000).toFixed(1)}M` : `$${Math.round(e.totalAnio/1000)}K`}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Barra de progreso */}
           <div>
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, fontWeight:600, color:V.ink3, marginBottom:5 }}>
@@ -830,7 +876,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
             )}
 
             {/* Widget financiero */}
-            <WidgetFinanciero userId={userId} perfil={perfil} />
+            <WidgetFinanciero userId={userId} perfil={perfil} negocios={negociosActivos} />
 
             {/* Recordatorios */}
             <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:16, padding:20 }}>

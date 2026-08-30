@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     importeTotal,
     fechaServicioDesde,
     fechaServicioHasta,
+    negocioId,
   } = body
 
   // Validaciones básicas
@@ -128,6 +129,7 @@ export async function POST(req: NextRequest) {
     if (user) {
       await supabase.from('facturas').insert({
         user_id: user.id,
+        negocio_id: negocioId || null,
         cliente: receptor,
         concepto: descripcion || `Comprobante tipo ${tipoComprobante}`,
         monto: importeTotal,

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import type { NegocioProyecto } from '@/lib/types'
 
 const V = {
   tealDark:'#0d5c78', teal:'#1a7fa8', tealLight:'#e8f6fb', tealRing:'#a8ddf0',
@@ -50,6 +51,18 @@ export default function FacturacionPage() {
   const [loading, setLoading]             = useState(true)
   const [tab, setTab]                     = useState<'nueva'|'historial'|'como'>('nueva')
 
+  // Entidad seleccionada: 'personal' o el id de un negocio activo. Cada
+  // negocio tiene su propio régimen, así que también su propio tipo de
+  // comprobante por defecto (Factura C para Monotributo, A/B/M para RI).
+  const [negocios, setNegocios]           = useState<NegocioProyecto[]>([])
+  const [entidadId, setEntidadId]         = useState<string>('personal')
+
+  const negociosPropios = useMemo(() => negocios.filter(n => n.datos?.relacion !== 'empleado'), [negocios])
+  const negocioActivo = useMemo(() => entidadId === 'personal' ? null : negociosPropios.find(n => n.id === entidadId) || null, [entidadId, negociosPropios])
+  const tipoActivo = negocioActivo
+    ? (negocioActivo.datos?.situacion_fiscal === 'mono' ? 'mono' : negocioActivo.datos?.situacion_fiscal === 'ri' ? 'ri' : undefined)
+    : perfil?.tipo_contribuyente
+
   // Campos de la factura
   const [tipoComp, setTipoComp]           = useState('')
   const [receptor, setReceptor]           = useState('')
@@ -72,28 +85,47 @@ export default function FacturacionPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login'; return }
 
-      const [{ data: profileData }, { data: facturasData }] = await Promise.all([
-        supabase.from('profiles').select('tipo_contribuyente, nombre').eq('id', user.id).single(),
-        supabase.from('facturas').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
-      ])
+      const { data: profileData } = await supabase.from('profiles').select('tipo_contribuyente, nombre').eq('id', user.id).single()
+      if (profileData) setPerfil(profileData)
 
-      if (profileData) {
-        setPerfil(profileData)
-        // Default tipo comprobante según régimen
-        if (profileData.tipo_contribuyente === 'mono') setTipoComp('11')
-        else if (profileData.tipo_contribuyente === 'ri') setTipoComp('1')
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        try {
+          const res = await fetch('/api/negocio/proyectos', { headers: { Authorization: `Bearer ${session.access_token}` } })
+          const json = await res.json()
+          setNegocios((json.proyectos || []).filter((p: NegocioProyecto) => p.estado === 'activo'))
+        } catch { /* la página sigue andando solo con "Personal" */ }
       }
-      setHistorial(facturasData || [])
       setLoading(false)
     }
     load()
   }, [])
 
+  // Default de tipo de comprobante según la entidad seleccionada
+  useEffect(() => {
+    if (tipoActivo === 'mono') setTipoComp('11')
+    else if (tipoActivo === 'ri') setTipoComp('1')
+  }, [tipoActivo])
+
+  // Historial filtrado por la entidad seleccionada
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const negId = entidadId === 'personal' ? null : entidadId
+      let q = supabase.from('facturas').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
+      q = negId ? q.eq('negocio_id', negId) : q.is('negocio_id', null)
+      const { data } = await q
+      setHistorial(data || [])
+    }
+    load()
+  }, [entidadId])
+
   const netoNum   = parseFloat(neto) || 0
   const ivaNum    = netoNum * (alicuota / 100)
   const totalNum  = netoNum + ivaNum
-  const esRI      = perfil?.tipo_contribuyente === 'ri'
-  const comprobantes = perfil?.tipo_contribuyente === 'mono' ? COMPROBANTES_MONO : COMPROBANTES_RI
+  const esRI      = tipoActivo === 'ri'
+  const comprobantes = tipoActivo === 'mono' ? COMPROBANTES_MONO : COMPROBANTES_RI
 
   const generarFactura = async () => {
     if (!receptor || !neto || !tipoComp) {
@@ -121,6 +153,7 @@ export default function FacturacionPage() {
           importeTotal: totalNum,
           fechaServicioDesde: concepto !== '1' ? fechaServDesde : null,
           fechaServicioHasta: concepto !== '1' ? fechaServHasta : null,
+          negocioId: entidadId === 'personal' ? null : entidadId,
         }),
       })
 
@@ -159,9 +192,29 @@ export default function FacturacionPage() {
         <div style={{ marginBottom:24 }}>
           <h1 style={{ fontSize:24, fontWeight:900, color:V.ink, margin:'0 0 4px' }}>🧾 Facturación electrónica</h1>
           <p style={{ fontSize:13, color:V.ink3, fontWeight:600, margin:0 }}>
-            {perfil?.tipo_contribuyente === 'mono' ? 'Factura C para monotributistas' : 'Facturas A, B y M para Responsables Inscriptos'}
+            {tipoActivo === 'mono' ? 'Factura C para monotributistas' : 'Facturas A, B y M para Responsables Inscriptos'}
+            {negocioActivo && ` · ${negocioActivo.nombre || negocioActivo.datos?.actividad}`}
           </p>
         </div>
+
+        {/* Selector de entidad — cada negocio tiene su propio régimen, así
+            que también su propio tipo de comprobante por defecto. */}
+        {negociosPropios.length > 0 && (
+          <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap' }}>
+            <button onClick={()=>setEntidadId('personal')} style={{
+              padding:'8px 16px', borderRadius:20, border:`1.5px solid ${entidadId==='personal'?V.teal:V.border}`,
+              background:entidadId==='personal'?V.tealLight:V.surface, color:entidadId==='personal'?V.tealDark:V.ink2,
+              fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:"'Nunito',sans-serif",
+            }}>👤 Personal</button>
+            {negociosPropios.map(n => (
+              <button key={n.id} onClick={()=>setEntidadId(n.id)} style={{
+                padding:'8px 16px', borderRadius:20, border:`1.5px solid ${entidadId===n.id?V.teal:V.border}`,
+                background:entidadId===n.id?V.tealLight:V.surface, color:entidadId===n.id?V.tealDark:V.ink2,
+                fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:"'Nunito',sans-serif",
+              }}>🏷️ {n.nombre || n.datos?.actividad || 'Negocio'}</button>
+            ))}
+          </div>
+        )}
 
         {/* Tabs */}
         <div style={{ display:'flex', gap:4, marginBottom:24, background:V.surface, borderRadius:12, padding:4, border:`1.5px solid ${V.border}` }}>

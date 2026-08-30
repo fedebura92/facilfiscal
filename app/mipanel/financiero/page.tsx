@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { CATEGORIAS_MONO } from '@/lib/data'
+import type { NegocioProyecto } from '@/lib/types'
 
 const V = {
   tealDark:'#0d5c78', teal:'#1a7fa8', tealLight:'#e8f6fb', tealRing:'#a8ddf0',
@@ -17,9 +19,10 @@ const V = {
 const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 const MESES_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-// Límites de categorías monotributo 2026
-const LIMITES_MONO = [2700000,4050000,5400000,6750000,9450000,13500000,19600000,24500000,29500000,35000000,68000000]
-const CATS_MONO = ['A','B','C','D','E','F','G','H','I','J','K']
+// Fuente única de límites de categoría (lib/data.ts) — antes había otra
+// copia hardcodeada y desactualizada acá adentro (ya iba por la 5ta vez).
+const LIMITES_MONO = CATEGORIAS_MONO.map(c => c.limite_anual)
+const CATS_MONO    = CATEGORIAS_MONO.map(c => c.letra)
 
 function money(n: number) {
   if (n >= 1000000) return `$${(n/1000000).toFixed(1)}M`
@@ -59,6 +62,21 @@ export default function FinancieroPage() {
   const [loading, setLoading]   = useState(true)
   const [anio, setAnio]         = useState(anioActual)
 
+  // Entidad seleccionada: 'personal' o el id de un negocio activo. Cada
+  // negocio tiene su propia categoría/régimen — no tiene sentido mezclar
+  // los ingresos de todos bajo un solo cálculo de límite.
+  const [negocios, setNegocios] = useState<NegocioProyecto[]>([])
+  const [entidadId, setEntidadId] = useState<string>('personal')
+
+  const negociosPropios = useMemo(() => negocios.filter(n => n.datos?.relacion !== 'empleado'), [negocios])
+  const negocioActivo = useMemo(() => entidadId === 'personal' ? null : negociosPropios.find(n => n.id === entidadId) || null, [entidadId, negociosPropios])
+  // Tipo de contribuyente EFECTIVO según la entidad elegida — antes esto
+  // siempre venía de perfil.tipo_contribuyente, aunque estuvieras viendo un
+  // negocio con un régimen distinto.
+  const tipoActivo = negocioActivo
+    ? (negocioActivo.datos?.situacion_fiscal === 'mono' ? 'mono' : negocioActivo.datos?.situacion_fiscal === 'ri' ? 'ri' : undefined)
+    : perfil?.tipo_contribuyente
+
   // Ingresos
   const [ingresos, setIngresos] = useState<number[]>(Array(12).fill(0))
   const [editMes, setEditMes]   = useState<number|null>(null)
@@ -76,20 +94,42 @@ export default function FinancieroPage() {
   const [savingFactura, setSavingFactura] = useState(false)
   const [tabActiva, setTabActiva]         = useState<'financiero'|'cobranzas'>('financiero')
 
-  // ── Cargar datos ────────────────────────────────────────────────────────
+  // ── Cargar usuario, perfil y negocios (una vez) ──────────────────────────
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { window.location.href = '/login'; return }
       setUserId(user.id)
 
-      const [{ data: profileData }, { data: ingresosData }, { data: facturasData }] = await Promise.all([
-        supabase.from('profiles').select('tipo_contribuyente, facturacion_estimada, nombre').eq('id', user.id).single(),
-        supabase.from('ingresos_mensuales').select('mes, monto').eq('user_id', user.id).eq('anio', anio),
-        supabase.from('facturas').select('*').eq('user_id', user.id).order('fecha_emision', { ascending: false }),
-      ])
-
+      const { data: profileData } = await supabase.from('profiles').select('tipo_contribuyente, facturacion_estimada, nombre').eq('id', user.id).single()
       if (profileData) setPerfil(profileData)
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        try {
+          const res = await fetch('/api/negocio/proyectos', { headers: { Authorization: `Bearer ${session.access_token}` } })
+          const json = await res.json()
+          setNegocios((json.proyectos || []).filter((p: NegocioProyecto) => p.estado === 'activo'))
+        } catch { /* el panel sigue funcionando solo con "Personal" */ }
+      }
+    }
+    load()
+  }, [])
+
+  // ── Cargar ingresos y facturas de la entidad + año seleccionados ────────
+  useEffect(() => {
+    if (!userId) return
+    const load = async () => {
+      setLoading(true)
+      const negId = entidadId === 'personal' ? null : entidadId
+
+      let qIngresos = supabase.from('ingresos_mensuales').select('mes, monto').eq('user_id', userId).eq('anio', anio)
+      qIngresos = negId ? qIngresos.eq('negocio_id', negId) : qIngresos.is('negocio_id', null)
+
+      let qFacturas = supabase.from('facturas').select('*').eq('user_id', userId).order('fecha_emision', { ascending: false })
+      qFacturas = negId ? qFacturas.eq('negocio_id', negId) : qFacturas.is('negocio_id', null)
+
+      const [{ data: ingresosData }, { data: facturasData }] = await Promise.all([qIngresos, qFacturas])
 
       const arr = Array(12).fill(0)
       for (const row of ingresosData || []) arr[row.mes - 1] = row.monto
@@ -99,9 +139,12 @@ export default function FinancieroPage() {
       setLoading(false)
     }
     load()
-  }, [anio])
+  }, [userId, anio, entidadId])
 
   // ── Guardar ingreso de un mes ────────────────────────────────────────────
+  // Chequeo manual (select → update/insert) en vez de upsert con onConflict:
+  // con negocio_id nullable, un solo onConflict no cubre bien "personal"
+  // (negocio_id IS NULL) y "de un negocio" (negocio_id = X) al mismo tiempo.
   const guardarIngreso = async (mes: number) => {
     if (!userId) return
     setSavingMes(true)
@@ -110,13 +153,16 @@ export default function FinancieroPage() {
     newArr[mes] = monto
     setIngresos(newArr)
 
-    await supabase.from('ingresos_mensuales').upsert({
-      user_id: userId,
-      anio,
-      mes: mes + 1,
-      monto,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,anio,mes' })
+    const negId = entidadId === 'personal' ? null : entidadId
+    let qExiste = supabase.from('ingresos_mensuales').select('id').eq('user_id', userId).eq('anio', anio).eq('mes', mes + 1)
+    qExiste = negId ? qExiste.eq('negocio_id', negId) : qExiste.is('negocio_id', null)
+    const { data: existente } = await qExiste.maybeSingle()
+
+    if (existente) {
+      await supabase.from('ingresos_mensuales').update({ monto, updated_at: new Date().toISOString() }).eq('id', existente.id)
+    } else {
+      await supabase.from('ingresos_mensuales').insert({ user_id: userId, negocio_id: negId, anio, mes: mes + 1, monto })
+    }
 
     setSavingMes(false)
     setEditMes(null)
@@ -127,8 +173,10 @@ export default function FinancieroPage() {
   const guardarFactura = async () => {
     if (!userId || !nfCliente || !nfMonto) return
     setSavingFactura(true)
+    const negId = entidadId === 'personal' ? null : entidadId
     const { data } = await supabase.from('facturas').insert({
       user_id: userId,
+      negocio_id: negId,
       cliente: nfCliente,
       concepto: nfConcepto,
       monto: parseFloat(nfMonto),
@@ -197,7 +245,7 @@ export default function FinancieroPage() {
           <div>
             <h1 style={{ fontSize:24, fontWeight:900, color:V.ink, margin:'0 0 4px' }}>💼 Panel financiero</h1>
             <p style={{ fontSize:13, color:V.ink3, fontWeight:600, margin:0 }}>
-              {perfil?.nombre ? `${perfil.nombre} · ` : ''}{anio}
+              {(negocioActivo ? (negocioActivo.nombre || negocioActivo.datos?.actividad) : perfil?.nombre) ? `${negocioActivo ? (negocioActivo.nombre || negocioActivo.datos?.actividad) : perfil?.nombre} · ` : ''}{anio}
             </p>
           </div>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
@@ -206,6 +254,25 @@ export default function FinancieroPage() {
             <button onClick={()=>setAnio(a=>a+1)} disabled={anio>=anioActual} style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:8, padding:'6px 12px', fontSize:13, fontWeight:700, color:anio>=anioActual?V.ink3:V.ink2, cursor:anio>=anioActual?'not-allowed':'pointer', fontFamily:"'Nunito',sans-serif" }}>{anio+1} ›</button>
           </div>
         </div>
+
+        {/* Selector de entidad — cada negocio tiene su propia categoría y
+            régimen, así que ingresos y facturas se ven de a uno por vez. */}
+        {negociosPropios.length > 0 && (
+          <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap' }}>
+            <button onClick={()=>setEntidadId('personal')} style={{
+              padding:'8px 16px', borderRadius:20, border:`1.5px solid ${entidadId==='personal'?V.teal:V.border}`,
+              background:entidadId==='personal'?V.tealLight:V.surface, color:entidadId==='personal'?V.tealDark:V.ink2,
+              fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:"'Nunito',sans-serif",
+            }}>👤 Personal</button>
+            {negociosPropios.map(n => (
+              <button key={n.id} onClick={()=>setEntidadId(n.id)} style={{
+                padding:'8px 16px', borderRadius:20, border:`1.5px solid ${entidadId===n.id?V.teal:V.border}`,
+                background:entidadId===n.id?V.tealLight:V.surface, color:entidadId===n.id?V.tealDark:V.ink2,
+                fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:"'Nunito',sans-serif",
+              }}>🏷️ {n.nombre || n.datos?.actividad || 'Negocio'}</button>
+            ))}
+          </div>
+        )}
 
         {/* Tabs */}
         <div style={{ display:'flex', gap:4, marginBottom:24, background:V.surface, borderRadius:12, padding:4, border:`1.5px solid ${V.border}` }}>
@@ -244,7 +311,7 @@ export default function FinancieroPage() {
             </div>
 
             {/* Barra de límite de categoría */}
-            {perfil?.tipo_contribuyente === 'mono' && (
+            {tipoActivo === 'mono' && (
               <div style={{ background:V.surface, border:`1.5px solid ${pctLimite>=90?V.redRing:pctLimite>=75?V.amberRing:V.border}`, borderRadius:14, padding:'18px 20px' }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:10 }}>
                   <div style={{ fontSize:14, fontWeight:800, color:V.ink }}>Progreso en categoría {catLabel}</div>
@@ -324,8 +391,8 @@ export default function FinancieroPage() {
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:10 }}>
                   {[
                     { label:'Ingreso esperado próximo mes', valor:money(promedioMensual), desc:'Basado en tu promedio histórico' },
-                    { label:'Impuestos estimados próx. mes', valor:money(promedioMensual * (perfil?.tipo_contribuyente==='mono'?0.04:0.31)), desc:perfil?.tipo_contribuyente==='mono'?'~4% de tus ingresos':'IVA + Ganancias estimados' },
-                    { label:'Neto estimado próx. mes', valor:money(promedioMensual * (perfil?.tipo_contribuyente==='mono'?0.96:0.69)), desc:'Después de impuestos' },
+                    { label:'Impuestos estimados próx. mes', valor:money(promedioMensual * (tipoActivo==='mono'?0.04:0.31)), desc:tipoActivo==='mono'?'~4% de tus ingresos':'IVA + Ganancias estimados' },
+                    { label:'Neto estimado próx. mes', valor:money(promedioMensual * (tipoActivo==='mono'?0.96:0.69)), desc:'Después de impuestos' },
                   ].map((item,i) => (
                     <div key={i} style={{ background:V.bg, borderRadius:10, padding:'14px 16px', border:`1px solid ${V.border}` }}>
                       <div style={{ fontSize:11, fontWeight:700, color:V.ink3, marginBottom:6, lineHeight:1.3 }}>{item.label}</div>
