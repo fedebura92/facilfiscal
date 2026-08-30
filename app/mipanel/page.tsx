@@ -539,10 +539,13 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
 
   const [negociosActivos, setNegociosActivos] = useState<NegocioProyecto[]>([])
 
-  // Obligaciones de la PERSONA (ej: Autónomos, Ganancias) — no dependen de
-  // cuántos negocios tenga, así que se calculan una sola vez desde Mi
-  // Perfil, nunca desde un negocio puntual.
-  const obligacionesPersona = useMemo(() => diagnostico.filter(o => o.nivel === 'persona'), [diagnostico])
+  // Obligaciones estrictamente personales. Si existen negocios activos,
+  // Ganancias se explica dentro de la actividad que la origina para evitar
+  // que un Mi Perfil incompleto contradiga un negocio ya configurado.
+  const obligacionesPersona = useMemo(
+    () => diagnostico.filter(o => o.nivel === 'persona' && (negociosActivos.length === 0 || o.key !== 'ganancias')),
+    [diagnostico, negociosActivos.length]
+  )
 
   // Facturación combinada de tus negocios — la que en definitiva importa
   // para evaluar Ganancias como persona (no cada negocio por separado).
@@ -554,11 +557,10 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     [negociosPropios]
   )
 
-  // Cada negocio muestra SOLO sus propias obligaciones (nivel 'negocio'):
-  // Autónomos/Ganancias no se repiten acá, porque ya se muestran una vez
-  // en "Tu situación personal".
+  // Cada negocio muestra sus obligaciones operativas, incluida Ganancias
+  // cuando corresponda. Autónomos permanece en la situación personal.
   const diagnosticosPorNegocio = useMemo(
-    () => negociosActivos.map(n => ({ negocio: n, diagnostico: calcularDiagnostico(n.datos).filter(o => o.nivel === 'negocio') })),
+    () => negociosActivos.map(n => ({ negocio: n, diagnostico: calcularDiagnostico(n.datos, 'negocio').filter(o => o.nivel === 'negocio') })),
     [negociosActivos]
   )
   const completedCount = tasks.filter(t=>t.done).length
@@ -1058,7 +1060,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
                   </div>
                   <div style={{ fontSize:11, color:V.ink3, fontWeight:600, marginBottom:12, display:'flex', gap:6, flexWrap:'wrap' }}>
                     {negocio.datos?.situacion_fiscal && (
-                      <span>{negocio.datos.situacion_fiscal === 'mono' ? '📋 Monotributo' : negocio.datos.situacion_fiscal === 'ri' ? '🏢 Responsable Inscripto' : negocio.datos.situacion_fiscal}{negocio.datos.provincia && ` · ${negocio.datos.provincia}`}</span>
+                      <span>{negocio.datos.alternativa_elegida === 'sociedad' ? '🏛️ Sociedad' : negocio.datos.situacion_fiscal === 'mono' ? '📋 Monotributo' : negocio.datos.situacion_fiscal === 'ri' ? '🏢 Responsable Inscripto' : negocio.datos.situacion_fiscal}{negocio.datos.provincia && ` · ${negocio.datos.provincia}`}</span>
                     )}
                     {negocio.datos?.relacion && <span>· {RELACION_LABEL[negocio.datos.relacion]}</span>}
                   </div>

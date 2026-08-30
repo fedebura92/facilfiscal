@@ -192,6 +192,11 @@ export interface DatosNegocio {
   // del negocio no son tuyas personalmente — trabajás en relación de
   // dependencia para otra persona/entidad que sí es la responsable.
   relacion?: RelacionNegocio
+
+  // Decisión final tomada al activar el proyecto. Antes solo se usaba
+  // durante el POST y se perdía; conservarla permite distinguir una
+  // actividad personal de una sociedad al recalcular el diagnóstico.
+  alternativa_elegida?: AlternativaKey
 }
 
 export type RelacionNegocio = 'titular' | 'socio' | 'administrador' | 'empleado' | 'otro'
@@ -236,6 +241,7 @@ export interface AnalisisAlternativa {
 // calcularDiagnostico() sirve para los dos casos sin adaptador.
 export interface SituacionFiscalInput {
   situacion_fiscal?: SituacionFiscal
+  alternativa_elegida?: AlternativaKey
   inscripto_autonomos?: boolean | null
   provincia?: string
   inscripto_iibb?: boolean | null
@@ -245,3 +251,5 @@ export interface SituacionFiscalInput {
   cantidad_empleados?: number | null
   perfil_data?: PerfilDataExtra
 }
+
+export type OrigenDiagnostico = 'perfil' | 'negocio'
