@@ -208,6 +208,7 @@ export default function MiPanel() {
   const [userId, setUserId]           = useState<string|null>(null)
   const [tasks, setTasks]             = useState<Task[]>(buildTasks(null,{}))
   const [authChecked, setAuthChecked] = useState(false)
+  const [loadError, setLoadError]     = useState('')
   const [menuOpen, setMenuOpen]       = useState(false)
   const [aiQuery, setAiQuery]         = useState('')
   const [aiLoading, setAiLoading]     = useState(false)
@@ -250,55 +251,88 @@ export default function MiPanel() {
   const [recuperoRespuesta, setRecuperoRespuesta]   = useState('')
   const [recuperoLoading, setRecuperoLoading]       = useState(false)
 
+  const [negociosActivos, setNegociosActivos] = useState<NegocioProyecto[]>([])
+
   useEffect(() => {
+    let active = true
+
+    const withTimeout = <T,>(promise: PromiseLike<T>, label: string, timeoutMs = 12000): Promise<T> =>
+      Promise.race([
+        Promise.resolve(promise),
+        new Promise<T>((_, reject) => {
+          window.setTimeout(() => reject(new Error(`${label} tardó demasiado en responder.`)), timeoutMs)
+        }),
+      ])
+
     const load = async () => {
-      const { data:{ user } } = await supabase.auth.getUser()
-      if (!user) { window.location.href='/login'; return }
-      setUserId(user.id)
+      setLoadError('')
+      setAuthChecked(false)
+
+      try {
+        const { data:{ user }, error: authError } = await withTimeout(supabase.auth.getUser(), 'La autenticación')
+        if (authError) throw authError
+        if (!user) { window.location.href='/login'; return }
+        if (!active) return
+        setUserId(user.id)
 
       // ── Lee de profiles (tabla correcta) ──────────────────────────────
       // select('*') trae también los campos de Mi Perfil v2 (situacion_fiscal,
       // tiene_empleados, inscripto_iibb, perfil_data, perfil_completitud, etc.)
       // que alimentan el diagnóstico de abajo.
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+        const { data: profileData, error: profileError } = await withTimeout(
+          supabase.from('profiles').select('*').eq('id', user.id).single(),
+          'La carga del perfil'
+        )
+        if (profileError && profileError.code !== 'PGRST116') throw profileError
 
-      const p: Perfil = { id: user.id, ...(profileData || {}) }
-      setPerfil(p)
+        const p: Perfil = { id: user.id, ...(profileData || {}) }
+        setPerfil(p)
 
       // ── Checklist ─────────────────────────────────────────────────────
-      const { data: checklistData } = await supabase
-        .from('user_checklist')
-        .select('task_id, done, done_at')
-        .eq('user_id', user.id)
+        const { data: checklistData, error: checklistError } = await withTimeout(
+          supabase.from('user_checklist').select('task_id, done, done_at').eq('user_id', user.id),
+          'La carga del checklist'
+        )
+        if (checklistError) throw checklistError
 
-      const db: Record<string,{done:boolean;done_at:string|null}> = {}
-      for (const row of checklistData || []) db[row.task_id] = { done:row.done, done_at:row.done_at }
+        const db: Record<string,{done:boolean;done_at:string|null}> = {}
+        for (const row of checklistData || []) db[row.task_id] = { done:row.done, done_at:row.done_at }
 
-      setTasks(buildTasks(p, db))
+        setTasks(buildTasks(p, db))
 
       // ── Negocios activos (Crear Mi Negocio) ────────────────────────────
       // Cada uno puede tener su propia situación fiscal (ej: RI para un
       // local y Monotributo para otra actividad, al mismo tiempo) — por eso
       // el diagnóstico se calcula por negocio, no solo con el perfil.
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        try {
-          const res = await fetch('/api/negocio/proyectos', { headers: { Authorization: `Bearer ${session.access_token}` } })
-          const json = await res.json()
-          const activos = (json.proyectos || []).filter((pr: NegocioProyecto) => pr.estado === 'activo')
-          setNegociosActivos(activos)
-        } catch {
-          // Si falla, el panel sigue funcionando con la situación general.
+        const { data: { session }, error: sessionError } = await withTimeout(supabase.auth.getSession(), 'La sesión')
+        if (sessionError) throw sessionError
+        if (session) {
+          try {
+            const controller = new AbortController()
+            const timeoutId = window.setTimeout(() => controller.abort(), 10000)
+            const res = await fetch('/api/negocio/proyectos', {
+              headers: { Authorization: `Bearer ${session.access_token}` },
+              signal: controller.signal,
+            })
+            window.clearTimeout(timeoutId)
+            if (!res.ok) throw new Error(`Negocios respondió ${res.status}`)
+            const json = await res.json()
+            const activos = (json.proyectos || []).filter((pr: NegocioProyecto) => pr.estado === 'activo')
+            if (active) setNegociosActivos(activos)
+          } catch (error) {
+            // La situación personal sigue disponible aunque falle este módulo.
+            console.error('[mipanel] No se pudieron cargar los negocios', error)
+          }
         }
+      } catch (error) {
+        console.error('[mipanel] Falló la carga inicial', error)
+        if (active) setLoadError(error instanceof Error ? error.message : 'No pudimos cargar tu información.')
+      } finally {
+        if (active) setAuthChecked(true)
       }
-
-      setAuthChecked(true)
     }
     load()
+    return () => { active = false }
   }, [])
 
   useEffect(() => { aiEndRef.current?.scrollIntoView({ behavior:'smooth' }) }, [aiHistory, aiLoading])
@@ -537,8 +571,6 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   const obligacionesPendientes = diagnostico.filter(o => o.aplica === true).length
   const obligacionesPorConfirmar = diagnostico.filter(o => o.aplica === null).length
 
-  const [negociosActivos, setNegociosActivos] = useState<NegocioProyecto[]>([])
-
   // Obligaciones estrictamente personales. Si existen negocios activos,
   // Ganancias se explica dentro de la actividad que la origina para evitar
   // que un Mi Perfil incompleto contradiga un negocio ya configurado.
@@ -749,6 +781,19 @@ const timelineItems = useMemo<TimelineItems>(() => {
 
   if (!authChecked) return (
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Nunito',sans-serif", color:V.ink3 }}>Cargando...</div>
+  )
+
+  if (loadError) return (
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24, background:V.bg, fontFamily:"'Nunito',sans-serif" }}>
+      <div style={{ width:'100%', maxWidth:460, padding:28, background:V.surface, border:`1px solid ${V.border}`, borderRadius:16, textAlign:'center' }}>
+        <div style={{ fontSize:28, marginBottom:10 }}>⚠️</div>
+        <h1 style={{ margin:'0 0 8px', fontSize:20, color:V.ink }}>No pudimos cargar Mi Panel</h1>
+        <p style={{ margin:'0 0 18px', fontSize:13, color:V.ink3 }}>{loadError}</p>
+        <button onClick={() => window.location.reload()} style={{ border:0, borderRadius:10, padding:'11px 18px', background:V.teal, color:'#fff', fontWeight:800, cursor:'pointer' }}>
+          Reintentar
+        </button>
+      </div>
+    </div>
   )
 
   return (
