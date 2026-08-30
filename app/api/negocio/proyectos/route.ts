@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
   // de este negocio (no de profiles) — así cada negocio guarda la suya.
   if (estado === 'activo' && alternativa_elegida) {
     datos.situacion_fiscal = mapearASituacionFiscal(alternativa_elegida)
+    datos.alternativa_elegida = alternativa_elegida
 
     // El motor de reglas (lib/reglas-fiscales.ts) lee las situaciones
     // especiales desde perfil_data.situaciones_especiales, pero el wizard
@@ -170,7 +171,7 @@ export async function POST(req: NextRequest) {
     // sobre los datos de ESTE negocio puntual, no sobre "la persona". Esto
     // es lo que permite que alguien sea RI para un local Y Monotributista
     // para otra actividad al mismo tiempo, cada uno con su propio cálculo.
-    const diagnosticoNegocio = calcularDiagnostico(datos)
+    const diagnosticoNegocio = calcularDiagnostico(datos, 'negocio')
     const completitudFiscal = calcularCompletitudFiscal(datos)
 
     const filasDiagNegocio = diagnosticoNegocio.map(d => ({

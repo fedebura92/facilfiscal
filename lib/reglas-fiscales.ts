@@ -27,7 +27,7 @@
 // lógica en componentes: importar desde acá.
 // ============================================================================
 
-import type { SituacionFiscalInput, PerfilFiscal } from './types'
+import type { SituacionFiscalInput, PerfilFiscal, OrigenDiagnostico } from './types'
 
 export type NivelObligacion = 'persona' | 'negocio'
 export type NivelConfianza = 'confirmado' | 'inferido' | 'heredado' | 'por_confirmar'
@@ -54,7 +54,10 @@ function ob(
   return { key, label, aplica, motivo, faltaInfo, nivel, confianza }
 }
 
-export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
+export function calcularDiagnostico(
+  p: SituacionFiscalInput,
+  origen: OrigenDiagnostico = 'perfil'
+): Obligacion[] {
   const out: Obligacion[] = []
   const sit = p.situacion_fiscal
 
@@ -104,17 +107,25 @@ export function calcularDiagnostico(p: SituacionFiscalInput): Obligacion[] {
   }
 
   // ── Ganancias ────────────────────────────────────────────────────────────
-  // Es de la PERSONA (Ganancias es un impuesto personal, aunque se dispare
-  // por la actividad de un negocio) — TODO-VERIFICAR: si el negocio es una
-  // sociedad, Ganancias puede corresponderle a la sociedad en vez de (o
-  // además de) a la persona; por ahora lo simplificamos como personal.
+  // En Mi Perfil se presenta como una obligación personal. Cuando el motor
+  // evalúa un negocio, se mantiene dentro del diagnóstico de esa actividad:
+  // de otro modo desaparecía de la tarjeta al filtrar por nivel y, si el
+  // perfil estaba incompleto, reaparecía contradictoriamente "por confirmar".
+  // En una sociedad la obligación pertenece directamente a la entidad; en
+  // una actividad individual se muestra allí como obligación originada por
+  // esa actividad, sin pretender calcular la liquidación consolidada.
   // Confianza 'inferido': se deduce del régimen + de si sos Autónomo.
+  const nivelGanancias: NivelObligacion = origen === 'negocio' ? 'negocio' : 'persona'
+  const esSociedad = p.alternativa_elegida === 'sociedad'
   if (sit === 'ri' || p.inscripto_autonomos) {
-    out.push(ob('ganancias', 'Impuesto a las Ganancias', true, 'Como Responsable Inscripto o Autónomo, en general te corresponde declarar Ganancias.', 'persona', 'inferido'))
+    const motivo = esSociedad
+      ? 'La sociedad tributa Ganancias como persona jurídica.'
+      : 'Como Responsable Inscripto o Autónomo, en general corresponde declarar Ganancias.'
+    out.push(ob('ganancias', 'Impuesto a las Ganancias', true, motivo, nivelGanancias, 'inferido'))
   } else if (sit === 'mono') {
-    out.push(ob('ganancias', 'Impuesto a las Ganancias', false, 'El Monotributo reemplaza a Ganancias mientras te mantengas dentro del régimen.', 'persona', 'inferido'))
+    out.push(ob('ganancias', 'Impuesto a las Ganancias', false, 'El Monotributo reemplaza a Ganancias mientras te mantengas dentro del régimen.', nivelGanancias, 'inferido'))
   } else {
-    out.push(ob('ganancias', 'Impuesto a las Ganancias', null, 'Necesitamos confirmar tu régimen fiscal.', 'persona', 'por_confirmar', ['situacion_fiscal']))
+    out.push(ob('ganancias', 'Impuesto a las Ganancias', null, 'Necesitamos confirmar tu régimen fiscal.', nivelGanancias, 'por_confirmar', ['situacion_fiscal']))
   }
 
   // ── Ingresos Brutos / Convenio Multilateral ─────────────────────────────
