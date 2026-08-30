@@ -1,163 +1,480 @@
--- ============================================================
--- FÁCIL FISCAL — Schema completo Supabase (versión final)
--- ============================================================
+-- FacilFiscal canonical database baseline
+-- Snapshot of the production structure on 2026-08-30.
+--
+-- Creates structure only. It intentionally does not copy users, invoices,
+-- email logs, fiscal deadlines, alerts, or time-sensitive tax amounts.
+-- Dynamic fiscal reference data must be loaded by a reviewed, dated migration.
 
-create extension if not exists "uuid-ossp";
+begin;
 
--- ── TABLA: users ─────────────────────────────────────────────
+create extension if not exists "uuid-ossp" with schema extensions;
+create extension if not exists pgcrypto with schema extensions;
+
+-- ---------------------------------------------------------------------------
+-- Legacy email subscription model
+-- ---------------------------------------------------------------------------
+
 create table if not exists public.users (
-  id               uuid primary key default uuid_generate_v4(),
-  email            text not null unique,
-  cuit             text,
-  tipo             text not null default 'mono'
-                   check (tipo in ('mono','ri','aut')),
-  nombre           text,
+  id uuid primary key default extensions.uuid_generate_v4(),
+  email text not null unique,
+  cuit text,
+  tipo text not null default 'mono' check (tipo in ('mono','ri','aut')),
+  nombre text,
   terminacion_cuit char(1),
-  activo           boolean default true,
-  created_at       timestamptz default now(),
-  updated_at       timestamptz default now()
+  activo boolean default true,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  provincia text,
+  actividad text,
+  tipo_contribuyente text check (tipo_contribuyente in ('mono','ri','aut')),
+  facturacion_estimada numeric,
+  constraint unique_email_tipo unique (email, tipo)
 );
 
 create index if not exists users_email_idx on public.users(email);
-create index if not exists users_tipo_idx  on public.users(tipo);
+create index if not exists users_tipo_idx on public.users(tipo);
 
-create or replace function update_updated_at()
-returns trigger as $$
-begin new.updated_at = now(); return new; end;
-$$ language plpgsql;
+-- ---------------------------------------------------------------------------
+-- Public fiscal reference data
+-- ---------------------------------------------------------------------------
 
-drop trigger if exists users_updated_at on public.users;
-create trigger users_updated_at
-  before update on public.users
-  for each row execute function update_updated_at();
-
--- ── TABLA: vencimientos ──────────────────────────────────────
 create table if not exists public.vencimientos (
-  id         uuid primary key default uuid_generate_v4(),
-  nombre     text not null,
-  emoji      text default '📋',
-  detalle    text,
-  dia_mes    int not null check (dia_mes between 1 and 31),
-  tipo       text not null check (tipo in ('mono','ri','aut','todos')),
-  mes        int,
-  activo     boolean default true,
+  id uuid primary key default extensions.uuid_generate_v4(),
+  nombre text not null,
+  emoji text default '📋',
+  detalle text,
+  dia_mes integer not null check (dia_mes between 1 and 31),
+  tipo text not null check (tipo in ('mono','ri','aut','todos')),
+  activo boolean default true,
   created_at timestamptz default now()
 );
 
 create index if not exists venc_tipo_idx on public.vencimientos(tipo);
-create index if not exists venc_dia_idx  on public.vencimientos(dia_mes);
+create index if not exists venc_dia_idx on public.vencimientos(dia_mes);
 
-insert into public.vencimientos (nombre, emoji, detalle, dia_mes, tipo) values
-  ('Monotributo (term. 0-4)', '📋', 'Terminación CUIT 0, 1, 2, 3 o 4',       3,  'mono'),
-  ('Monotributo (term. 5-9)', '📋', 'Terminación CUIT 5, 6, 7, 8 o 9',       10, 'mono'),
-  ('Obra Social / Previsional','🏥','Componente previsional del monotributo', 12, 'mono'),
-  ('IVA',                     '🧾','Presentación y pago mensual',             19, 'ri'  ),
-  ('Ganancias anticipo',      '💼','Anticipo mensual personas jurídicas',     25, 'ri'  ),
-  ('SUSS Empleadores',        '👥','Contribuciones patronales',               12, 'ri'  ),
-  ('Bienes Personales',       '🏠','Anticipo mensual',                        22, 'ri'  ),
-  ('Autónomos',               '⚡','Aporte mensual categorías I-V',            8, 'aut' ),
-  ('IVA (autónomos)',         '🧾','Si estás inscripto en IVA',               19, 'aut' ),
-  ('Ganancias anticipo',      '💼','Anticipo mensual personas humanas',       25, 'aut' );
-
--- ── TABLA: alerts ────────────────────────────────────────────
 create table if not exists public.alerts (
-  id                 uuid primary key default uuid_generate_v4(),
-  icon               text default '⚠️',
-  tipo               text default 'warn' check (tipo in ('warn','info','danger')),
-  title              text not null,
-  description        text,
+  id uuid primary key default extensions.uuid_generate_v4(),
+  icon text default '⚠️',
+  tipo text default 'warn' check (tipo in ('warn','info','danger')),
+  title text not null,
+  description text,
   tipo_contribuyente text not null default 'todos'
-                     check (tipo_contribuyente in ('mono','ri','aut','todos')),
-  activa             boolean default true,
-  fecha_expiracion   date,
-  created_at         timestamptz default now()
+    check (tipo_contribuyente in ('mono','ri','aut','todos')),
+  activa boolean default true,
+  fecha_expiracion date,
+  created_at timestamptz default now()
 );
 
-create index if not exists alerts_tipo_idx   on public.alerts(tipo_contribuyente);
+create index if not exists alerts_tipo_idx on public.alerts(tipo_contribuyente);
 create index if not exists alerts_activa_idx on public.alerts(activa);
 
-insert into public.alerts (icon, tipo, title, description, tipo_contribuyente) values
-  ('🔄','warn',   'Recategorización abierta',   'Período enero-febrero. Revisá si tus ingresos cambiaron.',            'mono'),
-  ('💰','warn',   'Nuevos valores de cuota',    'Los montos del monotributo se actualizaron. Verificá en ARCA.',       'mono'),
-  ('📢','info',   'ARCA reemplaza a AFIP',      'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.',            'todos'),
-  ('📅','warn',   'IVA bimestral',              'Si sos contribuyente bimestral, verificá el cronograma específico.', 'ri'),
-  ('💼','danger', 'Retenciones y percepciones', 'Verificá si debés presentar F.2002 o F.572 este mes.',               'ri'),
-  ('⚡','warn',   'Ajuste de categorías',       'Las categorías de autónomos se actualizan por inflación.',           'aut');
-
--- ── TABLA: email_logs ────────────────────────────────────────
--- fecha_envio se puebla via trigger (evita el error 42P17 de IMMUTABLE)
-create table if not exists public.email_logs (
-  id             uuid primary key default uuid_generate_v4(),
-  user_id        uuid references public.users(id) on delete cascade,
-  email          text not null,
-  tipo_email     text not null,
-  vencimiento_id uuid references public.vencimientos(id),
-  enviado_at     timestamptz default now(),
-  fecha_envio    date,
-  error          text
+create table if not exists public.vencimientos_fiscales (
+  id uuid primary key default gen_random_uuid(),
+  mes integer not null,
+  anio integer not null,
+  titulo text not null,
+  descripcion text not null,
+  categoria text[] not null,
+  tipo text not null,
+  dia integer,
+  rango text,
+  pendiente boolean default false,
+  verificado boolean default false,
+  fuente text,
+  created_at timestamptz default now(),
+  unique (mes, anio, titulo)
 );
 
-create index if not exists email_logs_user_idx  on public.email_logs(user_id);
-create index if not exists email_logs_email_idx on public.email_logs(email);
+create index if not exists idx_vencimientos_mes_anio
+  on public.vencimientos_fiscales(mes, anio);
 
+create table if not exists public.montos_monotributo (
+  id integer generated by default as identity primary key,
+  letra text not null,
+  orden integer not null,
+  limite_anual numeric not null,
+  imp_servicios numeric not null,
+  imp_productos numeric not null,
+  prev_sipa numeric not null,
+  os numeric not null,
+  total_servicios numeric not null,
+  total_productos numeric not null,
+  vigencia text not null,
+  fuente text,
+  updated_at timestamptz default now()
+);
+
+-- ---------------------------------------------------------------------------
+-- Email delivery history
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.email_logs (
+  id uuid primary key default extensions.uuid_generate_v4(),
+  user_id uuid references public.users(id) on delete cascade,
+  email text not null,
+  tipo_email text not null,
+  vencimiento_id uuid references public.vencimientos(id),
+  enviado_at timestamptz default now(),
+  fecha_envio date,
+  error text
+);
+
+create index if not exists email_logs_user_idx on public.email_logs(user_id);
+create index if not exists email_logs_email_idx on public.email_logs(email);
+create index if not exists email_logs_vencimiento_idx on public.email_logs(vencimiento_id);
 create unique index if not exists email_logs_no_dup
   on public.email_logs(email, tipo_email, vencimiento_id, fecha_envio)
   where error is null;
 
--- Trigger que puebla fecha_envio automáticamente
+-- ---------------------------------------------------------------------------
+-- Authenticated personal profile
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text not null,
+  nombre text,
+  provincia text,
+  actividad text,
+  tipo_contribuyente text,
+  facturacion_estimada numeric,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  terminacion_cuit text check (terminacion_cuit in ('0','1','2','3','4','5','6','7','8','9')),
+  dni text,
+  cuit text,
+  telefono text,
+  domicilio_fiscal text,
+  nombre_fantasia text,
+  actividad_principal text,
+  actividades_secundarias text[] default '{}',
+  fecha_inicio_actividad date,
+  cantidad_sucursales integer default 1,
+  forma_operacion text[] default '{}',
+  situacion_fiscal text,
+  categoria_monotributo text,
+  fecha_alta_fiscal date,
+  inscripto_iva boolean,
+  inscripto_ganancias boolean,
+  inscripto_autonomos boolean,
+  localidad text,
+  inscripto_iibb boolean,
+  convenio_multilateral boolean,
+  otras_jurisdicciones text[] default '{}',
+  tiene_empleados boolean,
+  cantidad_empleados integer,
+  rango_facturacion text,
+  perfil_completitud numeric default 0,
+  perfil_onboarding_step text default 'inicio',
+  perfil_data jsonb default '{}'
+);
+
+create table if not exists public.profile_diagnostico (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  obligacion_key text not null,
+  aplica boolean,
+  motivo text,
+  falta_info text[] default '{}',
+  calculado_at timestamptz default now(),
+  unique (user_id, obligacion_key)
+);
+
+create index if not exists idx_diagnostico_user
+  on public.profile_diagnostico(user_id);
+
+create table if not exists public.user_checklist (
+  id uuid primary key default extensions.uuid_generate_v4(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  task_id text not null,
+  done boolean default false,
+  done_at timestamptz,
+  updated_at timestamptz default now(),
+  unique (user_id, task_id)
+);
+
+create index if not exists checklist_user_idx on public.user_checklist(user_id);
+
+-- ---------------------------------------------------------------------------
+-- Businesses and their independent fiscal diagnoses
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.negocio_proyectos (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  estado text not null default 'simulacion'
+    check (estado in ('simulacion','proyecto','activo')),
+  nombre text,
+  datos jsonb not null default '{}',
+  completitud numeric default 0,
+  certeza text check (certeza in ('clara','requiere_analisis','insuficiente')),
+  falta_info text[] default '{}',
+  alternativa_recomendada text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  completitud_fiscal numeric default 0
+);
+
+create index if not exists idx_negocio_proyectos_user
+  on public.negocio_proyectos(user_id);
+
+create table if not exists public.negocio_analisis (
+  id uuid primary key default gen_random_uuid(),
+  proyecto_id uuid not null references public.negocio_proyectos(id) on delete cascade,
+  alternativa_key text not null
+    check (alternativa_key in ('monotributo','regimen_general','sociedad')),
+  adecuacion text check (adecuacion in ('alta','media','baja')),
+  explicacion text,
+  desventajas text[] default '{}',
+  criterios jsonb default '{}',
+  es_recomendada boolean default false,
+  calculado_at timestamptz default now(),
+  unique (proyecto_id, alternativa_key)
+);
+
+create index if not exists idx_negocio_analisis_proyecto
+  on public.negocio_analisis(proyecto_id);
+
+create table if not exists public.negocio_diagnostico (
+  id uuid primary key default gen_random_uuid(),
+  proyecto_id uuid not null references public.negocio_proyectos(id) on delete cascade,
+  obligacion_key text not null,
+  aplica boolean,
+  motivo text,
+  falta_info text[] default '{}',
+  calculado_at timestamptz default now(),
+  unique (proyecto_id, obligacion_key)
+);
+
+create index if not exists idx_negocio_diagnostico_proyecto
+  on public.negocio_diagnostico(proyecto_id);
+
+-- ---------------------------------------------------------------------------
+-- Financial records, optionally assigned to a business
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.ingresos_mensuales (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  anio integer not null,
+  mes integer not null check (mes between 1 and 12),
+  monto numeric not null default 0,
+  notas text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  negocio_id uuid references public.negocio_proyectos(id) on delete set null
+);
+
+create index if not exists ingresos_user_idx
+  on public.ingresos_mensuales(user_id, anio);
+create index if not exists idx_ingresos_negocio
+  on public.ingresos_mensuales(negocio_id);
+create unique index if not exists idx_ingresos_negocio_periodo
+  on public.ingresos_mensuales(user_id, negocio_id, anio, mes)
+  where negocio_id is not null;
+create unique index if not exists idx_ingresos_personal_periodo
+  on public.ingresos_mensuales(user_id, anio, mes)
+  where negocio_id is null;
+
+create table if not exists public.facturas (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  numero text,
+  cliente text not null,
+  concepto text,
+  monto numeric not null,
+  fecha_emision date not null default current_date,
+  fecha_vto date,
+  estado text not null default 'pendiente'
+    check (estado in ('pendiente','cobrada','vencida','cancelada')),
+  notas text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  negocio_id uuid references public.negocio_proyectos(id) on delete set null
+);
+
+create index if not exists facturas_user_idx on public.facturas(user_id);
+create index if not exists facturas_estado_idx on public.facturas(user_id, estado);
+create index if not exists idx_facturas_negocio on public.facturas(negocio_id);
+
+-- ---------------------------------------------------------------------------
+-- Functions and triggers
+-- ---------------------------------------------------------------------------
+
+create or replace function public.update_updated_at()
+returns trigger language plpgsql set search_path = '' as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create or replace function public.set_updated_at()
+returns trigger language plpgsql set search_path = '' as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
 create or replace function public.set_email_logs_fecha_envio()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql set search_path = '' as $$
 begin
   new.fecha_envio := new.enviado_at::date;
   return new;
 end;
 $$;
 
-drop trigger if exists trg_set_email_logs_fecha_envio on public.email_logs;
-create trigger trg_set_email_logs_fecha_envio
-  before insert or update on public.email_logs
-  for each row execute function public.set_email_logs_fecha_envio();
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  insert into public.profiles (id, email) values (new.id, new.email);
+  return new;
+end;
+$$;
 
--- ── ROW LEVEL SECURITY ───────────────────────────────────────
-alter table public.users        enable row level security;
-alter table public.vencimientos enable row level security;
-alter table public.alerts       enable row level security;
-alter table public.email_logs   enable row level security;
-
-drop policy if exists "vencimientos_public_read" on public.vencimientos;
-drop policy if exists "alerts_public_read"       on public.alerts;
-drop policy if exists "users_open"               on public.users;
-drop policy if exists "email_logs_service_only"  on public.email_logs;
-
-create policy "vencimientos_public_read"
-  on public.vencimientos for select using (activo = true);
-create policy "alerts_public_read"
-  on public.alerts for select using (activa = true);
-create policy "users_open"
-  on public.users for all using (true) with check (true);
-create policy "email_logs_service_only"
-  on public.email_logs for all using (false);
-
--- ── FUNCIÓN helper para cron ─────────────────────────────────
-create or replace function get_vencimientos_proximos(p_tipo text, p_dias int default 7)
-returns table (id uuid, nombre text, emoji text, detalle text, dia_mes int, tipo text, fecha date)
-as $$
+create or replace function public.get_vencimientos_proximos(
+  p_tipo text,
+  p_dias integer default 7
+)
+returns table (
+  id uuid,
+  nombre text,
+  emoji text,
+  detalle text,
+  dia_mes integer,
+  tipo text,
+  fecha date
+)
+language plpgsql set search_path = '' as $$
 begin
   return query
-    select v.id, v.nombre, v.emoji, v.detalle, v.dia_mes, v.tipo,
-      make_date(
-        extract(year  from current_date)::int,
-        extract(month from current_date)::int,
-        v.dia_mes
-      )::date as fecha
-    from public.vencimientos v
-    where v.activo = true
-      and (v.tipo = p_tipo or v.tipo = 'todos')
-      and make_date(
-            extract(year  from current_date)::int,
-            extract(month from current_date)::int,
-            v.dia_mes
-          ) between current_date and current_date + p_dias
-    order by fecha;
+  select v.id, v.nombre, v.emoji, v.detalle, v.dia_mes, v.tipo,
+    make_date(
+      extract(year from current_date)::integer,
+      extract(month from current_date)::integer,
+      v.dia_mes
+    )::date
+  from public.vencimientos v
+  where v.activo = true
+    and (v.tipo = p_tipo or v.tipo = 'todos')
+    and make_date(
+      extract(year from current_date)::integer,
+      extract(month from current_date)::integer,
+      v.dia_mes
+    ) between current_date and current_date + p_dias
+  order by 7;
 end;
-$$ language plpgsql;
+$$;
+
+drop trigger if exists users_updated_at on public.users;
+create trigger users_updated_at before update on public.users
+for each row execute function public.update_updated_at();
+
+drop trigger if exists trg_profiles_updated_at on public.profiles;
+create trigger trg_profiles_updated_at before update on public.profiles
+for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_negocio_proyectos_updated_at on public.negocio_proyectos;
+create trigger trg_negocio_proyectos_updated_at before update on public.negocio_proyectos
+for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_set_email_logs_fecha_envio on public.email_logs;
+create trigger trg_set_email_logs_fecha_envio
+before insert or update on public.email_logs
+for each row execute function public.set_email_logs_fecha_envio();
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users
+for each row execute function public.handle_new_user();
+
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+revoke execute on function public.update_updated_at() from public, anon, authenticated;
+revoke execute on function public.set_updated_at() from public, anon, authenticated;
+revoke execute on function public.set_email_logs_fecha_envio() from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Row-level security
+-- ---------------------------------------------------------------------------
+
+alter table public.users enable row level security;
+alter table public.vencimientos enable row level security;
+alter table public.alerts enable row level security;
+alter table public.vencimientos_fiscales enable row level security;
+alter table public.montos_monotributo enable row level security;
+alter table public.email_logs enable row level security;
+alter table public.profiles enable row level security;
+alter table public.profile_diagnostico enable row level security;
+alter table public.user_checklist enable row level security;
+alter table public.negocio_proyectos enable row level security;
+alter table public.negocio_analisis enable row level security;
+alter table public.negocio_diagnostico enable row level security;
+alter table public.ingresos_mensuales enable row level security;
+alter table public.facturas enable row level security;
+
+create policy vencimientos_public_read on public.vencimientos
+  for select to anon, authenticated using (activo = true);
+
+create policy alerts_public_read on public.alerts
+  for select to anon, authenticated using (activa = true);
+
+create policy "Lectura publica vencimientos" on public.vencimientos_fiscales
+  for select to anon, authenticated using (true);
+
+create policy montos_public_read on public.montos_monotributo
+  for select to anon, authenticated using (true);
+
+create policy email_logs_service_only on public.email_logs
+  for all to anon, authenticated using (false) with check (false);
+
+create policy profiles_select_own on public.profiles
+  for select to authenticated using ((select auth.uid()) = id);
+create policy profiles_insert_own on public.profiles
+  for insert to authenticated with check ((select auth.uid()) = id);
+create policy profiles_update_own on public.profiles
+  for update to authenticated
+  using ((select auth.uid()) = id)
+  with check ((select auth.uid()) = id);
+
+create policy diagnostico_select_own on public.profile_diagnostico
+  for select to authenticated using (user_id = (select auth.uid()));
+
+create policy checklist_owner on public.user_checklist
+  for all to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
+create policy negocio_proyectos_own on public.negocio_proyectos
+  for all to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
+create policy negocio_analisis_own on public.negocio_analisis
+  for all to authenticated
+  using ((select auth.uid()) = (
+    select np.user_id from public.negocio_proyectos np
+    where np.id = negocio_analisis.proyecto_id
+  ))
+  with check ((select auth.uid()) = (
+    select np.user_id from public.negocio_proyectos np
+    where np.id = negocio_analisis.proyecto_id
+  ));
+
+create policy negocio_diagnostico_select_own on public.negocio_diagnostico
+  for select to authenticated
+  using ((select auth.uid()) = (
+    select np.user_id from public.negocio_proyectos np
+    where np.id = negocio_diagnostico.proyecto_id
+  ));
+
+create policy ingresos_owner on public.ingresos_mensuales
+  for all to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
+create policy facturas_owner on public.facturas
+  for all to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
+commit;
