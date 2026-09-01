@@ -37,6 +37,7 @@ export default function Home() {
   const [alertas, setAlertas]     = useState<AlertaUI[]>([])
   const [catIdx, setCatIdx]       = useState('')
   const [conOS, setConOS]         = useState(true)
+  const [actividad, setActividad] = useState<'servicios'|'productos'>('servicios')
   const [aiQuery, setAiQuery]     = useState('')
   const [aiResp, setAiResp]       = useState('')
   const [aiLoading, setAiLoading] = useState(false)
@@ -71,7 +72,8 @@ export default function Home() {
   const proximos = useMemo(() => vencOrd.filter(v => diffDias(v.fecha) <= 10).slice(0, 8), [vencOrd])
   const idx     = useMemo(() => parseInt(catIdx), [catIdx])
   const os      = useMemo(() => conOS ? (categorias[idx]?.os ?? 0) : 0, [conOS, categorias, idx])
-  const total   = useMemo(() => catIdx === '' ? 0 : categorias[idx].imp + categorias[idx].prev + os, [catIdx, categorias, idx, os])
+  const impuesto = catIdx === '' ? 0 : actividad === 'productos' ? (categorias[idx].imp_productos ?? categorias[idx].imp) : categorias[idx].imp
+  const total   = useMemo(() => catIdx === '' ? 0 : impuesto + categorias[idx].prev + os, [catIdx, categorias, idx, os, impuesto])
   const fechaHoy = mounted ? new Intl.DateTimeFormat('es-AR', { weekday:'long', day:'numeric', month:'long' }).format(new Date()) : ''
 
   return (
@@ -234,6 +236,8 @@ export default function Home() {
                   <option value="" disabled>— Elegí tu categoría —</option>
                   {categorias.map((c, i) => <option key={c.letra} value={i}>{c.letra} — {money(c.limite_anual)}/año</option>)}
                 </select>
+                <div style={{ fontSize:11,fontWeight:800,color:V.ink3,marginBottom:5 }}>ACTIVIDAD</div>
+                <select value={actividad} onChange={e=>setActividad(e.target.value as 'servicios'|'productos')} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'9px 10px',marginBottom:10,background:V.bg}}><option value="servicios">Servicios / locaciones</option><option value="productos">Venta de cosas muebles</option></select>
                 <div style={{ fontSize:11, fontWeight:800, letterSpacing:'0.8px', textTransform:'uppercase', color:V.ink3, marginBottom:5 }}>Obra social</div>
                 <select value={conOS?'si':'no'} onChange={e => setConOS(e.target.value==='si')} style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:8, padding:'9px 10px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', marginBottom:10 }}>
                   <option value="si">Incluir obra social</option>
@@ -242,9 +246,9 @@ export default function Home() {
                 <div style={{ background:`linear-gradient(135deg,${V.tealDark},${V.tealMid})`, borderRadius:8, padding:'16px', textAlign:'center', minHeight:80, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
                   {catIdx !== '' ? <>
                     <div style={{ fontSize:28, fontWeight:900, color:'white', letterSpacing:'-0.5px', lineHeight:1, marginBottom:4 }}>{money(total)}</div>
-                    <div style={{ fontSize:10, color:'rgba(255,255,255,.65)', fontWeight:600, marginBottom:8 }}>por mes · estimado 2026</div>
+                    <div style={{ fontSize:10, color:'rgba(255,255,255,.65)', fontWeight:600, marginBottom:8 }}>por mes · vigente desde agosto 2026</div>
                     <div className="ff-calc-break" style={{ width:'100%' }}>
-                      {([['Imp.', categorias[idx].imp], ['Prev.', categorias[idx].prev], ...(os ? [['OS', os]] : [])] as [string, number][]).map(([l, val]) => (
+                      {([['Imp.', impuesto], ['Prev.', categorias[idx].prev], ...(os ? [['OS', os]] : [])] as [string, number][]).map(([l, val]) => (
                         <div key={l} style={{ background:'rgba(255,255,255,.1)', borderRadius:6, padding:'5px 6px', textAlign:'center' }}>
                           <div style={{ fontSize:8, color:'rgba(255,255,255,.55)', fontWeight:700, textTransform:'uppercase' }}>{l}</div>
                           <div style={{ fontSize:12, fontWeight:900, color:'white', marginTop:1 }}>{money(val)}</div>

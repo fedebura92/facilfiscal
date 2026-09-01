@@ -1,19 +1,18 @@
 'use client'
 import { useState } from 'react'
 import { TipoContribuyente } from '@/lib/types'
-import { CATEGORIAS_MONO, OS_EXTRA, MONTOS, formatMoney } from '@/lib/data'
+import { CATEGORIAS_MONO, formatMoney } from '@/lib/data'
 
 export default function Calculadora({ tipo }: { tipo: TipoContribuyente }) {
   const [catIdx, setCatIdx] = useState<string>('')
   const [conOS, setConOS]   = useState(true)
+  const [actividad, setActividad] = useState<'servicios'|'productos'>('servicios')
 
   const cats =
-    tipo === 'mono' ? CATEGORIAS_MONO.map((c, i) => ({ label: `Categoría ${c.letra} — hasta $${(c.limite_anual/1000000).toFixed(1)}M/año`, imp: c.imp, prev: c.prev, idx: i }))
-    : tipo === 'ri' ? MONTOS.ri.cats.map((label, i) => ({ label, imp: MONTOS.ri.imp[i], prev: MONTOS.ri.prev[i], idx: i }))
-    : MONTOS.aut.cats.map((label, i) => ({ label, imp: MONTOS.aut.imp[i], prev: MONTOS.aut.prev[i], idx: i }))
+    tipo === 'mono' ? CATEGORIAS_MONO.map((c, i) => ({ label: `Categoría ${c.letra} — hasta $${(c.limite_anual/1000000).toFixed(1)}M/año`, imp: actividad==='productos'?(c.imp_productos??c.imp):c.imp, prev: c.prev, os:c.os??0, idx: i })) : []
 
   const selected = catIdx !== '' ? cats[parseInt(catIdx)] : null
-  const os    = conOS && tipo === 'mono' ? OS_EXTRA : 0
+  const os    = conOS && tipo === 'mono' ? (selected?.os ?? 0) : 0
   const total = selected ? selected.imp + selected.prev + os : 0
 
   return (
@@ -41,6 +40,8 @@ export default function Calculadora({ tipo }: { tipo: TipoContribuyente }) {
       {/* Obra social (solo mono) */}
       {tipo === 'mono' && (
         <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize:11,fontWeight:800,marginBottom:6 }}>Actividad</div>
+          <select value={actividad} onChange={e=>setActividad(e.target.value as 'servicios'|'productos')} style={{width:'100%',padding:10,border:'1.5px solid var(--border)',borderRadius:8,marginBottom:12}}><option value="servicios">Servicios / locaciones</option><option value="productos">Venta de cosas muebles</option></select>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--ink3)', marginBottom: 6 }}>
             Obra social
           </div>
@@ -73,7 +74,7 @@ export default function Calculadora({ tipo }: { tipo: TipoContribuyente }) {
               {formatMoney(total)}
             </div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,.65)', fontWeight: 600, marginBottom: 10 }}>
-              por mes · valores estimados 2026
+              por mes · vigente desde agosto de 2026
             </div>
             <div style={{ display: 'flex', gap: 10, width: '100%' }}>
               {[
@@ -97,8 +98,7 @@ export default function Calculadora({ tipo }: { tipo: TipoContribuyente }) {
         )}
       </div>
       <p style={{ fontSize: 10, color: 'var(--ink3)', fontWeight: 600, marginTop: 8, textAlign: 'center' }}>
-        Valores estimados. Verificá el monto exacto en{' '}
-        <a href="https://www.afip.gob.ar" target="_blank" rel="noopener" style={{ color: 'var(--teal)' }}>afip.gob.ar</a>
+        Fuente oficial:{' '}<a href="https://www.arca.gob.ar/monotributo/categorias.asp" target="_blank" rel="noopener" style={{ color: 'var(--teal)' }}>ARCA</a>
       </p>
     </div>
   )

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Impuestos provinciales en Argentina — IIBB, Sellos y más por provincia",
+  title: "Ingresos Brutos por provincia 2026",
   description:
-    "Consultá los principales impuestos de cada provincia argentina: Ingresos Brutos (IIBB), Sellos, Inmobiliario y tasas municipales. Guía orientativa 2026.",
+    "Cómo encontrar la alícuota de Ingresos Brutos 2026 según actividad, padrón, provincia y Convenio Multilateral, con accesos oficiales.",
 
   keywords: [
     "impuestos provinciales argentina",

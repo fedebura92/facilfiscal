@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Autónomos — Aportes y Vencimientos AFIP | FacilFiscal',
+  title: 'Autónomos 2026: categorías y aportes ARCA',
   description:
-    'Controlá tus aportes mensuales como autónomo, vencimientos de IVA y Ganancias. Evitá multas con recordatorios automáticos de AFIP / ARCA.',
+    'Guía actualizada para identificar categoría y consultar el aporte mensual vigente de Autónomos 2026 en la tabla oficial de ARCA.',
 
   keywords: [
     'autonomos argentina',
