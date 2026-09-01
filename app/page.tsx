@@ -300,7 +300,9 @@ export default function Home() {
 
 
           {/* CAPTURA EMAIL */}
-          <CapturaEmail ref={capturaRef} tipoDefault="mono" />
+          <div style={{ marginTop:24 }}>
+            <CapturaEmail ref={capturaRef} tipoDefault="mono" />
+          </div>
 
         </main>
       </div>
