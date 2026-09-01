@@ -39,8 +39,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         /* ── Sidebar ── */
         .ff-sidebar {
           position: fixed; top: 0; left: 0; bottom: 0;
-          width: 236px; background: #0e5f7c;
-          border-right: 1px solid #0b506a;
+          width: 236px; background: #1f6f89;
+          border-right: 1px solid #195e75;
           display: flex; flex-direction: column;
           z-index: 200; overflow-y: auto;
           transition: transform .22s cubic-bezier(.4,0,.2,1);
