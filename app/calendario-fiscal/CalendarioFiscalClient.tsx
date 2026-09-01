@@ -369,33 +369,51 @@ const CALENDARIO_2026: MesData[] = [
     ],
   },
 
-  // ── SEPTIEMBRE (pendiente) ──────────────────────────────────────────────
+  // ── SEPTIEMBRE (verificado en ARCA) ─────────────────────────────────────
   {
-    mes: 9, nombre: "Septiembre", verificado: false,
+    mes: 9, nombre: "Septiembre", verificado: true,
     vencimientos: [
       {
         rango: "7, 8 y 9",
-        titulo: "Autónomos — cuota agosto 2026",
-        descripcion: "Pago de aportes previsionales (período agosto 2026). Fechas aproximadas según terminación de CUIT. Confirmá en arca.gob.ar.",
-        categoria: ["autonomo"], tipo: "pago", pendiente: true,
+        titulo: "Autónomos — aportes previsionales agosto 2026",
+        descripcion: "Pago mensual según terminación de CUIT: 0-1-2-3 el 7/09; 4-5-6 el 8/09; 7-8-9 el 9/09.",
+        categoria: ["autonomo"], tipo: "pago",
       },
       {
         rango: "9, 10 y 11",
-        titulo: "Cargas sociales — F.931 (período agosto 2026)",
-        descripcion: "Presentación del F.931 y pago de cargas sociales. Fecha aproximada: entre el 9 y 11 de septiembre. Confirmá en arca.gob.ar.",
-        categoria: ["empleador"], tipo: "pago", pendiente: true,
+        titulo: "Empleadores — declaración jurada y pago F.931",
+        descripcion: "Período agosto 2026 según terminación de CUIT: 0-1-2-3 el 9/09; 4-5-6 el 10/09; 7-8-9 el 11/09.",
+        categoria: ["empleador"], tipo: "declaracion",
       },
       {
-        dia: 20,
+        dia: 10,
+        titulo: "Casas particulares — pago obligatorio F.102/RT",
+        descripcion: "Pago obligatorio correspondiente al período agosto 2026.",
+        categoria: ["empleador"], tipo: "pago",
+      },
+      {
+        dia: 15,
+        titulo: "Casas particulares — pago voluntario F.575/RT",
+        descripcion: "Pago voluntario correspondiente al período agosto 2026.",
+        categoria: ["empleador"], tipo: "pago",
+      },
+      {
+        rango: "18, 21, 22, 23 y 24",
+        titulo: "IVA y Libro de IVA Digital — agosto 2026",
+        descripcion: "Presentación y pago: CUIT 0-1 el 18/09; 2-3 el 21/09; 4-5 el 22/09; 6-7 el 23/09; 8-9 el 24/09.",
+        categoria: ["responsable"], tipo: "declaracion",
+      },
+      {
+        dia: 21,
         titulo: "Monotributo — cuota septiembre 2026",
-        descripcion: "Pago de la cuota mensual de monotributo.",
+        descripcion: "Pago mensual para todas las terminaciones de CUIT. El día 20 es domingo, por lo que vence el siguiente día hábil.",
         categoria: ["monotributo"], tipo: "pago",
       },
       {
-        rango: "18 al 24",
-        titulo: "IVA — DJ mensual (período agosto 2026)",
-        descripcion: "Presentación y pago del IVA. Fechas aproximadas en la segunda quincena de septiembre. Confirmá en arca.gob.ar.",
-        categoria: ["responsable"], tipo: "declaracion", pendiente: true,
+        dia: 22,
+        titulo: "Ganancias 2025 — presentación de declaración jurada",
+        descripcion: "Plazo especial para personas humanas y sucesiones indivisas. No modifica el vencimiento del saldo de pago.",
+        categoria: ["autonomo", "responsable"], tipo: "presentacion",
       },
     ],
   },
@@ -648,7 +666,7 @@ export default function CalendarioFiscalClient() {
             <p style={{ fontSize: 11, color: C.gray500, margin: 0, lineHeight: 1.6 }}>
               <strong style={{ color: C.gray700 }}>✓</strong> Fechas verificadas<br />
               <strong style={{ color: C.gray400 }}>~</strong> Fechas aproximadas<br />
-              <span style={{ color: C.gray400 }}>Fuente: ARCA / estudiodelamo.com</span>
+              <span style={{ color: C.gray400 }}>Fuente principal: calendario oficial de ARCA</span>
             </p>
           </div>
 
