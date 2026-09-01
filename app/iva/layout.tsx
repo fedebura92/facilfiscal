@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculá tu IVA gratis",
+  title: "Calculadora de IVA 2026 Argentina",
   description:
-    "Calculá cuánto IVA tenés que pagar en Argentina en segundos. Ingresá tus ventas y compras y obtené el resultado al instante. Gratis y sin registro.",
+    "Calculá débito fiscal, crédito fiscal, retenciones y saldo de IVA 2026 en Argentina, por alícuota. Gratis y sin registro.",
 
   keywords: [
     "calcular IVA argentina",

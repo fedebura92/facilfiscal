@@ -11,3 +11,18 @@ export function breadcrumbJsonLd(items: { name:string; url:string }[]) {
     })),
   }
 }
+
+export function calculatorJsonLd(name:string, description:string, path:string) {
+  return {
+    '@context':'https://schema.org', '@type':'WebApplication', name, description,
+    applicationCategory:'FinanceApplication', operatingSystem:'Web',
+    url:`https://www.facilfiscal.com.ar${path}`,
+    offers:{ '@type':'Offer', price:'0', priceCurrency:'ARS' },
+  }
+}
+
+export function faqJsonLd(items:{ question:string; answer:string }[]) {
+  return { '@context':'https://schema.org', '@type':'FAQPage', mainEntity:items.map(item => ({
+    '@type':'Question', name:item.question, acceptedAnswer:{ '@type':'Answer', text:item.answer },
+  })) }
+}

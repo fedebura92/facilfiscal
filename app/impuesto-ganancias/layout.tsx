@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculá Impuesto a las Ganancias",
+  title: "Calculadora Ganancias 2026 Argentina",
   description:
-    "Calculá cuánto tenés que pagar de Impuesto a las Ganancias en Argentina. Estimá tu impuesto de forma simple y evitá errores con AFIP.",
+    "Calculá Ganancias 2026 para personas humanas con la escala anual oficial de ARCA. Estimación gratuita de la base sujeta a impuesto.",
 
   keywords: [
     "impuesto a las ganancias argentina",

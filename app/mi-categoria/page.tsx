@@ -1,17 +1,18 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import SiteHeader from '@/components/SiteHeader'
 import { useFiscalData } from '@/components/FiscalDataProvider'
 
-type CategoriaCalculadora = { letra:string; limite:number; imp:number; prev:number; os:number }
+type CategoriaCalculadora = { letra:string; limite:number; imp:number; impProductos:number; prev:number; os:number }
 
 export default function MiCategoria() {
   const { categorias, vigencia, fuenteUrl, origen } = useFiscalData()
   const CATEGORIAS: CategoriaCalculadora[] = categorias.map(c => ({
-    letra:c.letra, limite:c.limite_anual, imp:c.imp, prev:c.prev, os:c.os ?? 0,
+    letra:c.letra, limite:c.limite_anual, imp:c.imp, impProductos:c.imp_productos ?? c.imp, prev:c.prev, os:c.os ?? 0,
   }))
   const [facturacion, setFacturacion] = useState('')
   const [conOS, setConOS]             = useState(true)
+  const [actividad, setActividad]     = useState<'servicios'|'productos'>('servicios')
   const [paso, setPaso]               = useState<'calc'|'email'|'result'>('calc')
   const [email, setEmail]             = useState('')
   const [emailOk, setEmailOk]         = useState(false)
@@ -21,9 +22,6 @@ export default function MiCategoria() {
   const [aiQuery, setAiQuery]         = useState('')
   const [aiResp, setAiResp]           = useState('')
   const [aiLoad, setAiLoad]           = useState(false)
-  const [mounted, setMounted]         = useState(false)
-
-  useEffect(() => setMounted(true), [])
 
   function calcular() {
     const monto = parseFloat(facturacion.replace(/\./g,'').replace(',','.'))
@@ -77,8 +75,6 @@ export default function MiCategoria() {
     ink:'#0f2733', ink2:'#3d5a6b', ink3:'#7a9aaa',
   }
 
-  if (!mounted) return null
-
   return (
     <>
       <SiteHeader currentPath="/mi-categoria" />
@@ -103,7 +99,7 @@ export default function MiCategoria() {
             {paso!=='calc'&&<button onClick={()=>setPaso('calc')} style={{fontSize:12,fontWeight:700,color:V.teal,background:'none',border:'none'}}>← Modificar</button>}
           </div>
           <div style={{padding:'20px 18px'}}>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:16}}>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:14,marginBottom:16}}>
               <div>
                 <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:6}}>Facturación mensual promedio</div>
                 <div style={{display:'flex',alignItems:'center',border:`1.5px solid ${V.border}`,borderRadius:8,overflow:'hidden',background:V.bg}}>
@@ -114,6 +110,12 @@ export default function MiCategoria() {
                     disabled={paso!=='calc'}
                     style={{flex:1,border:'none',padding:'10px 12px',fontSize:14,fontWeight:600,color:V.ink,background:'transparent',outline:'none',opacity:paso!=='calc'?.6:1}}/>
                 </div>
+              </div>
+              <div>
+                <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:6}}>Actividad</div>
+                <select value={actividad} onChange={e=>setActividad(e.target.value as 'servicios'|'productos')} disabled={paso!=='calc'} style={{width:'100%',border:`1.5px solid ${V.border}`,borderRadius:8,padding:'10px 12px',fontSize:14,fontWeight:600,color:V.ink,background:V.bg}}>
+                  <option value="servicios">Servicios / locaciones</option><option value="productos">Venta de cosas muebles</option>
+                </select>
               </div>
               <div>
                 <div style={{fontSize:11,fontWeight:800,letterSpacing:'0.8px',textTransform:'uppercase',color:V.ink3,marginBottom:6}}>Obra social</div>
@@ -130,6 +132,7 @@ export default function MiCategoria() {
                 Ver mi categoría →
               </button>
             )}
+            <p style={{fontSize:12,color:V.ink3,lineHeight:1.5,margin:'12px 0 0'}}>La categoría definitiva también puede quedar determinada por superficie afectada, energía, alquileres y precio unitario máximo. Este cálculo usa ingresos brutos anualizados; verificá los demás parámetros en ARCA.</p>
           </div>
         </div>
 
@@ -185,7 +188,7 @@ export default function MiCategoria() {
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
                   {([
-                    ['Impositivo', resultado.imp],
+                    ['Impositivo', actividad==='productos'?resultado.impProductos:resultado.imp],
                     ['Previsional', resultado.prev],
                     ['Obra social', conOS ? resultado.os : 0],
                   ] as [string,number][]).filter(([,v])=>v>0).map(([l,v])=>(
@@ -197,7 +200,7 @@ export default function MiCategoria() {
                 </div>
                 <div style={{background:'rgba(255,255,255,.8)',borderRadius:8,padding:'12px',textAlign:'center',marginTop:10}}>
                   <div style={{fontSize:11,color:'#166534',fontWeight:700,marginBottom:2}}>Total mensual estimado</div>
-                  <div style={{fontSize:26,fontWeight:900,color:V.green}}>{money(resultado.imp+resultado.prev+(conOS?resultado.os:0))}</div>
+                  <div style={{fontSize:26,fontWeight:900,color:V.green}}>{money((actividad==='productos'?resultado.impProductos:resultado.imp)+resultado.prev+(conOS?resultado.os:0))}</div>
                 </div>
                 <div style={{fontSize:11,color:'#166534',fontWeight:600,textAlign:'center',marginTop:10}}>
                   * Valores estimados 2026. Verificá en arca.gob.ar.

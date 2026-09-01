@@ -424,9 +424,10 @@ export default function MiPanel() {
     } else {
       // ¿Cuánto pago?
       const catIdx = LIMITES_MONO.findIndex(l => facAnual <= l)
-      // Cuotas 2026 estimadas
-      const CUOTAS = [5000,7500,10000,13000,18000,25000,35000,45000,55000,67000,130000]
-      const cuota = catIdx >= 0 ? CUOTAS[catIdx] : CUOTAS[CUOTAS.length-1]
+      // Cuota vigente de servicios, desde la misma fuente fiscal del panel.
+      const cuota = catIdx >= 0
+        ? (categorias[catIdx].total_servicios ?? categorias[catIdx].imp + categorias[catIdx].prev + (categorias[catIdx].os ?? 0))
+        : (categorias[categorias.length-1].total_servicios ?? 0)
       setSimResultado({
         tipo: 'cuanto',
         cat: catIdx >= 0 ? CATS_MONO[catIdx] : 'K',
@@ -1297,7 +1298,8 @@ const timelineItems = useMemo<TimelineItems>(() => {
               <div style={{ display:'flex', borderBottom:`1px solid ${V.border}`, background:V.bg }}>
                 {([
                   { id:'mas', label:'¿Qué pasa si facturo más?' },
-                  { id:'ri',  label:'¿Me conviene RI?' },
+                  // La comparación Mono/RI requiere compras, deducciones y
+                  // situación previsional; se retiró el cálculo genérico.
                   { id:'cuanto', label:'¿Cuánto pago?' },
                 ] as const).map(tab => (
                   <button key={tab.id} onClick={() => { setSimTab(tab.id); setSimResultado(null) }} style={{ flex:1, padding:'10px 8px', border:'none', borderBottom:`2px solid ${simTab===tab.id?V.teal:'transparent'}`, background:'transparent', fontSize:11, fontWeight:simTab===tab.id?800:600, color:simTab===tab.id?V.teal:V.ink3, cursor:'pointer', fontFamily:"'Nunito',sans-serif" }}>{tab.label}</button>

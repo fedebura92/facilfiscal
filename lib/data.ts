@@ -15,18 +15,17 @@ export const TERMINACION_DIAS: Record<string, number> = {
 export const VIGENCIA_MONTOS = 'Vigente desde el 01/08/2026 — Fuente: ARCA — verificado el 31/08/2026'
 
 export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
-  // imp = impuesto integrado (servicios), prev = aportes SIPA, os se suma aparte
-  { letra: 'A', limite_anual: 12009410.45,  imp: 5585.77,    prev: 18246.86  },
-  { letra: 'B', limite_anual: 17595182.74,  imp: 10612.98,   prev: 20071.55  },
-  { letra: 'C', limite_anual: 24670494.31,  imp: 18246.86,   prev: 22078.71  },
-  { letra: 'D', limite_anual: 30628651.43,  imp: 29790.79,   prev: 24286.58  },
-  { letra: 'E', limite_anual: 36028231.33,  imp: 55857.73,   prev: 26715.24  },
-  { letra: 'F', limite_anual: 45151659.41,  imp: 78573.20,   prev: 29386.76  },
-  { letra: 'G', limite_anual: 53995798.87,  imp: 142995.76,  prev: 41141.46  },
-  { letra: 'H', limite_anual: 81924660.37,  imp: 409623.31,  prev: 57598.04  },
-  { letra: 'I', limite_anual: 91699761.90,  imp: 814591.79,  prev: 80637.26  },
-  { letra: 'J', limite_anual: 105012519.20, imp: 977510.14,  prev: 112892.16 },
-  { letra: 'K', limite_anual: 126610838.75, imp: 1368514.20, prev: 158049.02 },
+  { letra:'A', limite_anual:12009410.45, imp:5585.77, imp_productos:5585.77, prev:18246.86, os:25694.55, total_servicios:49527.18, total_productos:49527.18 },
+  { letra:'B', limite_anual:17595182.74, imp:10612.98, imp_productos:10612.98, prev:20071.55, os:25694.55, total_servicios:56379.08, total_productos:56379.08 },
+  { letra:'C', limite_anual:24670494.31, imp:18246.86, imp_productos:16757.32, prev:22078.71, os:25694.55, total_servicios:66020.12, total_productos:64530.58 },
+  { letra:'D', limite_anual:30628651.43, imp:29790.79, imp_productos:27742.67, prev:24286.58, os:30535.56, total_servicios:84612.93, total_productos:82564.81 },
+  { letra:'E', limite_anual:36028231.33, imp:55857.73, imp_productos:44313.79, prev:26715.24, os:37238.48, total_servicios:119811.45, total_productos:108267.51 },
+  { letra:'F', limite_anual:45151659.41, imp:78573.20, imp_productos:57719.64, prev:29386.76, os:42824.25, total_servicios:150784.21, total_productos:129930.65 },
+  { letra:'G', limite_anual:53995798.87, imp:142995.76, imp_productos:71497.87, prev:41141.46, os:46175.72, total_servicios:230312.94, total_productos:158815.05 },
+  { letra:'H', limite_anual:81924660.37, imp:409623.31, imp_productos:204811.64, prev:57598.04, os:55485.33, total_servicios:522706.68, total_productos:317895.01 },
+  { letra:'I', limite_anual:91699761.90, imp:814591.79, imp_productos:325836.71, prev:80637.26, os:68518.81, total_servicios:963747.86, total_productos:474992.78 },
+  { letra:'J', limite_anual:105012519.20, imp:977510.14, imp_productos:391004.07, prev:112892.16, os:76897.46, total_servicios:1167299.76, total_productos:580793.69 },
+  { letra:'K', limite_anual:126610838.75, imp:1368514.20, imp_productos:456171.40, prev:158049.02, os:87882.82, total_servicios:1614446.04, total_productos:702103.24 },
 ]
 
 export const OS_EXTRA = 25694.55 // Categorías A-C; categorías superiores varían según ARCA
@@ -40,20 +39,8 @@ export const MONTOS = {
     prev:    CATEGORIAS_MONO.map(c => c.prev),
     os:      OS_EXTRA,
   },
-  ri: {
-    cats:    ['Pequeño RI (hasta $30M)', 'Mediano RI (hasta $100M)', 'Gran RI (más de $100M)'],
-    limites: ['hasta $30M/año', 'hasta $100M/año', 'más de $100M/año'],
-    imp:     [18000, 35000, 60000],
-    prev:    [28000, 40000, 50000],
-    os:      0,
-  },
-  aut: {
-    cats:    ['Categoría I', 'Categoría II', 'Categoría III', 'Categoría IV', 'Categoría V'],
-    limites: ['menor actividad', '—', '—', '—', 'mayor actividad'],
-    imp:     [15000, 22000, 32000, 48000, 65000],
-    prev:    [22000, 28000, 35000, 45000, 58000],
-    os:      0,
-  },
+  ri: { cats:[], limites:[], imp:[], prev:[], os:0 },
+  aut:{ cats:[], limites:[], imp:[], prev:[], os:0 },
 }
 
 // ── Tipo UI de vencimiento (con dia_mes) ─────────────────

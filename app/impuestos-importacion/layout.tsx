@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculá impuestos de importación",
+  title: "Calculadora importación Argentina 2026",
   description:
-    "Calculá cuánto tenés que pagar al importar productos en Argentina. Incluye aranceles, IVA, percepciones y costos totales de importación.",
+    "Calculá CIF, derechos, tasa estadística, IVA y percepciones de una importación en Argentina con tasas oficiales por NCM.",
 
   keywords: [
     "impuestos importacion argentina",
