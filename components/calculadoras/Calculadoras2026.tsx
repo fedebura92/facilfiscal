@@ -1,65 +1,80 @@
 'use client'
-
 import { useState } from 'react'
-import { calcularGanancias2026, calcularIIBB, calcularIVA, calcularImportacion, VERIFICACION_FISCAL } from '@/lib/calculadoras-fiscales'
+import { calcularIIBB, calcularIVA, calcularImportacion, estimarGananciasSimple, VERIFICACION_FISCAL } from '@/lib/calculadoras-fiscales'
+import { ACTIVIDADES_SIMPLES, estimarAlicuotaProvincia, PROVINCIAS_IIBB, type ActividadSimple } from '@/lib/provincias-fiscales'
 
-const money = (n:number) => n.toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:2})
-const num = (v:string) => Number(v) || 0
-const field = { width:'100%', padding:12, border:'1px solid #cbd5e1', borderRadius:8, fontSize:16, boxSizing:'border-box' as const }
-const grid = { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))', gap:16 }
+const money=(n:number)=>n.toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0})
+const n=(v:string)=>Number(v)||0
+const input={width:'100%',padding:12,border:'2px solid #e2e8f0',borderRadius:9,fontSize:16,boxSizing:'border-box' as const,marginTop:6}
+const grid={display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:16}
 
-function Shell({ title, intro, color, source, children }:{title:string;intro:string;color:string;source:string;children:React.ReactNode}) {
-  return <main style={{background:'#f8fafc',minHeight:'100vh'}}>
-    <section style={{background:color,color:'white',padding:'54px 20px',textAlign:'center'}}><h1 style={{fontSize:'clamp(30px,5vw,46px)',margin:'0 0 12px'}}>{title}</h1><p style={{maxWidth:720,margin:'auto',fontSize:18}}>{intro}</p></section>
-    <section style={{maxWidth:820,margin:'0 auto',padding:'40px 20px'}}>
-      <div style={{background:'white',padding:'clamp(20px,4vw,34px)',borderRadius:16,boxShadow:'0 4px 24px #0f172a14'}}>{children}</div>
-      <p style={{fontSize:13,color:'#475569',lineHeight:1.6,marginTop:18}}>Información verificada el {VERIFICACION_FISCAL}. Fuente oficial: <a href={source} target="_blank" rel="noopener noreferrer">consultar ARCA / organismo competente</a>. El resultado depende de los datos ingresados y no reemplaza la declaración jurada ni el asesoramiento profesional.</p>
-    </section>
-  </main>
+function Shell({title,intro,color,source,children}:{title:string;intro:string;color:string;source:string;children:React.ReactNode}){return <main style={{background:'#f8fafc',minHeight:'100vh'}}><header style={{background:color,color:'white',padding:'48px 20px',textAlign:'center'}}><h1 style={{fontSize:'clamp(30px,5vw,46px)',margin:'0 0 10px'}}>{title}</h1><p style={{maxWidth:700,margin:'auto',fontSize:18}}>{intro}</p></header><section style={{maxWidth:820,margin:'0 auto',padding:'36px 18px'}}><div style={{background:'white',padding:'clamp(20px,4vw,34px)',borderRadius:16,boxShadow:'0 4px 24px #0f172a14'}}>{children}</div><p style={{fontSize:13,color:'#64748b',lineHeight:1.6}}>Revisado el {VERIFICACION_FISCAL}. <a href={source} target="_blank" rel="noopener noreferrer">Ver fuente oficial</a>. Es una estimación: ARCA o el organismo provincial determina el importe definitivo.</p></section></main>}
+function Choice({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button type="button" onClick={onClick} style={{padding:13,borderRadius:9,border:`2px solid ${active?'#0d9488':'#e2e8f0'}`,background:active?'#ecfdf5':'white',fontWeight:800,cursor:'pointer'}}>{children}</button>}
+function Result({label,value,main=false}:{label:string;value:string;main?:boolean}){return <div style={{background:main?'#ecfdf5':'#f1f5f9',border:main?'2px solid #86efac':'none',padding:18,borderRadius:10}}><div style={{fontSize:13,color:'#475569'}}>{label}</div><strong style={{fontSize:main?27:21,color:main?'#166534':'#0f172a'}}>{value}</strong></div>}
+function More({open,setOpen,children}:{open:boolean;setOpen:(v:boolean)=>void;children:React.ReactNode}){return <><button type="button" onClick={()=>setOpen(!open)} style={{marginTop:18,border:'none',background:'none',color:'#0d5c78',fontWeight:800,cursor:'pointer'}}>⚙️ {open?'Ocultar opciones adicionales':'Tengo más datos para mejorar el cálculo'}</button>{open?<div style={{marginTop:16,padding:18,background:'#f8fafc',borderRadius:12}}>{children}</div>:null}</>}
+
+export function GananciasCalculator(){
+ const [tipo,setTipo]=useState<'empleado'|'independiente'>('empleado'); const [ing,setIng]=useState(''); const [meses,setMeses]=useState('13'); const [gastos,setGastos]=useState(''); const [hijos,setHijos]=useState('0'); const [conyuge,setConyuge]=useState(false); const [alquiler,setAlquiler]=useState(''); const [prepaga,setPrepaga]=useState(''); const [domestico,setDomestico]=useState(''); const [more,setMore]=useState(false)
+ const r=estimarGananciasSimple({tipo,ingresoMensual:n(ing),meses:n(meses),gastosMensuales:n(gastos),hijos:n(hijos),conyuge,alquilerMensual:n(alquiler),prepagaMensual:n(prepaga),personalDomesticoMensual:n(domestico)})
+ return <Shell title="Calculadora de Ganancias 2026" intro="Decinos cuánto ganás y respondé preguntas simples. Nosotros hacemos las deducciones." color="linear-gradient(135deg,#7c3aed,#4c1d95)" source="https://www.arca.gob.ar/gananciasYBienes/ganancias/personas-humanas-sucesiones-indivisas/deducciones/deducciones-personales.asp">
+  <h2 style={{marginTop:0}}>1. ¿Cómo trabajás?</h2><div style={grid}><Choice active={tipo==='empleado'} onClick={()=>{setTipo('empleado');setMeses('13')}}>👔 Trabajo en relación de dependencia</Choice><Choice active={tipo==='independiente'} onClick={()=>{setTipo('independiente');setMeses('12')}}>💼 Trabajo por mi cuenta</Choice></div>
+  <h2>2. ¿Cuánto cobrás normalmente?</h2><label><strong>{tipo==='empleado'?'Sueldo bruto mensual (antes de descuentos)':'Ingresos o facturación mensual'}</strong><input style={input} type="number" min="0" value={ing} onChange={e=>setIng(e.target.value)} placeholder="Ej.: 2500000"/></label>
+  {tipo==='independiente'?<label style={{display:'block',marginTop:14}}><strong>Gastos mensuales del trabajo</strong><input style={input} type="number" min="0" value={gastos} onChange={e=>setGastos(e.target.value)} placeholder="Alquiler, insumos, servicios…"/></label>:null}
+  <h2>3. Tu situación familiar</h2><div style={grid}><label>Hijos menores o a cargo<select style={input} value={hijos} onChange={e=>setHijos(e.target.value)}>{[0,1,2,3,4,5].map(x=><option key={x}>{x}</option>)}</select></label><label style={{display:'flex',gap:10,alignItems:'center',paddingTop:26}}><input type="checkbox" checked={conyuge} onChange={e=>setConyuge(e.target.checked)}/> Mi pareja no tiene ingresos y está a mi cargo</label></div>
+  <More open={more} setOpen={setMore}><div style={grid}><label>Alquiler mensual de tu vivienda<input style={input} type="number" value={alquiler} onChange={e=>setAlquiler(e.target.value)}/></label><label>Prepaga adicional por mes<input style={input} type="number" value={prepaga} onChange={e=>setPrepaga(e.target.value)}/></label><label>Personal doméstico por mes<input style={input} type="number" value={domestico} onChange={e=>setDomestico(e.target.value)}/></label><label>Pagos recibidos en el año<select style={input} value={meses} onChange={e=>setMeses(e.target.value)}><option value="12">12 meses</option><option value="13">12 meses + aguinaldo</option></select></label></div></More>
+  <div style={{...grid,marginTop:26}}><Result main label="Ganancias anual estimada" value={money(r.impuesto)}/><Result label="Promedio mensual orientativo" value={money(r.impuesto/12)}/><Result label="Ingreso anual considerado" value={money(r.ingresoAnual)}/></div>
+  <p style={{background:'#f5f3ff',padding:14,borderRadius:10,lineHeight:1.5}}>Aplicamos automáticamente aportes estimados, mínimo no imponible, deducción especial 2026 y las cargas que marcaste. Si tu empleador ya te retiene, compará el resultado con tu recibo y lo informado en SiRADIG.</p>
+ </Shell>
 }
 
-export function GananciasCalculator() {
-  const [base,setBase]=useState(''); const r=calcularGanancias2026(num(base))
-  return <Shell title="Calculadora de Ganancias 2026" intro="Aplicá la escala anual 2026 a tu ganancia neta sujeta a impuesto." color="linear-gradient(135deg,#7c3aed,#4c1d95)" source="https://www.arca.gob.ar/gananciasYBienes/ganancias/personas-humanas-sucesiones-indivisas/declaracion-jurada/documentos/Tabla-Art-94-LIG-liquidacion-anual-y-final-2026.pdf">
-    <label><strong>Ganancia neta sujeta a impuesto anual</strong><input style={{...field,marginTop:8}} type="number" min="0" value={base} onChange={e=>setBase(e.target.value)} placeholder="Ej.: 12000000" /></label>
-    <p style={{color:'#64748b'}}>Ingresá la base luego de gastos deducibles, deducciones personales y quebrantos admitidos. No ingreses el sueldo bruto.</p>
-    <div style={{...grid,marginTop:24}}><Result label="Impuesto anual estimado" value={money(r.impuesto)}/><Result label="Alícuota marginal" value={`${r.tasaMarginal*100}%`}/></div>
-    <Notice>Las personas humanas ingresan cinco anticipos, pero no equivalen simplemente a dividir este resultado por cinco: ARCA calcula una base específica.</Notice>
-  </Shell>
+export function IVACalculator(){
+ const [ventas,setVentas]=useState('');const [compras,setCompras]=useState('');const [incluye,setIncluye]=useState(true);const [tasa,setTasa]=useState('.21');const [ret,setRet]=useState('');const [more,setMore]=useState(false)
+ const rate=Number(tasa); const net=(x:number)=>incluye?x/(1+rate):x; const r=calcularIVA({ventas:[{neto:net(n(ventas)),tasa:rate}],compras:[{neto:net(n(compras)),tasa:rate}],retenciones:n(ret)})
+ return <Shell title="Calculadora de IVA 2026" intro="Usá los totales de tus ventas y compras del mes. No necesitás separar débito y crédito." color="linear-gradient(135deg,#0891b2,#155e75)" source="https://biblioteca.arca.gob.ar/search/query/dcp/TOR_C_020631_1997_03_26">
+  <h2 style={{marginTop:0}}>¿Cuánto vendiste este mes?</h2><input style={input} type="number" value={ventas} onChange={e=>setVentas(e.target.value)} placeholder="Total facturado"/>
+  <h2>¿Cuánto compraste con factura válida?</h2><input style={input} type="number" value={compras} onChange={e=>setCompras(e.target.value)} placeholder="Compras y gastos del negocio"/>
+  <div style={{...grid,marginTop:18}}><label>¿Los importes ya incluyen IVA?<select style={input} value={incluye?'si':'no'} onChange={e=>setIncluye(e.target.value==='si')}><option value="si">Sí, son los totales de las facturas</option><option value="no">No, son importes netos</option></select></label><label>IVA habitual<select style={input} value={tasa} onChange={e=>setTasa(e.target.value)}><option value=".21">21% — la mayoría de actividades</option><option value=".105">10,5% — tasa reducida</option><option value=".27">27% — ciertos servicios</option></select></label></div>
+  <More open={more} setOpen={setMore}><label>Retenciones y percepciones que figuran en ARCA<input style={input} type="number" value={ret} onChange={e=>setRet(e.target.value)}/></label></More>
+  <div style={{...grid,marginTop:26}}><Result label="IVA de tus ventas" value={money(r.debito)}/><Result label="IVA de tus compras" value={money(r.credito)}/><Result main label={r.pagar?'IVA estimado a pagar':'Saldo estimado a favor'} value={money(r.pagar||r.saldoFavor)}/></div>
+ </Shell>
 }
 
-export function IVACalculator() {
-  const [v,setV]=useState(['','','']); const [c,setC]=useState(['','','']); const [ret,setRet]=useState(''); const [saldo,setSaldo]=useState('')
-  const tasas=[.21,.105,.27]; const r=calcularIVA({ventas:tasas.map((t,i)=>({neto:num(v[i]),tasa:t})),compras:tasas.map((t,i)=>({neto:num(c[i]),tasa:t})),retenciones:num(ret),saldoAnterior:num(saldo)})
-  return <Shell title="Calculadora de IVA 2026" intro="Calculá débito fiscal, crédito fiscal y saldo del período por alícuota." color="linear-gradient(135deg,#0891b2,#155e75)" source="https://biblioteca.arca.gob.ar/search/query/dcp/TOR_C_020631_1997_03_26">
-    <h2>Importes netos, sin IVA</h2><div style={grid}>{tasas.map((t,i)=><div key={t}><label><strong>Ventas {t*100}%</strong><input style={{...field,marginTop:6}} type="number" min="0" value={v[i]} onChange={e=>setV(v.map((x,j)=>j===i?e.target.value:x))}/></label><label style={{display:'block',marginTop:12}}><strong>Compras {t*100}%</strong><input style={{...field,marginTop:6}} type="number" min="0" value={c[i]} onChange={e=>setC(c.map((x,j)=>j===i?e.target.value:x))}/></label></div>)}</div>
-    <div style={{...grid,marginTop:20}}><label>Retenciones/percepciones computables<input style={{...field,marginTop:6}} type="number" value={ret} onChange={e=>setRet(e.target.value)}/></label><label>Saldo a favor anterior<input style={{...field,marginTop:6}} type="number" value={saldo} onChange={e=>setSaldo(e.target.value)}/></label></div>
-    <div style={{...grid,marginTop:24}}><Result label="Débito fiscal" value={money(r.debito)}/><Result label="Crédito fiscal" value={money(r.credito)}/><Result label={r.pagar?'Saldo a pagar':'Saldo a favor'} value={money(r.pagar||r.saldoFavor)}/></div>
-    <Notice>Las exportaciones no generan débito fiscal: no uses 2,5% para representarlas. Operaciones exentas, prorrateo del crédito y regímenes especiales requieren tratamiento separado.</Notice>
-  </Shell>
+export function IIBBCalculator(){
+ const [prov,setProv]=useState('Buenos Aires');const [act,setAct]=useState<ActividadSimple>('servicios');const [fac,setFac]=useState('');const [ret,setRet]=useState('');const [ali,setAli]=useState('');const [more,setMore]=useState(false)
+ const sugerida=estimarAlicuotaProvincia(prov,act);const usada=ali?Number(ali):sugerida;const r=calcularIIBB({base:n(fac),alicuota:usada,retenciones:n(ret)})
+ return <Shell title="Calculadora de Ingresos Brutos 2026" intro="Elegí dónde trabajás, qué hacés y cuánto facturaste. Te damos una estimación inmediata." color="linear-gradient(135deg,#059669,#065f46)" source="https://www.comarb.gob.ar/convenio-multilateral">
+  <div style={grid}><label><strong>Provincia</strong><select style={input} value={prov} onChange={e=>{setProv(e.target.value);setAli('')}}>{PROVINCIAS_IIBB.map(p=><option key={p[0]}>{p[0]}</option>)}</select></label><label><strong>¿A qué te dedicás?</strong><select style={input} value={act} onChange={e=>{setAct(e.target.value as ActividadSimple);setAli('')}}>{Object.entries(ACTIVIDADES_SIMPLES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></label></div>
+  <label style={{display:'block',marginTop:18}}><strong>¿Cuánto facturaste este mes?</strong><input style={input} type="number" value={fac} onChange={e=>setFac(e.target.value)} placeholder="Total de facturas del mes"/></label>
+  <More open={more} setOpen={setMore}><div style={grid}><label>Alícuota exacta si la conocés (%)<input style={input} type="number" step=".01" value={ali} onChange={e=>setAli(e.target.value)}/></label><label>Retenciones/percepciones del mes<input style={input} type="number" value={ret} onChange={e=>setRet(e.target.value)}/></label></div></More>
+  <div style={{...grid,marginTop:26}}><Result label="Tasa orientativa usada" value={`${usada}%`}/><Result main label="Ingresos Brutos estimado" value={money(r.pagar)}/></div>
+  <p style={{background:'#fff7ed',padding:14,borderRadius:10}}>La tasa sugerida es una orientación general, porque el padrón puede asignarte otra según código de actividad, ingresos y exenciones. Si tenés la alícuota de tu padrón, abrí “más datos” y reemplazala.</p>
+ </Shell>
 }
 
-export function IIBBCalculator() {
-  const [base,setBase]=useState(''); const [ali,setAli]=useState(''); const [min,setMin]=useState(''); const [ret,setRet]=useState(''); const [saldo,setSaldo]=useState('')
-  const r=calcularIIBB({base:num(base),alicuota:num(ali),minimo:num(min),retenciones:num(ret),saldoAnterior:num(saldo)})
-  return <Shell title="Calculadora de Ingresos Brutos 2026" intro="Estimá el impuesto con la alícuota oficial de tu actividad y jurisdicción." color="linear-gradient(135deg,#059669,#065f46)" source="https://www.comarb.gob.ar/convenio-multilateral">
-    <div style={grid}><label>Base imponible del período<input style={{...field,marginTop:6}} type="number" value={base} onChange={e=>setBase(e.target.value)}/></label><label>Alícuota oficial (%)<input style={{...field,marginTop:6}} type="number" step="0.01" value={ali} onChange={e=>setAli(e.target.value)}/></label><label>Mínimo del período (opcional)<input style={{...field,marginTop:6}} type="number" value={min} onChange={e=>setMin(e.target.value)}/></label><label>Retenciones/percepciones<input style={{...field,marginTop:6}} type="number" value={ret} onChange={e=>setRet(e.target.value)}/></label><label>Saldo anterior<input style={{...field,marginTop:6}} type="number" value={saldo} onChange={e=>setSaldo(e.target.value)}/></label></div>
-    <div style={{...grid,marginTop:24}}><Result label="Impuesto determinado" value={money(r.determinado)}/><Result label={r.pagar?'Saldo a pagar':'Saldo a favor'} value={money(r.pagar||r.saldoFavor)}/></div>
-    <Notice>No existe una tasa única por provincia. Buscá la alícuota según actividad, padrón y ley tarifaria. En Convenio Multilateral ingresá la base atribuida a la jurisdicción después de aplicar el coeficiente correspondiente.</Notice>
-  </Shell>
+export function ImportCalculator(){
+ const [fob,setFob]=useState('');const [envio,setEnvio]=useState('');const [tc,setTc]=useState('');const [fran,setFran]=useState(true);const [more,setMore]=useState(false);const [der,setDer]=useState('20')
+ const r=calcularImportacion({fobUSD:n(fob),fleteUSD:n(envio),seguroUSD:0,tipoCambio:n(tc),derecho:n(der),estadistica:3,iva:21,franquiciaSimplificada:fran})
+ return <Shell title="Calculadora de importación 2026" intro="Ingresá el precio, envío y dólar aduanero. Las opciones técnicas quedan ocultas." color="linear-gradient(135deg,#ea580c,#9a3412)" source="https://www.arca.gob.ar/aduana/arancelintegrado/">
+  <div style={grid}><label><strong>Precio del producto (USD)</strong><input style={input} type="number" value={fob} onChange={e=>setFob(e.target.value)}/></label><label><strong>Envío (USD)</strong><input style={input} type="number" value={envio} onChange={e=>setEnvio(e.target.value)}/></label><label><strong>Dólar aduanero</strong><input style={input} type="number" value={tc} onChange={e=>setTc(e.target.value)} placeholder="Cotización usada por Aduana"/></label></div>
+  <label style={{display:'flex',gap:10,marginTop:18}}><input type="checkbox" checked={fran} onChange={e=>setFran(e.target.checked)}/> Es uno de mis primeros 5 envíos del año y el producto no supera USD 400</label>
+  <More open={more} setOpen={setMore}><label>Derecho de importación según producto (%)<input style={input} type="number" value={der} onChange={e=>setDer(e.target.value)}/></label></More>
+  <div style={{...grid,marginTop:26}}><Result label="Producto + envío en pesos" value={money(r.cif)}/><Result label="Impuestos estimados" value={money(r.tributos)}/><Result main label="Costo total estimado" value={money(r.total)}/></div>
+ </Shell>
 }
 
-export function ImportCalculator() {
-  const [x,setX]=useState<Record<string,string>>({}); const set=(k:string,v:string)=>setX(s=>({...s,[k]:v})); const [fran,setFran]=useState(false)
-  const r=calcularImportacion({fobUSD:num(x.fob),fleteUSD:num(x.flete),seguroUSD:num(x.seguro),tipoCambio:num(x.tc),derecho:num(x.der),estadistica:num(x.est),iva:num(x.iva)||21,percepcionIVA:num(x.piva),percepcionGanancias:num(x.pgan),internos:num(x.int),franquiciaSimplificada:fran})
-  const fields=[['fob','FOB (USD)'],['flete','Flete (USD)'],['seguro','Seguro (USD)'],['tc','Tipo de cambio aduanero (ARS/USD)'],['der','Derecho según NCM (%)'],['est','Tasa estadística (%)'],['iva','IVA (%)'],['piva','Percepción IVA (%)'],['pgan','Percepción Ganancias (%)'],['int','Impuestos internos (%)']]
-  return <Shell title="Calculadora de impuestos de importación" intro="Desglosá el costo aduanero con las tasas oficiales de la posición NCM." color="linear-gradient(135deg,#ea580c,#9a3412)" source="https://www.arca.gob.ar/aduana/arancelintegrado/">
-    <div style={grid}>{fields.map(([k,l])=><label key={k}>{l}<input style={{...field,marginTop:6}} type="number" step="0.01" value={x[k]||''} onChange={e=>set(k,e.target.value)}/></label>)}</div>
-    <label style={{display:'flex',gap:10,marginTop:20,alignItems:'start'}}><input type="checkbox" checked={fran} onChange={e=>setFran(e.target.checked)}/> Envío simplificado elegible dentro de los primeros cinco del año y FOB hasta USD 400: sin derecho de importación ni tasa estadística.</label>
-    <div style={{...grid,marginTop:24}}><Result label="Valor CIF" value={money(r.cif)}/><Result label="Tributos estimados" value={money(r.tributos)}/><Result label="Total CIF + tributos" value={money(r.total)}/></div>
-    <Notice>La franquicia no elimina IVA ni impuestos internos. Confirmá canal, límites y NCM: esta calculadora no incluye honorarios, almacenaje, logística local ni restricciones de importación.</Notice>
-  </Shell>
+export function ProvinceCalculatorPage(){
+ const [prov,setProv]=useState('Buenos Aires');const [act,setAct]=useState<ActividadSimple>('servicios');const [fac,setFac]=useState('');const [ret,setRet]=useState('');
+ const info=PROVINCIAS_IIBB.find(p=>p[0]===prov)!;const tasa=estimarAlicuotaProvincia(prov,act);const r=calcularIIBB({base:n(fac),alicuota:tasa,retenciones:n(ret)})
+ return <main style={{background:'#f8fafc',minHeight:'100vh'}}>
+  <header style={{background:'linear-gradient(135deg,#1d4ed8,#312e81)',color:'white',padding:'52px 20px',textAlign:'center'}}><h1 style={{fontSize:'clamp(30px,5vw,46px)',margin:'0 0 12px'}}>Calculadora de impuestos por provincia</h1><p style={{maxWidth:730,margin:'auto',fontSize:18}}>Elegí tu provincia y actividad. Calculá Ingresos Brutos y consultá el organismo que te corresponde.</p></header>
+  <section style={{maxWidth:900,margin:'0 auto',padding:'36px 18px'}}>
+   <div style={{background:'white',padding:'clamp(20px,4vw,34px)',borderRadius:16,boxShadow:'0 4px 24px #0f172a14'}}>
+    <h2 style={{marginTop:0}}>Calculá en tres pasos</h2><div style={grid}><label><strong>1. ¿Dónde está tu actividad?</strong><select style={input} value={prov} onChange={e=>setProv(e.target.value)}>{PROVINCIAS_IIBB.map(p=><option key={p[0]}>{p[0]}</option>)}</select></label><label><strong>2. ¿Qué hacés?</strong><select style={input} value={act} onChange={e=>setAct(e.target.value as ActividadSimple)}>{Object.entries(ACTIVIDADES_SIMPLES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></label><label><strong>3. Facturación mensual</strong><input style={input} type="number" value={fac} onChange={e=>setFac(e.target.value)} placeholder="Ej.: 2000000"/></label></div>
+    <label style={{display:'block',marginTop:16,maxWidth:420}}>Si te retuvieron IIBB, ingresalo acá (opcional)<input style={input} type="number" value={ret} onChange={e=>setRet(e.target.value)}/></label>
+    <div style={{...grid,marginTop:24}}><Result label="Alícuota general orientativa" value={`${tasa}%`}/><Result main label="IIBB mensual estimado" value={money(r.pagar)}/></div>
+    <div style={{marginTop:22,padding:18,borderRadius:12,background:'#eff6ff'}}><h3 style={{margin:'0 0 6px'}}>{prov} · {info[1]}</h3><p style={{margin:'0 0 10px'}}>{ACTIVIDADES_SIMPLES[act].nota}. La tasa final puede cambiar por padrón, nivel de ingresos, municipio o exención.</p><a href={info[3]} target="_blank" rel="noopener noreferrer" style={{fontWeight:800}}>Consultar en {info[1]} →</a></div>
+   </div>
+   <section style={{marginTop:36}}><h2>Compará las 24 jurisdicciones</h2><p style={{color:'#64748b'}}>Estas son tasas generales orientativas para una primera estimación. Seleccioná una provincia para calcular arriba.</p><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))',gap:12}}>{PROVINCIAS_IIBB.map(p=><button key={p[0]} onClick={()=>{setProv(p[0]);window.scrollTo({top:0,behavior:'smooth'})}} style={{textAlign:'left',padding:16,borderRadius:12,border:`2px solid ${prov===p[0]?'#2563eb':'#e2e8f0'}`,background:'white',cursor:'pointer'}}><strong style={{display:'block',fontSize:16}}>{p[0]}</strong><span style={{color:'#2563eb',fontWeight:900,fontSize:20}}>{p[2]}%</span><small style={{display:'block',color:'#64748b'}}>{p[1]}</small></button>)}</div></section>
+  </section>
+ </main>
 }
-
-function Result({label,value}:{label:string;value:string}) { return <div style={{background:'#f1f5f9',padding:18,borderRadius:10}}><div style={{fontSize:13,color:'#475569'}}>{label}</div><strong style={{fontSize:22}}>{value}</strong></div> }
-function Notice({children}:{children:React.ReactNode}) { return <div style={{background:'#fff7ed',border:'1px solid #fed7aa',padding:14,borderRadius:10,marginTop:22,color:'#9a3412',lineHeight:1.5}}>{children}</div> }

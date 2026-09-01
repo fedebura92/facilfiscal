@@ -18,6 +18,31 @@ export function calcularGanancias2026(base: number) {
   return { base: imponible, impuesto: tramo.fijo + (imponible - tramo.desde) * tramo.tasa, tasaMarginal: tramo.tasa }
 }
 
+export const DEDUCCIONES_GANANCIAS_2026 = {
+  noImponible: 6019671.36, conyuge: 5669323.06, hijo: 2859060.31,
+  hijoDiscapacitado: 5718120.60, especialAutonomo: 21068849.78,
+  especialNuevoProfesional: 24078685.46, especialEmpleado: 28894422.56,
+} as const
+
+export function estimarGananciasSimple(params:{
+  tipo:'empleado'|'independiente'; ingresoMensual:number; meses:number; gastosMensuales?:number
+  hijos?:number; hijosDiscapacitados?:number; conyuge?:boolean; alquilerMensual?:number
+  prepagaMensual?:number; personalDomesticoMensual?:number; otrosAnuales?:number
+}) {
+  const ingresoAnual=Math.max(0,params.ingresoMensual)*Math.max(1,params.meses)
+  const aportes=params.tipo==='empleado'?ingresoAnual*.17:0
+  const gastos=params.tipo==='independiente'?Math.max(0,params.gastosMensuales??0)*params.meses:0
+  const neta=Math.max(0,ingresoAnual-aportes-gastos)
+  const d=DEDUCCIONES_GANANCIAS_2026
+  const personales=d.noImponible+(params.tipo==='empleado'?d.especialEmpleado:d.especialAutonomo)+(params.conyuge?d.conyuge:0)+(params.hijos??0)*d.hijo+(params.hijosDiscapacitados??0)*d.hijoDiscapacitado
+  const alquiler=Math.min(Math.max(0,params.alquilerMensual??0)*params.meses*.4,d.noImponible)
+  const prepaga=Math.min(Math.max(0,params.prepagaMensual??0)*params.meses,neta*.05)
+  const domestico=Math.min(Math.max(0,params.personalDomesticoMensual??0)*params.meses,d.noImponible)
+  const generales=alquiler+prepaga+domestico+Math.max(0,params.otrosAnuales??0)
+  const base=Math.max(0,neta-personales-generales)
+  return {...calcularGanancias2026(base),ingresoAnual,aportes,gastos,personales,generales}
+}
+
 export type MovimientoIVA = { neto: number; tasa: number }
 export function calcularIVA(params: { ventas: MovimientoIVA[]; compras: MovimientoIVA[]; retenciones?: number; saldoAnterior?: number }) {
   const debito = params.ventas.reduce((s, m) => s + Math.max(0, m.neto) * m.tasa, 0)
