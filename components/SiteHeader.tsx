@@ -39,8 +39,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         /* ── Sidebar ── */
         .ff-sidebar {
           position: fixed; top: 0; left: 0; bottom: 0;
-          width: 236px; background: #0e5f7c;
-          border-right: 1px solid #0b506a;
+          width: 236px; background: #fff;
+          border-right: 1px solid #e2e8ed;
           display: flex; flex-direction: column;
           z-index: 200; overflow-y: auto;
           transition: transform .22s cubic-bezier(.4,0,.2,1);
@@ -177,23 +177,22 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         /* ── Sidebar nav items ── */
         .ff-nav-group-label {
           font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
-          text-transform: uppercase; color: #b9d3dd;
+          text-transform: uppercase; color: #7a9aaa;
           padding: 16px 16px 6px;
         }
         .ff-nav-item {
           display: flex; align-items: center; gap: 9px;
           padding: 8px 16px; margin: 1px 8px;
           border-radius: 8px; text-decoration: none;
-          font-size: 13px; font-weight: 600; color: #eef7fa;
+          font-size: 13px; font-weight: 700; color: #3d5a6b;
           cursor: pointer; transition: background .13s, color .13s;
           border: none; background: none; width: calc(100% - 16px);
           text-align: left;
         }
-        .ff-nav-item:hover { background: rgba(255,255,255,.12); color: #fff; }
+        .ff-nav-item:hover { background: #f4f7f9; color: #0d5c78; }
         .ff-nav-item.active {
-          background: #fff; color: #0d5c78;
+          background: #e8f6fb; color: #0d5c78;
           font-weight: 800;
-          box-shadow: 0 2px 9px rgba(13,92,120,.10);
         }
         .ff-nav-item.active::before {
           content: ''; display: block; width: 3px; height: 100%;
@@ -205,8 +204,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
         /* ── Sidebar logo zone ── */
         .ff-sidebar-logo {
-          padding: 16px 16px 12px; border-bottom: 1px solid #e2e8f0;
-          background: #fff;
+          padding: 16px 16px 12px; border-bottom: 1px solid #e2e8ed;
           display: flex; align-items: center; gap: 8px;
           text-decoration: none; flex-shrink: 0;
         }
@@ -269,12 +267,12 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         ))}
 
         {/* Separador y link a AFIP */}
-        <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid rgba(255,255,255,.18)' }}>
-          <a href="/crear-negocio" className={`ff-nav-item${currentPath === '/crear-negocio' ? ' active' : ''}`}>
+        <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid #e2e8ed' }}>
+          <a href="/crear-negocio" className="ff-nav-item">
             <span className="ff-nav-emoji">🏗️</span>
             Crear negocio
           </a>
-          <a href="/mipanel" className={`ff-nav-item${currentPath === '/mipanel' ? ' active' : ''}`}>
+          <a href="/mipanel" className="ff-nav-item" style={{ color: '#0d9488', fontWeight: 800 }}>
             <span className="ff-nav-emoji">📊</span>
             Mi panel
           </a>
