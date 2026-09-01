@@ -92,22 +92,28 @@ function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; p
   useEffect(() => {
     if (!userId) return
     const load = async () => {
-      // Entidades a considerar: "Personal" (siempre) + cada negocio propio
-      // (no los que marcaste como empleado — esa facturación no es tuya).
-      const entidades: { etiqueta:string; negocioId: string|null; tipo: string|undefined }[] = [
-        { etiqueta:'Personal', negocioId:null, tipo: perfil?.tipo_contribuyente },
-        ...negocios.filter(n => n.datos?.relacion !== 'empleado').map(n => ({
-          etiqueta: n.nombre || n.datos?.actividad || 'Negocio',
-          negocioId: n.id,
-          tipo: n.datos?.situacion_fiscal === 'mono' ? 'mono' : n.datos?.situacion_fiscal === 'ri' ? 'ri' : undefined,
-        })),
-      ]
+      // Una fila por entidad fiscal/CUIT, no por tarjeta de negocio. Varias
+      // actividades individuales pueden compartir el CUIT personal y sus
+      // ingresos deben sumarse antes de evaluar límites o categorías.
+      const porId = new Map<string, { etiqueta:string; entidadId:string|null; tipo:string|undefined }>()
+      porId.set('personal-sin-entidad', { etiqueta:'Personal', entidadId:null, tipo:perfil?.tipo_contribuyente })
+      for (const n of negocios.filter(n => n.datos?.relacion !== 'empleado')) {
+        const entidad = n.entidad_fiscal
+        const key = n.entidad_fiscal_id || `negocio-${n.id}`
+        porId.set(key, {
+          etiqueta: entidad?.nombre || n.nombre || n.datos?.actividad || 'Negocio',
+          entidadId: n.entidad_fiscal_id || null,
+          tipo: entidad?.regimen_fiscal || (n.datos?.situacion_fiscal === 'mono' ? 'mono' : n.datos?.situacion_fiscal === 'ri' ? 'ri' : undefined),
+        })
+        if (entidad?.tipo === 'persona_fisica') porId.delete('personal-sin-entidad')
+      }
+      const entidades = Array.from(porId.values())
 
       const resultados = await Promise.all(entidades.map(async (e) => {
         let qIngresos = supabase.from('ingresos_mensuales').select('monto').eq('user_id', userId).eq('anio', anio)
-        qIngresos = e.negocioId ? qIngresos.eq('negocio_id', e.negocioId) : qIngresos.is('negocio_id', null)
+        qIngresos = e.entidadId ? qIngresos.eq('entidad_fiscal_id', e.entidadId) : qIngresos.is('negocio_id', null)
         let qFacturas = supabase.from('facturas').select('monto, estado').eq('user_id', userId).eq('estado', 'pendiente')
-        qFacturas = e.negocioId ? qFacturas.eq('negocio_id', e.negocioId) : qFacturas.is('negocio_id', null)
+        qFacturas = e.entidadId ? qFacturas.eq('entidad_fiscal_id', e.entidadId) : qFacturas.is('negocio_id', null)
 
         const [{ data: ingresos }, { data: facturas }] = await Promise.all([qIngresos, qFacturas])
         const totalAnio = (ingresos || []).reduce((a: number, r: any) => a + r.monto, 0)
@@ -136,7 +142,7 @@ function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; p
       setPorEntidad(resultados.filter(r => r.totalAnio > 0 || r.porCobrar > 0).map(r => ({ etiqueta:r.etiqueta, totalAnio:r.totalAnio, cat:r.cat, pct:r.pct })))
     }
     load()
-  }, [userId, anio, negocios])
+  }, [userId, anio, negocios, perfil?.tipo_contribuyente])
 
   const pctColor = data ? (data.pct >= 90 ? V.red : data.pct >= 75 ? V.amber : V.green) : V.teal
 
@@ -167,7 +173,7 @@ function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; p
 
           {porEntidad.length > 1 && (
             <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-              <div style={{ fontSize:10, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.04em' }}>Por negocio</div>
+              <div style={{ fontSize:10, fontWeight:700, color:V.ink3, textTransform:'uppercase', letterSpacing:'.04em' }}>Por entidad fiscal</div>
               {porEntidad.map((e,i) => (
                 <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'7px 10px', background:V.bg, borderRadius:8 }}>
                   <span style={{ fontSize:12, fontWeight:700, color:V.ink }}>{e.etiqueta}</span>
@@ -589,10 +595,34 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     [negociosPropios]
   )
 
-  // Cada negocio muestra sus obligaciones operativas, incluida Ganancias
-  // cuando corresponda. Autónomos permanece en la situación personal.
+  // Una sola tarjeta de obligaciones por entidad fiscal. Si dos actividades
+  // comparten CUIT personal, se combinan antes de ejecutar el motor para no
+  // duplicar Monotributo, IVA o Ganancias.
   const diagnosticosPorNegocio = useMemo(
-    () => negociosActivos.map(n => ({ negocio: n, diagnostico: calcularDiagnostico(n.datos, 'negocio').filter(o => o.nivel === 'negocio') })),
+    () => {
+      const agrupados = new Map<string, NegocioProyecto>()
+      for (const n of negociosActivos) {
+        const key = n.entidad_fiscal_id || n.id
+        const anterior = agrupados.get(key)
+        if (!anterior) {
+          agrupados.set(key, { ...n, nombre:n.entidad_fiscal?.nombre || n.nombre })
+          continue
+        }
+        agrupados.set(key, {
+          ...anterior,
+          datos: {
+            ...anterior.datos,
+            facturacion_estimada:(anterior.datos.facturacion_estimada || 0) + (n.datos.facturacion_estimada || 0),
+            tiene_empleados:Boolean(anterior.datos.tiene_empleados || n.datos.tiene_empleados),
+            inscripto_iibb:Boolean(anterior.datos.inscripto_iibb || n.datos.inscripto_iibb),
+          },
+        })
+      }
+      return Array.from(agrupados.values()).map(negocio => ({
+        negocio,
+        diagnostico:calcularDiagnostico(negocio.datos, 'negocio').filter(o => o.nivel === 'negocio'),
+      }))
+    },
     [negociosActivos]
   )
   const completedCount = tasks.filter(t=>t.done).length
@@ -617,23 +647,33 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   // Negocios activos que aportan vencimientos propios: no los que marcaste
   // como "empleado" (esas fechas no son tuyas) y que ya tengan situación
   // fiscal + terminación de CUIT cargadas.
-  const negociosConVencimiento = useMemo(
-    () => negociosPropios.filter(n => n.datos?.situacion_fiscal && n.datos?.terminacion_cuit),
-    [negociosPropios]
-  )
+  const negociosConVencimiento = useMemo(() => {
+    const unicos = new Map<string, NegocioProyecto>()
+    for (const n of negociosPropios) {
+      const tipo = n.entidad_fiscal?.regimen_fiscal || n.datos?.situacion_fiscal
+      const terminacion = n.entidad_fiscal?.terminacion_cuit || n.datos?.terminacion_cuit
+      if (tipo && terminacion) unicos.set(n.entidad_fiscal_id || n.id, n)
+    }
+    return Array.from(unicos.values())
+  }, [negociosPropios])
 
   const vencimientos = useMemo(() => {
     const items: {titulo:string;dia:number;negocio:string}[] = []
 
     // Mi Perfil directo (para quien todavía no usa Crear Mi Negocio, o
     // tiene una situación personal propia además de sus negocios)
-    items.push(...itemsVencimientoDe(perfil?.tipo_contribuyente, perfil?.terminacion_cuit, 'Personal'))
+    const personalYaRepresentada = negociosConVencimiento.some(n => n.entidad_fiscal?.tipo === 'persona_fisica')
+    if (!personalYaRepresentada) {
+      items.push(...itemsVencimientoDe(perfil?.tipo_contribuyente, perfil?.terminacion_cuit, 'Personal'))
+    }
 
     // Cada negocio activo, con su propia situación fiscal y CUIT
     for (const n of negociosConVencimiento) {
-      const tipoNegocio = n.datos.situacion_fiscal === 'mono' ? 'mono' : 'ri'
-      const nombreNegocio = n.nombre || n.datos.actividad || 'Negocio'
-      items.push(...itemsVencimientoDe(tipoNegocio, n.datos.terminacion_cuit, nombreNegocio))
+      const regimen = n.entidad_fiscal?.regimen_fiscal || n.datos.situacion_fiscal
+      const tipoNegocio = regimen === 'mono' ? 'mono' : 'ri'
+      const nombreNegocio = n.entidad_fiscal?.nombre || n.nombre || n.datos.actividad || 'Entidad fiscal'
+      const terminacion = n.entidad_fiscal?.terminacion_cuit || n.datos.terminacion_cuit
+      items.push(...itemsVencimientoDe(tipoNegocio, terminacion || undefined, nombreNegocio))
     }
 
     return items.sort((a,b)=>getDias(a.dia)-getDias(b.dia))
@@ -700,13 +740,16 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
   const scoresPorEntidad = useMemo(() => {
     const entidades: { etiqueta: string; items: ReturnType<typeof construirScoreItems> }[] = []
 
-    if (perfil?.tipo_contribuyente && perfil?.terminacion_cuit) {
+    const personalYaRepresentada = negociosConVencimiento.some(n => n.entidad_fiscal?.tipo === 'persona_fisica')
+    if (!personalYaRepresentada && perfil?.tipo_contribuyente && perfil?.terminacion_cuit) {
       entidades.push({ etiqueta: 'Personal', items: construirScoreItems(perfil.tipo_contribuyente, perfil.terminacion_cuit, perfil.facturacion_estimada) })
     }
     for (const n of negociosConVencimiento) {
-      const tipoNegocio = n.datos.situacion_fiscal === 'mono' ? 'mono' : 'ri'
-      const nombreNegocio = n.nombre || n.datos.actividad || 'Negocio'
-      entidades.push({ etiqueta: nombreNegocio, items: construirScoreItems(tipoNegocio, n.datos.terminacion_cuit, n.datos.facturacion_estimada) })
+      const regimen = n.entidad_fiscal?.regimen_fiscal || n.datos.situacion_fiscal
+      const tipoNegocio = regimen === 'mono' ? 'mono' : 'ri'
+      const nombreNegocio = n.entidad_fiscal?.nombre || n.nombre || n.datos.actividad || 'Entidad fiscal'
+      const terminacion = n.entidad_fiscal?.terminacion_cuit || n.datos.terminacion_cuit
+      entidades.push({ etiqueta: nombreNegocio, items: construirScoreItems(tipoNegocio, terminacion || undefined, n.datos.facturacion_estimada) })
     }
     return entidades
   }, [perfil, negociosConVencimiento])
