@@ -83,6 +83,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           min-height: 56px;
         }
         .ff-topbar-row1 {
+          position: relative;
           display: flex; align-items: center;
           justify-content: space-between;
           gap: 8px; width: 100%; height: 56px;
@@ -106,8 +107,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           box-shadow: 0 1px 4px rgba(13,92,120,.18);
         }
 
-        /* Mobile: switcher baja a segunda fila, ancho completo */
-        @media (max-width: 767px) {
+        /* Mobile y tablet angosta: switcher baja a segunda fila, ancho completo */
+        @media (max-width: 899px) {
           .ff-switcher-desktop { display: none !important; }
           .ff-switcher-mobile {
             width: 100%;
@@ -122,10 +123,13 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           }
         }
 
-        /* Tablet y desktop: switcher en línea, mobile switcher oculto */
-        @media (min-width: 768px) {
+        /* Tablet ancha y desktop: switcher centrado respecto de toda la barra */
+        @media (min-width: 900px) {
           .ff-switcher-mobile { display: none !important; }
           .ff-switcher-desktop {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
             width: auto;
             margin-bottom: 0;
             flex-shrink: 0;
@@ -138,6 +142,9 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             width: auto;
             flex: 1;
           }
+        }
+        @media (min-width: 900px) and (max-width: 1279px) {
+          .ff-topbar-create-business { display: none !important; }
         }
 
         /* ── Hamburger ── */
@@ -325,7 +332,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
             {/* CTAs principales */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <a href="/crear-negocio" className="ff-cta-secondary">
+              <a href="/crear-negocio" className="ff-cta-secondary ff-topbar-create-business">
                 🏗️ <span className="ff-cta-label">Crear negocio</span>
               </a>
               <a href="/mipanel" className="ff-cta-primary">
