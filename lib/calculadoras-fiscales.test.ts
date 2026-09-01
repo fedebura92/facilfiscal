@@ -1,11 +1,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { calcularGanancias2026, calcularIIBB, calcularIVA, calcularImportacion } from './calculadoras-fiscales.ts'
+import { calcularGanancias2026, calcularIIBB, calcularIVA, calcularImportacion, estimarGananciasSimple } from './calculadoras-fiscales.ts'
 
 test('Ganancias aplica la escala anual 2026', () => {
   assert.equal(calcularGanancias2026(0).impuesto, 0)
   assert.equal(calcularGanancias2026(2336953.69).impuesto, 116847.68)
   assert.equal(calcularGanancias2026(80000000).tasaMarginal, 0.35)
+})
+test('Ganancias simple transforma sueldo bruto y deducciones cotidianas', () => {
+  const sinCargas=estimarGananciasSimple({tipo:'empleado',ingresoMensual:5000000,meses:13})
+  const conCargas=estimarGananciasSimple({tipo:'empleado',ingresoMensual:5000000,meses:13,hijos:2,alquilerMensual:500000})
+  assert.ok(sinCargas.impuesto>0)
+  assert.ok(conCargas.impuesto<sinCargas.impuesto)
+  assert.equal(sinCargas.aportes,11050000)
 })
 test('IVA separa débito, crédito, pagos y saldo a favor', () => {
   assert.deepEqual(calcularIVA({ ventas:[{neto:1000,tasa:.21}], compras:[{neto:500,tasa:.21}], retenciones:25 }), { debito:210, credito:105, deducciones:25, pagar:80, saldoFavor:0 })
