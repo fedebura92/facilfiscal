@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { analizarProyecto } from '@/lib/comparador-negocio'
 import { calcularDiagnostico, calcularCompletitudFiscal } from '@/lib/reglas-fiscales'
-import type { DatosNegocio, EstadoProyecto, AlternativaKey } from '@/lib/types'
+import type { DatosNegocio, EstadoProyecto, AlternativaKey, RelacionNegocio, TipoEntidadFiscal } from '@/lib/types'
 
 async function getUser(req: NextRequest) {
   const token = (req.headers.get('authorization') || '').replace('Bearer ', '')
@@ -20,6 +20,93 @@ function mapearASituacionFiscal(alt: AlternativaKey): 'mono' | 'ri' {
   return alt === 'monotributo' ? 'mono' : 'ri'
 }
 
+function normalizarCuit(cuit?: string) {
+  const digitos = (cuit || '').replace(/\D/g, '')
+  return digitos.length === 11 ? digitos : null
+}
+
+function clasificarEntidad(
+  alternativa: AlternativaKey,
+  relacion: RelacionNegocio
+): TipoEntidadFiscal {
+  if (alternativa === 'sociedad') return 'persona_juridica'
+  if (['administrador', 'empleado', 'otro'].includes(relacion)) return 'tercero'
+  return 'persona_fisica'
+}
+
+// Vincula el negocio con la entidad que realmente tributa. Dos actividades
+// individuales del mismo usuario comparten la entidad personal y, por lo
+// tanto, CUIT, régimen, límites y vencimientos. Una sociedad o un negocio de
+// terceros recibe una entidad separada.
+async function sincronizarEntidadFiscal({
+  admin,
+  userId,
+  proyectoId,
+  nombre,
+  datos,
+  alternativa,
+}: {
+  admin: ReturnType<typeof supabaseAdmin>
+  userId: string
+  proyectoId: string
+  nombre?: string
+  datos: DatosNegocio
+  alternativa: AlternativaKey
+}) {
+  const relacion: RelacionNegocio = datos.relacion
+    || (alternativa === 'sociedad' ? 'socio' : 'titular')
+  const tipo = clasificarEntidad(alternativa, relacion)
+  let entidadId: string | null = null
+
+  if (tipo === 'persona_fisica') {
+    const { data: personal, error } = await admin
+      .from('entidades_fiscales')
+      .select('id')
+      .eq('creada_por', userId)
+      .eq('tipo', 'persona_fisica')
+      .single()
+    if (error || !personal) throw new Error(error?.message || 'No se encontró la entidad fiscal personal.')
+    entidadId = personal.id
+  } else {
+    const cuit = normalizarCuit(datos.cuit)
+    const payload = {
+      creada_por: userId,
+      tipo,
+      nombre: nombre || datos.nombre_fantasia || datos.actividad || 'Negocio',
+      cuit,
+      terminacion_cuit: cuit?.slice(-1) || datos.terminacion_cuit || null,
+      regimen_fiscal: datos.situacion_fiscal || null,
+      provincia: datos.provincia || null,
+      localidad: datos.localidad || null,
+      proyecto_origen_id: proyectoId,
+    }
+    const { data: entidad, error } = await admin
+      .from('entidades_fiscales')
+      .upsert(payload, { onConflict: 'proyecto_origen_id' })
+      .select('id')
+      .single()
+    if (error || !entidad) throw new Error(error?.message || 'No se pudo crear la entidad fiscal del negocio.')
+    entidadId = entidad.id
+  }
+
+  const relacionEntidad: RelacionNegocio = tipo === 'persona_fisica' ? 'titular' : relacion
+  const { error: miembroError } = await admin.from('entidad_usuarios').upsert({
+    entidad_fiscal_id: entidadId,
+    user_id: userId,
+    relacion: relacionEntidad,
+    permiso: relacion === 'empleado' ? 'ver' : 'administrar',
+  }, { onConflict: 'entidad_fiscal_id,user_id' })
+  if (miembroError) throw new Error(miembroError.message)
+
+  const { error: proyectoError } = await admin.from('negocio_proyectos').update({
+    entidad_fiscal_id: entidadId,
+    relacion,
+  }).eq('id', proyectoId).eq('user_id', userId)
+  if (proyectoError) throw new Error(proyectoError.message)
+
+  return { entidadId, relacion, tipo }
+}
+
 export async function GET(req: NextRequest) {
   const user = await getUser(req)
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
@@ -35,6 +122,19 @@ export async function GET(req: NextRequest) {
 
   const proyectos = data || []
   const idsActivos = proyectos.filter(p => p.estado === 'activo').map(p => p.id)
+  const entidadIds = Array.from(new Set(
+    proyectos.map(p => p.entidad_fiscal_id).filter((id): id is string => Boolean(id))
+  ))
+
+  let entidadesPorId: Record<string, any> = {}
+  if (entidadIds.length > 0) {
+    const { data: entidades, error: entidadesError } = await admin
+      .from('entidades_fiscales')
+      .select('*')
+      .in('id', entidadIds)
+    if (entidadesError) return NextResponse.json({ error: entidadesError.message }, { status: 500 })
+    entidadesPorId = Object.fromEntries((entidades || []).map(entidad => [entidad.id, entidad]))
+  }
 
   // Traer el diagnóstico de todos los negocios activos en una sola consulta
   // y agruparlo por proyecto, para que el panel pueda mostrar las
@@ -53,6 +153,7 @@ export async function GET(req: NextRequest) {
 
   const proyectosConDiagnostico = proyectos.map(p => ({
     ...p,
+    entidad_fiscal: p.entidad_fiscal_id ? entidadesPorId[p.entidad_fiscal_id] ?? null : null,
     diagnostico: diagnosticoPorProyecto[p.id] || [],
   }))
 
@@ -165,12 +266,33 @@ export async function POST(req: NextRequest) {
     .upsert(filasAnalisis, { onConflict: 'proyecto_id,alternativa_key' })
   if (analisisErr) return NextResponse.json({ error: analisisErr.message }, { status: 500 })
 
+  if (!proyectoId) {
+    return NextResponse.json({ error: 'No se pudo identificar el proyecto guardado.' }, { status: 500 })
+  }
+
   // ── Activación: conectar con Mi Perfil (spec punto 12 y 13) ────────────
   if (estado === 'activo' && alternativa_elegida) {
+    try {
+      await sincronizarEntidadFiscal({
+        admin,
+        userId: user.id,
+        proyectoId,
+        nombre,
+        datos,
+        alternativa: alternativa_elegida,
+      })
+    } catch (error) {
+      console.error('[negocio/proyectos] No se pudo vincular la entidad fiscal', error)
+      return NextResponse.json({
+        error: error instanceof Error ? error.message : 'No se pudo vincular la entidad fiscal.',
+      }, { status: 500 })
+    }
+
     // 1) Diagnóstico PROPIO de este negocio — corre el motor de reglas
-    // sobre los datos de ESTE negocio puntual, no sobre "la persona". Esto
-    // es lo que permite que alguien sea RI para un local Y Monotributista
-    // para otra actividad al mismo tiempo, cada uno con su propio cálculo.
+    // sobre los datos de ESTE negocio. La agrupación final por régimen,
+    // facturación y vencimientos se hace por entidad fiscal/CUIT: varios
+    // negocios individuales no pueden inventar regímenes distintos si
+    // comparten la entidad personal.
     const diagnosticoNegocio = calcularDiagnostico(datos, 'negocio')
     const completitudFiscal = calcularCompletitudFiscal(datos)
 
@@ -200,10 +322,9 @@ export async function POST(req: NextRequest) {
     // Mi Perfil queda como la situación de la PERSONA, sin que un negocio
     // se la pise.
     //
-    // Pendiente (fase siguiente): vencimientos por terminación de CUIT
-    // todavía leen `profiles.tipo_contribuyente`/`terminacion_cuit`, que ya
-    // no se actualiza automáticamente acá — hoy solo reflejan lo que la
-    // persona haya cargado directamente en Mi Perfil.
+    // Las entidades fiscales permiten que el siguiente paso lea régimen,
+    // CUIT y vencimientos desde el responsable real, no desde la tarjeta de
+    // negocio o desde el último proyecto activado.
   }
 
   return NextResponse.json({ id: proyectoId, resultados, certeza, faltaInfo, completitud })

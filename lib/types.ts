@@ -159,6 +159,7 @@ export interface DatosNegocio {
   cantidad_empleados?: number | null
   tipo_clientes?: string[]             // 'consumidor_final' | 'monotributistas' | 'responsables_inscriptos' | 'empresas' | 'exterior'
   provincia?: string
+  localidad?: string
   provincias_operacion?: string[]      // más de una => Convenio Multilateral
   venta_online?: boolean | null
   importaciones?: boolean | null
@@ -200,12 +201,34 @@ export interface DatosNegocio {
 }
 
 export type RelacionNegocio = 'titular' | 'socio' | 'administrador' | 'empleado' | 'otro'
+export type TipoEntidadFiscal = 'persona_fisica' | 'persona_juridica' | 'tercero'
+export type EstadoEntidadFiscal = 'activa' | 'inactiva'
+export type PermisoEntidad = 'ver' | 'cargar' | 'administrar'
+
+export interface EntidadFiscal {
+  id: string
+  creada_por: string
+  tipo: TipoEntidadFiscal
+  nombre: string
+  cuit?: string | null
+  terminacion_cuit?: string | null
+  regimen_fiscal?: SituacionFiscal | null
+  provincia?: string | null
+  localidad?: string | null
+  estado: EstadoEntidadFiscal
+  proyecto_origen_id?: string | null
+  created_at?: string
+  updated_at?: string
+}
 
 export interface NegocioProyecto {
   id: string
   user_id: string
   estado: EstadoProyecto
   nombre?: string
+  entidad_fiscal_id?: string | null
+  relacion?: RelacionNegocio | null
+  entidad_fiscal?: EntidadFiscal | null
   datos: DatosNegocio
   completitud: number
   certeza?: Certeza | null

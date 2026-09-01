@@ -1,6 +1,3 @@
-// Generated from the live FacilFiscal Supabase schema on 2026-08-30.
-// Regenerate after every database migration.
-
 export type Json =
   | string
   | number
@@ -101,11 +98,100 @@ export type Database = {
           },
         ]
       }
+      entidad_usuarios: {
+        Row: {
+          created_at: string
+          entidad_fiscal_id: string
+          permiso: string
+          relacion: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entidad_fiscal_id: string
+          permiso?: string
+          relacion: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entidad_fiscal_id?: string
+          permiso?: string
+          relacion?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entidad_usuarios_entidad_fiscal_id_fkey"
+            columns: ["entidad_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "entidades_fiscales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entidades_fiscales: {
+        Row: {
+          creada_por: string
+          created_at: string
+          cuit: string | null
+          estado: string
+          id: string
+          localidad: string | null
+          nombre: string
+          provincia: string | null
+          proyecto_origen_id: string | null
+          regimen_fiscal: string | null
+          terminacion_cuit: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          creada_por: string
+          created_at?: string
+          cuit?: string | null
+          estado?: string
+          id?: string
+          localidad?: string | null
+          nombre: string
+          provincia?: string | null
+          proyecto_origen_id?: string | null
+          regimen_fiscal?: string | null
+          terminacion_cuit?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          creada_por?: string
+          created_at?: string
+          cuit?: string | null
+          estado?: string
+          id?: string
+          localidad?: string | null
+          nombre?: string
+          provincia?: string | null
+          proyecto_origen_id?: string | null
+          regimen_fiscal?: string | null
+          terminacion_cuit?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entidades_fiscales_proyecto_origen_id_fkey"
+            columns: ["proyecto_origen_id"]
+            isOneToOne: true
+            referencedRelation: "negocio_proyectos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facturas: {
         Row: {
           cliente: string
           concepto: string | null
           created_at: string | null
+          entidad_fiscal_id: string | null
           estado: string
           fecha_emision: string
           fecha_vto: string | null
@@ -121,6 +207,7 @@ export type Database = {
           cliente: string
           concepto?: string | null
           created_at?: string | null
+          entidad_fiscal_id?: string | null
           estado?: string
           fecha_emision?: string
           fecha_vto?: string | null
@@ -136,6 +223,7 @@ export type Database = {
           cliente?: string
           concepto?: string | null
           created_at?: string | null
+          entidad_fiscal_id?: string | null
           estado?: string
           fecha_emision?: string
           fecha_vto?: string | null
@@ -149,6 +237,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "facturas_entidad_fiscal_id_fkey"
+            columns: ["entidad_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "entidades_fiscales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_entidad_usuario_fkey"
+            columns: ["entidad_fiscal_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "entidad_usuarios"
+            referencedColumns: ["entidad_fiscal_id", "user_id"]
+          },
+          {
             foreignKeyName: "facturas_negocio_id_fkey"
             columns: ["negocio_id"]
             isOneToOne: false
@@ -161,6 +263,7 @@ export type Database = {
         Row: {
           anio: number
           created_at: string | null
+          entidad_fiscal_id: string | null
           id: string
           mes: number
           monto: number
@@ -172,6 +275,7 @@ export type Database = {
         Insert: {
           anio: number
           created_at?: string | null
+          entidad_fiscal_id?: string | null
           id?: string
           mes: number
           monto?: number
@@ -183,6 +287,7 @@ export type Database = {
         Update: {
           anio?: number
           created_at?: string | null
+          entidad_fiscal_id?: string | null
           id?: string
           mes?: number
           monto?: number
@@ -192,6 +297,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ingresos_entidad_usuario_fkey"
+            columns: ["entidad_fiscal_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "entidad_usuarios"
+            referencedColumns: ["entidad_fiscal_id", "user_id"]
+          },
+          {
+            foreignKeyName: "ingresos_mensuales_entidad_fiscal_id_fkey"
+            columns: ["entidad_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "entidades_fiscales"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ingresos_mensuales_negocio_id_fkey"
             columns: ["negocio_id"]
@@ -339,10 +458,12 @@ export type Database = {
           completitud_fiscal: number | null
           created_at: string | null
           datos: Json
+          entidad_fiscal_id: string | null
           estado: string
           falta_info: string[] | null
           id: string
           nombre: string | null
+          relacion: string | null
           updated_at: string | null
           user_id: string
         }
@@ -353,10 +474,12 @@ export type Database = {
           completitud_fiscal?: number | null
           created_at?: string | null
           datos?: Json
+          entidad_fiscal_id?: string | null
           estado?: string
           falta_info?: string[] | null
           id?: string
           nombre?: string | null
+          relacion?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -367,14 +490,24 @@ export type Database = {
           completitud_fiscal?: number | null
           created_at?: string | null
           datos?: Json
+          entidad_fiscal_id?: string | null
           estado?: string
           falta_info?: string[] | null
           id?: string
           nombre?: string | null
+          relacion?: string | null
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "negocio_proyectos_entidad_fiscal_id_fkey"
+            columns: ["entidad_fiscal_id"]
+            isOneToOne: false
+            referencedRelation: "entidades_fiscales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_diagnostico: {
         Row: {
