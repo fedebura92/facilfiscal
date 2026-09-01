@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { CATEGORIAS_MONO } from '@/lib/data'
+import { useFiscalData } from '@/components/FiscalDataProvider'
 import { calcularDiagnostico, calcularCompletitud, type Obligacion } from '@/lib/reglas-fiscales'
 import type { PerfilFiscal, SituacionFiscal, FormaOperacion } from '@/lib/types'
 
@@ -196,6 +196,7 @@ const field = (label: string, node: React.ReactNode, help?: string) => (
 
 // ── Página ──────────────────────────────────────────────────────────────
 export default function PerfilPage() {
+  const { categorias } = useFiscalData()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -435,7 +436,7 @@ export default function PerfilPage() {
           {perfil.situacion_fiscal === 'mono' && field('Categoría de Monotributo', (
             <select style={inp} value={perfil.categoria_monotributo || ''} onChange={e => set('categoria_monotributo', e.target.value)}>
               <option value="">No sé / todavía no la tengo</option>
-              {CATEGORIAS_MONO.map(c => <option key={c.letra} value={c.letra}>Categoría {c.letra}</option>)}
+              {categorias.map(c => <option key={c.letra} value={c.letra}>Categoría {c.letra}</option>)}
             </select>
           ))}
 

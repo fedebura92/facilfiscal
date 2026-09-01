@@ -7,34 +7,35 @@ export const TERMINACION_DIAS: Record<string, number> = {
 }
 
 // ── Categorías de Monotributo (A–K) ─────────────────────
-// Fuente: ARCA — Valores vigentes desde el 01/02/2026
-// https://www.afip.gob.ar/monotributo/categorias.asp
-// Última actualización: febrero 2026
+// Snapshot de emergencia de la fuente versionada en Supabase.
+// Fuente oficial: ARCA — valores vigentes desde el 01/08/2026.
+// https://www.arca.gob.ar/monotributo/categorias.asp
+// Última verificación manual: 31/08/2026
 
-export const VIGENCIA_MONTOS = 'Vigente desde el 01/02/2026 — Fuente: ARCA'
+export const VIGENCIA_MONTOS = 'Vigente desde el 01/08/2026 — Fuente: ARCA — verificado el 31/08/2026'
 
 export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
   // imp = impuesto integrado (servicios), prev = aportes SIPA, os se suma aparte
-  { letra: 'A', limite_anual: 10277988.13,  imp: 4780.46,    prev: 15616.17  },
-  { letra: 'B', limite_anual: 15058447.71,  imp: 9082.88,    prev: 17177.79  },
-  { letra: 'C', limite_anual: 21113696.52,  imp: 15616.17,   prev: 18895.57  },
-  { letra: 'D', limite_anual: 26212853.42,  imp: 25495.79,   prev: 20785.13  },
-  { letra: 'E', limite_anual: 30833964.37,  imp: 47804.60,   prev: 22863.64  },
-  { letra: 'F', limite_anual: 38642048.36,  imp: 67245.13,   prev: 25150.00  },
-  { letra: 'G', limite_anual: 46211109.37,  imp: 122379.76,  prev: 35210.00  },
-  { letra: 'H', limite_anual: 70113407.33,  imp: 350567.04,  prev: 49294.00  },
-  { letra: 'I', limite_anual: 78479211.62,  imp: 697150.35,  prev: 69011.60  },
-  { letra: 'J', limite_anual: 89872640.30,  imp: 836580.42,  prev: 96616.24  },
-  { letra: 'K', limite_anual: 108357084.05, imp: 1171212.59, prev: 135262.74 },
+  { letra: 'A', limite_anual: 12009410.45,  imp: 5585.77,    prev: 18246.86  },
+  { letra: 'B', limite_anual: 17595182.74,  imp: 10612.98,   prev: 20071.55  },
+  { letra: 'C', limite_anual: 24670494.31,  imp: 18246.86,   prev: 22078.71  },
+  { letra: 'D', limite_anual: 30628651.43,  imp: 29790.79,   prev: 24286.58  },
+  { letra: 'E', limite_anual: 36028231.33,  imp: 55857.73,   prev: 26715.24  },
+  { letra: 'F', limite_anual: 45151659.41,  imp: 78573.20,   prev: 29386.76  },
+  { letra: 'G', limite_anual: 53995798.87,  imp: 142995.76,  prev: 41141.46  },
+  { letra: 'H', limite_anual: 81924660.37,  imp: 409623.31,  prev: 57598.04  },
+  { letra: 'I', limite_anual: 91699761.90,  imp: 814591.79,  prev: 80637.26  },
+  { letra: 'J', limite_anual: 105012519.20, imp: 977510.14,  prev: 112892.16 },
+  { letra: 'K', limite_anual: 126610838.75, imp: 1368514.20, prev: 158049.02 },
 ]
 
-export const OS_EXTRA = 21990.11 // Aportes obra social vigentes 01/02/2026
+export const OS_EXTRA = 25694.55 // Categorías A-C; categorías superiores varían según ARCA
 
 // ── Tabla de montos (FUENTE ÚNICA) ──────────────────────
 export const MONTOS = {
   mono: {
     cats:    CATEGORIAS_MONO.map(c => c.letra),
-    limites: ['$10,3M','$15,1M','$21,1M','$26,2M','$30,8M','$38,6M','$46,2M','$70,1M','$78,5M','$89,9M','$108,4M'],
+    limites: ['$12,0M','$17,6M','$24,7M','$30,6M','$36,0M','$45,2M','$54,0M','$81,9M','$91,7M','$105,0M','$126,6M'],
     imp:     CATEGORIAS_MONO.map(c => c.imp),
     prev:    CATEGORIAS_MONO.map(c => c.prev),
     os:      OS_EXTRA,
@@ -77,9 +78,7 @@ export type AlertaUI = {
 // ── Fallback de vencimientos (FUENTE ÚNICA) ──────────────
 export const FALLBACK_VENC: Record<TipoContribuyente, VencimientoUI[]> = {
   mono: [
-    { id:'1', nombre:'Monotributo (term. 0-4)', emoji:'📋', detalle:'Terminación CUIT 0, 1, 2, 3 o 4', dia_mes:3,  tipo:'mono', fecha:'' },
-    { id:'2', nombre:'Monotributo (term. 5-9)', emoji:'📋', detalle:'Terminación CUIT 5, 6, 7, 8 o 9', dia_mes:10, tipo:'mono', fecha:'' },
-    { id:'3', nombre:'Obra Social / Previsional',emoji:'🏥', detalle:'Componente previsional',           dia_mes:12, tipo:'mono', fecha:'' },
+    { id:'1', nombre:'Monotributo — cuota mensual', emoji:'📋', detalle:'Fecha general; verificá feriados en el calendario oficial de ARCA', dia_mes:20, tipo:'mono', fecha:'' },
   ],
   ri: [
     { id:'4',  nombre:'IVA (term. 0-1)',             emoji:'🧾', detalle:'Terminación CUIT 0 o 1 — Presentación y pago',  dia_mes:19, tipo:'ri', fecha:'' },
@@ -123,7 +122,9 @@ export const FALLBACK_ALERTAS: Record<TipoContribuyente, AlertaUI[]> = {
 // ── Helpers de fecha ─────────────────────────────────────
 export function addFecha(v: VencimientoUI): VencimientoUI {
   const n = new Date()
-  return { ...v, fecha: new Date(n.getFullYear(), n.getMonth(), v.dia_mes).toISOString() }
+  const fecha = new Date(n.getFullYear(), n.getMonth(), v.dia_mes)
+  if (fecha < new Date(n.getFullYear(), n.getMonth(), n.getDate())) fecha.setMonth(fecha.getMonth() + 1)
+  return { ...v, fecha: fecha.toISOString() }
 }
 
 export function diffDias(f: string): number {

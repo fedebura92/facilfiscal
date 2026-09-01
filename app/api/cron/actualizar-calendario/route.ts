@@ -42,6 +42,7 @@ export async function GET (req: Request) {
       .select('id')
       .eq('mes', mesActual)
       .eq('anio', anioActual)
+      .eq('estado', 'validado')
       .limit(1)
 
     if (checkError) throw new Error(checkError.message)
@@ -96,7 +97,7 @@ Devolvé ÚNICAMENTE un JSON válido con este formato exacto, sin texto adiciona
       "tipo": "pago",
       "dia": 20,
       "rango": null,
-      "pendiente": false
+      "pendiente": true
     }
   ]
 }
@@ -106,7 +107,7 @@ Reglas:
 - "categoria" es array con uno o más de: monotributo | responsable | autonomo | empleador
 - Si el vencimiento tiene día exacto, usá "dia" (número) y "rango" null
 - Si hay rango de días por CUIT, usá "rango" (string como "5, 6 y 7") y "dia" null
-- "pendiente" siempre false (son fechas confirmadas)
+- "pendiente" siempre true: esta fuente es secundaria y requiere validación contra ARCA
 - En descripción aclará los días exactos por terminación de CUIT si aplica
 - Ignorá duplicados (si IVA aparece 5 veces por CUIT, resumilo en 1 entrada con rango)
 
@@ -143,12 +144,15 @@ ${htmlRecortado}`
     }
 
     // ── 4. Guardar en Supabase ────────────────────────────────────────────
-    // Primero borrar los del mismo mes/año para evitar duplicados
+    // Reemplazar únicamente borradores previos de la misma fuente. Las
+    // versiones validadas nunca se eliminan desde el cron.
     await supabase
       .from('vencimientos_fiscales')
       .delete()
       .eq('mes', mesNum)
       .eq('anio', anio)
+      .eq('estado', 'borrador')
+      .eq('fuente', url)
 
     // Insertar los nuevos
     const rows = vencimientos.map(v => ({
@@ -160,8 +164,12 @@ ${htmlRecortado}`
       tipo: v.tipo,
       dia: v.dia ?? null,
       rango: v.rango ?? null,
-      pendiente: v.pendiente ?? false,
-      verificado: true,
+      pendiente: true,
+      verificado: false,
+      estado: 'borrador',
+      fuente_nombre: 'Fuente secundaria',
+      version: Number(`${anio}${String(mesNum).padStart(2, '0')}`),
+      verificado_at: null,
       fuente: url,
     }))
 
@@ -177,7 +185,7 @@ ${htmlRecortado}`
     return NextResponse.json({
       ok: true,
       mes: `${mesNombre} ${anio}`,
-      vencimientosInsertados: rows.length,
+      borradoresInsertados: rows.length,
     })
 
   } catch (error: any) {
@@ -223,13 +231,12 @@ async function notificarActualizacion(mes: string, anio: number, cantidad: numbe
       body: JSON.stringify({
         from: 'sistema@facilfiscal.com.ar',
         to: process.env.ADMIN_EMAIL || 'admin@facilfiscal.com.ar',
-        subject: `✅ Calendario ${mes} ${anio} actualizado — ${cantidad} vencimientos`,
+        subject: `🟡 Calendario ${mes} ${anio}: ${cantidad} fechas para revisar`,
         html: `
-          <h2>Calendario fiscal actualizado automáticamente</h2>
+          <h2>Candidatos guardados como borrador</h2>
           <p><strong>Mes:</strong> ${mes} ${anio}</p>
-          <p><strong>Vencimientos insertados:</strong> ${cantidad}</p>
-          <p>Revisá el resultado en <a href="https://facilfiscal.com.ar/calendario-fiscal">facilfiscal.com.ar/calendario-fiscal</a></p>
-          <p><em>Siempre verificá contra el calendario oficial de ARCA antes de publicar cambios críticos.</em></p>
+          <p><strong>Fechas detectadas:</strong> ${cantidad}</p>
+          <p>No se publicaron. Comparalas con el calendario oficial de ARCA y cambialas a estado validado únicamente si coinciden.</p>
         `,
       }),
     })

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { CATEGORIAS_MONO } from '@/lib/data'
+import { useFiscalData } from '@/components/FiscalDataProvider'
 import type { NegocioProyecto } from '@/lib/types'
 
 const V = {
@@ -21,9 +21,6 @@ const MESES_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Ag
 
 // Fuente única de límites de categoría (lib/data.ts) — antes había otra
 // copia hardcodeada y desactualizada acá adentro (ya iba por la 5ta vez).
-const LIMITES_MONO = CATEGORIAS_MONO.map(c => c.limite_anual)
-const CATS_MONO    = CATEGORIAS_MONO.map(c => c.letra)
-
 function money(n: number) {
   if (n >= 1000000) return `$${(n/1000000).toFixed(1)}M`
   if (n >= 1000) return `$${Math.round(n/1000)}K`
@@ -54,6 +51,9 @@ interface Perfil {
 }
 
 export default function FinancieroPage() {
+  const { categorias } = useFiscalData()
+  const LIMITES_MONO = categorias.map(c => c.limite_anual)
+  const CATS_MONO = categorias.map(c => c.letra)
   const anioActual = new Date().getFullYear()
   const mesActual  = new Date().getMonth() // 0-indexed
 

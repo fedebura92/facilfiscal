@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { CATEGORIAS_MONO } from '@/lib/data'
+import { useFiscalData } from '@/components/FiscalDataProvider'
 import { calcularDiagnostico, calcularCompletitud, type Obligacion } from '@/lib/reglas-fiscales'
 import type { PerfilFiscal, NegocioProyecto } from '@/lib/types'
 
@@ -17,9 +17,6 @@ const CONFIANZA_LABEL: Record<string, string> = {
 
 // Fuente única de límites de categoría (lib/data.ts) — antes había 4 copias
 // hardcodeadas y desactualizadas de este mismo array en este archivo.
-const LIMITES_MONO = CATEGORIAS_MONO.map(c => c.limite_anual)
-const CATS_MONO    = CATEGORIAS_MONO.map(c => c.letra)
-
 // Perfil = alias de PerfilFiscal (Mi Perfil v2). Se mantiene el nombre local
 // para no tocar cada referencia de "Perfil" en este archivo.
 type Perfil = PerfilFiscal
@@ -45,8 +42,6 @@ const V = {
   ink:'#0f2733', ink2:'#3d5a6b', ink3:'#7a9aaa',
 }
 
-const IVA_DIA: Record<string,number>  = { '0':18,'1':18,'2':19,'3':19,'4':20,'5':20,'6':21,'7':21,'8':22,'9':22 }
-const AUT_DIA: Record<string,number>  = { '0':5,'1':5,'2':5,'3':5,'4':6,'5':6,'6':6,'7':7,'8':7,'9':7 }
 const F931_DIA: Record<string,number> = { '0':9,'1':9,'2':9,'3':9,'4':10,'5':10,'6':10,'7':11,'8':11,'9':11 }
 
 function getDias(dia: number) {
@@ -80,14 +75,15 @@ function buildTasks(p: Perfil | null, db: Record<string,{done:boolean;done_at:st
 
 // ── Widget resumen del panel financiero ──────────────────────────────────────
 function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; perfil: any; negocios: NegocioProyecto[] }) {
+  const { categorias } = useFiscalData()
   const [data, setData] = useState<{ totalAnio:number; disponible:number; porCobrar:number; pct:number; cat:string } | null>(null)
   const [porEntidad, setPorEntidad] = useState<{ etiqueta:string; totalAnio:number; cat:string; pct:number }[]>([])
   const anio = new Date().getFullYear()
 
   // Fuente única (lib/data.ts) — antes había otra copia hardcodeada y
   // desactualizada de este mismo array acá adentro.
-  const LIMITES = LIMITES_MONO
-  const CATS    = CATS_MONO
+  const LIMITES = categorias.map(c => c.limite_anual)
+  const CATS    = categorias.map(c => c.letra)
 
   useEffect(() => {
     if (!userId) return
@@ -142,7 +138,7 @@ function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; p
       setPorEntidad(resultados.filter(r => r.totalAnio > 0 || r.porCobrar > 0).map(r => ({ etiqueta:r.etiqueta, totalAnio:r.totalAnio, cat:r.cat, pct:r.pct })))
     }
     load()
-  }, [userId, anio, negocios, perfil?.tipo_contribuyente])
+  }, [userId, anio, negocios, perfil?.tipo_contribuyente, categorias])
 
   const pctColor = data ? (data.pct >= 90 ? V.red : data.pct >= 75 ? V.amber : V.green) : V.teal
 
@@ -210,6 +206,9 @@ function WidgetFinanciero({ userId, perfil, negocios }: { userId: string|null; p
 }
 
 export default function MiPanel() {
+  const { categorias } = useFiscalData()
+  const LIMITES_MONO = categorias.map(c => c.limite_anual)
+  const CATS_MONO = categorias.map(c => c.letra)
   const [perfil, setPerfil]           = useState<Perfil|null>(null)
   const [userId, setUserId]           = useState<string|null>(null)
   const [tasks, setTasks]             = useState<Task[]>(buildTasks(null,{}))
@@ -554,8 +553,8 @@ Perfil:
 - Provincia: ${perfil.provincia || 'No definida'}
 - Terminación CUIT: ${t || 'No definida'}
 - Facturación estimada: ${perfil.facturacion_estimada ? `$${perfil.facturacion_estimada.toLocaleString('es-AR')}` : 'No definida'}
-${t && perfil.tipo_contribuyente==='ri'  ? `- Vencimiento IVA: día ${IVA_DIA[t]}` : ''}
-${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT_DIA[t]}` : ''}
+${t && perfil.tipo_contribuyente==='ri'  ? '- Vencimiento IVA: consultar el calendario oficial validado para este CUIT' : ''}
+${t && perfil.tipo_contribuyente==='aut' ? '- Vencimiento autónomos: consultar el calendario oficial validado para este CUIT' : ''}
 ` : 'Sin perfil completado.'
 
     try {
@@ -639,8 +638,8 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     if (!t || !tipo) return []
     const items: {titulo:string;dia:number;negocio:string}[] = []
     if (tipo==='mono') items.push({ titulo:'Monotributo — cuota mensual', dia:20, negocio:etiqueta })
-    if (tipo==='ri'||tipo==='aut') { const d=IVA_DIA[t]; if(d) items.push({ titulo:`IVA — DJ mensual (CUIT …${t})`, dia:d, negocio:etiqueta }) }
-    if (tipo==='aut') { const d=AUT_DIA[t]; if(d) items.push({ titulo:`Autónomos — cuota mensual (CUIT …${t})`, dia:d, negocio:etiqueta }) }
+    // IVA y Autónomos dependen del calendario oficial de cada período. No se
+    // publican días estimados como si fueran vencimientos confirmados.
     return items
   }
 
@@ -708,8 +707,8 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     if (t) {
       const vencCheck = []
       if (tipo === 'mono') vencCheck.push({ nombre: 'Monotributo', dia: 20 })
-      if (tipo === 'ri' || tipo === 'aut') vencCheck.push({ nombre: 'IVA', dia: IVA_DIA[t] })
-      if (tipo === 'aut') vencCheck.push({ nombre: 'Autónomos', dia: AUT_DIA[t] })
+      if (tipo === 'ri' || tipo === 'aut') items.push({ texto: 'Vencimiento de IVA por confirmar con calendario oficial', nivel: 'warn', detalle: 'La fecha se mostrará cuando exista un vencimiento validado para este período y CUIT.' })
+      if (tipo === 'aut') items.push({ texto: 'Vencimiento de Autónomos por confirmar con calendario oficial', nivel: 'warn', detalle: 'La fecha se mostrará cuando exista un vencimiento validado para este período y CUIT.' })
       for (const v of vencCheck) {
         const dias = getDias(v.dia)
         if (dias === 0) items.push({ texto: `${v.nombre} vence HOY`, nivel: 'danger', detalle: '¡Pagá ahora para evitar recargos!' })
@@ -722,7 +721,7 @@ ${t && perfil.tipo_contribuyente==='aut' ? `- Vencimiento autónomos: día ${AUT
     // Recategorización
     const mes = new Date().getMonth() + 1
     if (tipo === 'mono') {
-      if ([3, 7, 11].includes(mes)) items.push({ texto: 'Mes de recategorización', nivel: 'warn', detalle: 'Este mes debés revisar si tu categoría sigue siendo correcta.' })
+      if ([2, 8].includes(mes)) items.push({ texto: 'Mes de recategorización', nivel: 'warn', detalle: 'Este mes debés revisar si tu categoría sigue siendo correcta.' })
       else items.push({ texto: 'Recategorización al día', nivel: 'ok' })
     }
 
@@ -793,8 +792,8 @@ const timelineItems = useMemo<TimelineItems>(() => {
 
     const checks = []
     if (tipo === 'mono') checks.push({ nombre: 'Pagar monotributo', dia: 20 })
-    if (tipo === 'ri' || tipo === 'aut') checks.push({ nombre: 'Presentar y pagar IVA', dia: IVA_DIA[t] })
-    if (tipo === 'aut') checks.push({ nombre: 'Pagar aportes autónomos', dia: AUT_DIA[t] })
+    // Las fechas de IVA y Autónomos solo deben provenir del calendario oficial
+    // validado; no se agregan estimaciones a la agenda de acciones.
 
     for (const c of checks) {
       const dias = getDias(c.dia)
@@ -804,7 +803,7 @@ const timelineItems = useMemo<TimelineItems>(() => {
     }
 
     const mes = new Date().getMonth() + 1
-    if ([3, 7, 11].includes(mes) && tipo === 'mono') {
+    if ([2, 8].includes(mes) && tipo === 'mono') {
       hoy.push('Revisar recategorización de monotributo')
     }
 

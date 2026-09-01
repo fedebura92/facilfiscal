@@ -55,14 +55,14 @@ export function SEOMonotributo() {
             El Monotributo es un régimen simplificado de la AFIP/ARCA que permite a trabajadores independientes, profesionales y pequeños negocios pagar <strong>un solo monto fijo por mes</strong> en lugar de liquidar impuestos por separado. Con ese pago único cubrís el IVA, Ganancias, tu aporte jubilatorio y la obra social.
           </p>
           <p style={paraStyle}>
-            Es ideal si trabajás de forma independiente, tenés un negocio chico o empezás a facturar. Si tus ingresos superan los $72 millones anuales, tenés que pasar al régimen general como Responsable Inscripto.
+            Es una alternativa habitual si trabajás de forma independiente, tenés un negocio pequeño o empezás a facturar. Desde agosto de 2026, el límite máximo anual publicado por ARCA para la categoría K es de <strong>$126.610.838,75</strong>.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginTop: 8 }}>
             {[
               { icon: '✅', title: 'Un solo pago', desc: 'IVA + Ganancias + jubilación + obra social en una cuota' },
-              { icon: '📅', title: 'Pago mensual', desc: 'Vence los primeros días de cada mes según tu CUIT' },
+              { icon: '📅', title: 'Pago mensual', desc: 'La cuota mensual vence, en general, el día 20' },
               { icon: '📄', title: 'Factura C', desc: 'Como monotributista emitís siempre Factura C' },
-              { icon: '🔄', title: 'Recategorización', desc: 'Se revisa cada 6 meses: enero-febrero y julio-agosto' },
+              { icon: '🔄', title: 'Recategorización', desc: 'Se evalúa dos veces al año, en febrero y agosto' },
             ].map(item => (
               <div key={item.title} style={{ background: V.tealLight, border: `1px solid ${V.tealRing}`, borderRadius: 10, padding: '12px' }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>{item.icon}</div>
@@ -79,7 +79,7 @@ export function SEOMonotributo() {
         <div style={headerStyle}>💳 ¿Cómo y cuándo se paga?</div>
         <div style={bodyStyle}>
           <p style={paraStyle}>
-            El pago se hace todos los meses a través de ARCA (ex AFIP). El vencimiento depende del <strong>último dígito de tu CUIT</strong>: si termina en 0 a 4, vence los primeros días; si termina en 5 a 9, vence unos días después.
+            El pago se hace todos los meses a través de ARCA. La cuota mensual vence, en general, el <strong>día 20</strong>; si coincide con un día inhábil, se debe revisar el calendario oficial del período.
           </p>
           <p style={paraStyle}>
             Para pagar generás un <strong>VEP (Volante Electrónico de Pago)</strong> desde el sitio de ARCA y lo pagás desde el home banking de tu banco. También podés pagar en cajero automático con débito o en Pago Fácil/Rapipago con el formulario impreso.
@@ -98,7 +98,7 @@ export function SEOMonotributo() {
             Las categorías van de la A a la K y se determinan por tu <strong>facturación anual</strong> (lo que facturaste en los últimos 12 meses). Cada categoría tiene un límite de ingresos y una cuota mensual diferente.
           </p>
           <p style={paraStyle}>
-            Si facturás más de lo que permite tu categoría durante 3 meses, tenés que recategorizarte a una categoría más alta. Si facturás menos de lo que permite la categoría inferior durante 6 meses, podés bajar. La recategorización se hace en enero-febrero y en julio-agosto de cada año.
+            Para la recategorización se evalúan los parámetros de los últimos 12 meses. El trámite se realiza en febrero y agosto; si corresponde modificar la categoría, ARCA informa la fecha límite de cada período.
           </p>
           <div style={{ background: V.redBg, border: `1px solid ${V.redRing}`, borderRadius: 10, padding: '12px 14px', fontSize: 12, fontWeight: 600, color: '#7a2020', lineHeight: 1.6 }}>
             ⚠️ <strong>Ojo:</strong> Si estás en una categoría más baja de la que te corresponde, AFIP puede recategorizarte de oficio y cobrarte las diferencias con intereses.
@@ -116,7 +116,7 @@ export function SEOMonotributo() {
           },
           {
             q: '¿Puedo tener empleados siendo monotributista?',
-            a: 'Sí, podés tener hasta 3 empleados. Eso te permite estar en categorías más altas (hasta la K). Si tenés empleados también tenés que pagar cargas sociales aparte.',
+            a: 'Sí, pero tener empleados genera obligaciones adicionales como registración, ART, recibos y cargas sociales. La categoría del Monotributo se determina por los parámetros vigentes, no por una cantidad fija de empleados.',
           },
           {
             q: '¿Puedo trabajar en relación de dependencia y ser monotributista a la vez?',
@@ -128,7 +128,7 @@ export function SEOMonotributo() {
           },
           {
             q: '¿Qué es la recategorización y cuándo la tengo que hacer?',
-            a: 'La recategorización es el proceso de revisar tu categoría según lo que facturaste en los últimos 12 meses. Se hace dos veces al año: en enero-febrero y en julio-agosto. Si no hacés nada, quedás en la misma categoría.',
+            a: 'La recategorización revisa los parámetros de los últimos 12 meses. Se realiza dos veces al año, en febrero y agosto. Si tus parámetros no cambiaron de categoría, no tenés que modificarla.',
           },
         ].map((item, i) => (
           <div key={i} style={{ ...faqStyle, borderBottom: i === 4 ? 'none' : `1px solid ${V.border}` }}>
@@ -152,7 +152,7 @@ export function SEOResponsableInscripto() {
             El Responsable Inscripto (RI) es el régimen general de impuestos de AFIP. A diferencia del Monotributo, acá no pagás un monto fijo: pagás según lo que realmente ganaste y gastaste en el mes. Tenés que liquidar IVA, Ganancias y otros impuestos por separado cada mes.
           </p>
           <p style={paraStyle}>
-            Pasás a ser Responsable Inscripto cuando tu facturación supera los $72 millones anuales, o cuando elegís ese régimen por conveniencia (por ejemplo, si tenés muchos gastos deducibles o trabajás con empresas que necesitan factura A).
+            Podés quedar fuera del Monotributo cuando superás alguno de sus parámetros máximos o por otras causales de exclusión. Desde agosto de 2026, el límite máximo de ingresos brutos de la categoría K es de $126.610.838,75; también podés optar por el régimen general si corresponde a tu actividad.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginTop: 8 }}>
             {[
@@ -213,7 +213,7 @@ export function SEOResponsableInscripto() {
         {[
           {
             q: '¿Cuándo tengo que pasar del Monotributo al régimen general?',
-            a: 'Cuando tu facturación anual supera los $72 millones (categoría K del Monotributo). También podés elegir pasarte antes si te conviene por la cantidad de gastos deducibles que tenés.',
+            a: 'Cuando superás los parámetros máximos vigentes o se configura otra causal de exclusión. Desde agosto de 2026, el tope de ingresos brutos de la categoría K es de $126.610.838,75. También podés optar antes por el régimen general si corresponde.',
           },
           {
             q: '¿Qué son las retenciones de IVA?',
@@ -256,7 +256,7 @@ export function SEOAutonomos() {
               { icon: '⚡', title: 'Aportes mensuales', desc: 'Pagás aportes jubilatorios todos los meses según tu categoría (I a V)' },
               { icon: '🧾', title: 'Podés estar en IVA', desc: 'Si tu actividad lo requiere, también tenés que liquidar IVA mensualmente' },
               { icon: '💼', title: 'Ganancias', desc: 'Pagás el impuesto a las Ganancias con anticipos mensuales' },
-              { icon: '📅', title: 'Vence el día 8', desc: 'El aporte mensual de autónomos vence el día 8 de cada mes' },
+              { icon: '📅', title: 'Vence según CUIT', desc: 'La fecha mensual se escalona según la terminación de CUIT' },
             ].map(item => (
               <div key={item.title} style={{ background: V.tealLight, border: `1px solid ${V.tealRing}`, borderRadius: 10, padding: '12px' }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>{item.icon}</div>
@@ -301,7 +301,7 @@ export function SEOAutonomos() {
           },
           {
             q: '¿Puedo ser autónomo y monotributista a la vez?',
-            a: 'No podés estar en ambos regímenes para la misma actividad. Pero sí podés ser autónomo en tu actividad principal y tener otra actividad secundaria en Monotributo, siempre que sean actividades distintas.',
+            a: 'La respuesta depende de la causa de tu inscripción como autónomo y de tus actividades. No conviene asignar un régimen distinto a cada actividad bajo el mismo CUIT sin revisar el encuadre completo con ARCA o un profesional.',
           },
           {
             q: '¿Los autónomos tienen obra social?',

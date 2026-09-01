@@ -3,12 +3,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Impuestos provinciales en Argentina — IIBB, Sellos y más por provincia",
   description:
-    "Consultá los impuestos de cada provincia argentina: Ingresos Brutos (IIBB), Impuesto de Sellos, Inmobiliario y Tasas Municipales. Las 24 jurisdicciones actualizadas 2025.",
+    "Consultá los principales impuestos de cada provincia argentina: Ingresos Brutos (IIBB), Sellos, Inmobiliario y tasas municipales. Guía orientativa 2026.",
 
   keywords: [
     "impuestos provinciales argentina",
     "ingresos brutos por provincia",
-    "alicuota IIBB argentina 2025",
+    "alicuota IIBB argentina 2026",
     "impuesto de sellos provincia",
     "cuanto se paga de ingresos brutos",
     "impuestos municipales argentina",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Impuestos por provincia en Argentina | FácilFiscal",
     description:
-      "IIBB, Sellos, Inmobiliario y Tasas Municipales de las 24 jurisdicciones argentinas. Datos actualizados 2025.",
+      "IIBB, Sellos, Inmobiliario y tasas municipales de las 24 jurisdicciones argentinas. Guía 2026.",
     url: "/impuestos-por-provincia",
     siteName: "FácilFiscal",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Impuestos por provincia en Argentina | FácilFiscal",
-    description: "IIBB, Sellos, Inmobiliario de las 24 jurisdicciones. Datos actualizados 2025.",
+    description: "IIBB, Sellos e Inmobiliario de las 24 jurisdicciones. Guía orientativa 2026.",
     images: ["/og-image.png"],
   },
 
