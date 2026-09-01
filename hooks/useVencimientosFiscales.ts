@@ -46,6 +46,7 @@ export function useVencimientosFiscales(mes: number, anio: number) {
           .select('*')
           .eq('mes', mes)
           .eq('anio', anio)
+          .eq('estado', 'validado')
           .order('dia', { ascending: true, nullsFirst: false })
 
         if (sbError) throw new Error(sbError.message)

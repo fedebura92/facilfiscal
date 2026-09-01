@@ -39,6 +39,10 @@ export interface CategoriaMonotributo {
   limite_anual: number
   imp: number
   prev: number
+  os?: number
+  imp_productos?: number
+  total_servicios?: number
+  total_productos?: number
 }
 
 export interface ResultadoCalculo {

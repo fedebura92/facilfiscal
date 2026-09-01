@@ -1,20 +1,18 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { FiscalDataProvider } from '@/components/FiscalDataProvider'
+import StructuredData from '@/components/StructuredData'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.facilfiscal.com.ar'),
 
-  alternates: {
-    canonical: '/',
-  },
-
   title: {
-    default: 'Fácil Fiscal — Monotributo fácil en Argentina',
+    default: 'Fácil Fiscal — Creá y administrá tu negocio en Argentina',
     template: '%s | Fácil Fiscal',
   },
 
   description:
-    'Calculá tu categoría de monotributo, aprendé a facturar correctamente y evitá errores con AFIP. Recordatorios automáticos de vencimientos.',
+    'Creá y administrá tu negocio en Argentina. Compará Monotributo, Responsable Inscripto y sociedades; organizá impuestos, facturación y vencimientos.',
 
   keywords: [
     'monotributo argentina',
@@ -24,6 +22,9 @@ export const metadata: Metadata = {
     'ARCA Argentina',
     'factura C',
     'recategorizacion monotributo',
+    'crear negocio argentina',
+    'administrar impuestos negocio',
+    'obligaciones fiscales argentina',
   ],
 
   authors: [{ name: 'Fácil Fiscal' }],
@@ -34,9 +35,9 @@ export const metadata: Metadata = {
     url: 'https://www.facilfiscal.com.ar',
     siteName: 'Fácil Fiscal',
 
-    title: 'Fácil Fiscal — Monotributo fácil en Argentina',
+    title: 'Fácil Fiscal — Creá y administrá tu negocio en Argentina',
     description:
-      'Calculá tu categoría, aprendé a facturar y recibí alertas automáticas de vencimientos.',
+      'Compará alternativas fiscales, creá tu negocio y administrá impuestos, facturación y vencimientos.',
 
     images: [
       {
@@ -49,9 +50,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    title: 'Fácil Fiscal — Monotributo fácil en Argentina',
+    title: 'Fácil Fiscal — Creá y administrá tu negocio en Argentina',
     description:
-      'Calculá tu categoría, aprendé a facturar y recibí alertas automáticas de vencimientos.',
+      'Compará alternativas fiscales, creá tu negocio y administrá impuestos, facturación y vencimientos.',
     images: ['/og-image.png'],
   },
 
@@ -72,7 +73,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <StructuredData data={[
+          {
+            '@context':'https://schema.org', '@type':'Organization',
+            name:'Fácil Fiscal', url:'https://www.facilfiscal.com.ar',
+            logo:'https://www.facilfiscal.com.ar/icon.png',
+          },
+          {
+            '@context':'https://schema.org', '@type':'WebSite',
+            name:'Fácil Fiscal', url:'https://www.facilfiscal.com.ar',
+            inLanguage:'es-AR',
+          },
+        ]} />
+        <FiscalDataProvider>{children}</FiscalDataProvider>
+      </body>
     </html>
   )
 }

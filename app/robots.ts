@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/unsubscribe'],
+      disallow: ['/api/', '/auth/', '/login', '/mipanel/', '/unsubscribe'],
     },
     sitemap: 'https://www.facilfiscal.com.ar/sitemap.xml',
   }

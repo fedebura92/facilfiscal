@@ -5,7 +5,7 @@ import CalendarioFiscalClient from "./CalendarioFiscalClient";
 export const metadata: Metadata = {
   title: "Calendario Fiscal 2026 Argentina | Vencimientos AFIP ARCA - Fácil Fiscal",
   description:
-    "Calendario completo de vencimientos impositivos 2026 para monotributistas, responsables inscriptos y autónomos en Argentina. IVA, cargas sociales, recategorización y más.",
+    "Calendario de vencimientos impositivos 2026 para monotributistas, responsables inscriptos y autónomos. Diferencia fechas verificadas y pendientes de confirmación.",
   keywords: [
     "calendario fiscal 2026 argentina",
     "vencimientos afip 2026",
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     title: "Calendario Fiscal 2026 — Todos los vencimientos AFIP/ARCA",
     description:
       "Vencimientos de monotributo, IVA, autónomos, cargas sociales y más. Filtrá por tu situación impositiva.",
-    url: "https://facilfiscal.com.ar/calendario-fiscal",
+    url: "https://www.facilfiscal.com.ar/calendario-fiscal",
     siteName: "Fácil Fiscal",
     locale: "es_AR",
     type: "website",
   },
   alternates: {
-    canonical: "https://facilfiscal.com.ar/calendario-fiscal",
+    canonical: "https://www.facilfiscal.com.ar/calendario-fiscal",
   },
 };
 

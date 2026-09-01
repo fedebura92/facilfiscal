@@ -61,59 +61,6 @@ function chequearSensatez(nuevas: any[]): { ok: boolean; motivo?: string } {
   return { ok: true }
 }
 
-function construirNuevoDataTs(contenidoActual: string, datos: any): string {
-  const vigenciaLine = `export const VIGENCIA_MONTOS = 'Vigente desde el ${datos.vigencia} — Fuente: ARCA'`
-
-  const catsBlock = [
-    'export const CATEGORIAS_MONO: CategoriaMonotributo[] = [',
-    '  // imp = impuesto integrado (servicios), prev = aportes SIPA, os se suma aparte',
-    ...datos.categorias
-      .sort((a: any, b: any) => LETRAS_ESPERADAS.indexOf(a.letra) - LETRAS_ESPERADAS.indexOf(b.letra))
-      .map((c: any) => `  { letra: '${c.letra}', limite_anual: ${c.limite_anual}, imp: ${c.imp_servicios}, prev: ${c.prev_sipa} },`),
-    ']',
-  ].join('\n')
-
-  const osValor = datos.categorias[0]?.os ?? 0
-  const osLine = `export const OS_EXTRA = ${osValor} // Aportes obra social vigentes ${datos.vigencia}`
-
-  return contenidoActual
-    .replace(/export const VIGENCIA_MONTOS = '[^']*'/, vigenciaLine)
-    .replace(/export const CATEGORIAS_MONO: CategoriaMonotributo\[\] = \[[\s\S]*?\n\]/, catsBlock)
-    .replace(/export const OS_EXTRA = [\d.]+ \/\/[^\n]*/, osLine)
-    .replace(/\/\/ Última actualización: [^\n]*/, `// Última actualización: automática — ${new Date().toLocaleDateString('es-AR', { month:'long', year:'numeric' })}`)
-}
-
-async function commitearDataTs(nuevoContenido: string, mensaje: string) {
-  const owner  = process.env.GITHUB_REPO_OWNER || 'fedebura92'
-  const repo   = process.env.GITHUB_REPO_NAME  || 'facilfiscal'
-  const branch = process.env.GITHUB_BRANCH     || 'main'
-  const path   = 'lib/data.ts'
-  const token  = process.env.GITHUB_TOKEN
-
-  if (!token) throw new Error('Falta la variable de entorno GITHUB_TOKEN: no se puede commitear lib/data.ts automáticamente.')
-
-  const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-  })
-  if (!getRes.ok) throw new Error(`No pude leer lib/data.ts de GitHub (${getRes.status}).`)
-  const { sha } = await getRes.json()
-
-  const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: mensaje,
-      content: Buffer.from(nuevoContenido, 'utf-8').toString('base64'),
-      sha,
-      branch,
-    }),
-  })
-  if (!putRes.ok) {
-    const detalle = await putRes.text()
-    throw new Error(`No pude commitear lib/data.ts (${putRes.status}): ${detalle}`)
-  }
-}
-
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -122,7 +69,7 @@ export async function GET(req: NextRequest) {
 
   try {
     // ── 1. Scrapear la página de categorías de ARCA ──────────────────────
-    const response = await fetch('https://www.afip.gob.ar/monotributo/categorias.asp', {
+    const response = await fetch('https://www.arca.gob.ar/monotributo/categorias.asp', {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FacilFiscal/1.0)' }
     })
     if (!response.ok) throw new Error(`Error al scrapear ARCA: ${response.status}`)
@@ -156,7 +103,7 @@ Devolvé ÚNICAMENTE un JSON válido sin backticks ni texto adicional, con este 
     }
   ]
 }
-Los números deben ser enteros sin puntos ni comas. Incluí las 11 categorías (A a K).
+Los números deben ser JSON numéricos con hasta dos decimales, sin separadores de miles. Incluí las 11 categorías (A a K).
 HTML: ${tablaHtml}`
       }]
     })
@@ -174,28 +121,7 @@ HTML: ${tablaHtml}`
       throw new Error('Claude no devolvió todas las categorías')
     }
 
-    // ── 3. Guardar en Supabase (queda como registro histórico/auditoría) ──
-    await supabase.from('montos_monotributo').delete().neq('id', 0)
-
-    const rows = datos.categorias.map((c: any, i: number) => ({
-      letra:          c.letra,
-      orden:          i + 1,
-      limite_anual:   c.limite_anual,
-      imp_servicios:  c.imp_servicios,
-      imp_productos:  c.imp_productos,
-      prev_sipa:      c.prev_sipa,
-      os:             c.os,
-      total_servicios:c.total_servicios,
-      total_productos:c.total_productos,
-      vigencia:       datos.vigencia,
-      fuente:         'https://www.afip.gob.ar/monotributo/categorias.asp',
-      updated_at:     new Date().toISOString(),
-    }))
-
-    const { error } = await supabase.from('montos_monotributo').insert(rows)
-    if (error) throw new Error(`Error Supabase: ${error.message}`)
-
-    // ── 4. ¿Cambió algo respecto a lo que ya está en lib/data.ts? ────────
+    // ── 3. ¿Cambió algo respecto al fallback verificado vigente? ─────────
     const cambios = detectarCambios(datos.categorias)
 
     if (!cambios) {
@@ -206,7 +132,7 @@ HTML: ${tablaHtml}`
       return NextResponse.json({ ok: true, cambios: false })
     }
 
-    // ── 5. Hay cambios: ¿son sensatos? ────────────────────────────────────
+    // ── 4. Hay cambios: ¿son sensatos? ────────────────────────────────────
     const sensatez = chequearSensatez(datos.categorias)
 
     if (!sensatez.ok) {
@@ -214,29 +140,54 @@ HTML: ${tablaHtml}`
         `⚠️ Montos de monotributo cambiaron pero requieren revisión manual`,
         `<h2>ARCA publicó valores nuevos, pero no se auto-aplicaron</h2>
          <p><strong>Motivo:</strong> ${sensatez.motivo}</p>
-         <p>Los valores quedaron guardados en la tabla <code>montos_monotributo</code> de Supabase para que los revises, pero <strong>no se tocó <code>lib/data.ts</code></strong> por seguridad.</p>
+         <p>Los valores no se publicaron. El registro queda disponible para revisión manual.</p>
          <p>Vigencia detectada: ${datos.vigencia}</p>`
       )
       return NextResponse.json({ ok: true, cambios: true, autoAplicado: false, motivo: sensatez.motivo })
     }
 
-    // ── 6. Todo sensato: commitear lib/data.ts a GitHub (dispara deploy) ──
-    const getContenido = await fetch(`https://raw.githubusercontent.com/${process.env.GITHUB_REPO_OWNER || 'fedebura92'}/${process.env.GITHUB_REPO_NAME || 'facilfiscal'}/${process.env.GITHUB_BRANCH || 'main'}/lib/data.ts`)
-    if (!getContenido.ok) throw new Error('No pude leer lib/data.ts actual desde GitHub (raw).')
-    const contenidoActual = await getContenido.text()
+    // ── 5. Guardar como borrador versionado. Nunca publicar sin aprobación. ─
+    const [dia, mes, anio] = String(datos.vigencia).split('/').map(Number)
+    if (!dia || !mes || !anio) throw new Error(`Vigencia inválida: ${datos.vigencia}`)
+    const version = anio * 10000 + mes * 100 + dia
+    const contenido = datos.categorias
+      .sort((a: any, b: any) => LETRAS_ESPERADAS.indexOf(a.letra) - LETRAS_ESPERADAS.indexOf(b.letra))
+      .map((c: any) => ({
+        letra:c.letra,
+        limite_anual:Number(c.limite_anual),
+        imp_servicios:Number(c.imp_servicios),
+        imp_productos:Number(c.imp_productos),
+        prev_sipa:Number(c.prev_sipa),
+        obra_social:Number(c.os),
+        total_servicios:Number(c.total_servicios),
+        total_productos:Number(c.total_productos),
+      }))
 
-    const nuevoContenido = construirNuevoDataTs(contenidoActual, datos)
-    await commitearDataTs(nuevoContenido, `chore: actualizar montos de monotributo — vigencia ${datos.vigencia} (auto, ARCA)`)
+    const payload = {
+      dominio:'monotributo', clave:'categorias', version, contenido,
+      vigente_desde:`${anio}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`,
+      estado:'borrador' as const, fuente_nombre:'ARCA',
+      fuente_url:'https://www.arca.gob.ar/monotributo/categorias.asp',
+    }
+    const { data: existente } = await supabase.from('datos_fiscales_versiones')
+      .select('id, estado').eq('dominio','monotributo').eq('clave','categorias').eq('version',version).maybeSingle()
+    if (existente?.estado === 'validado') {
+      throw new Error(`La versión ${version} ya está validada; el cron no puede reemplazarla.`)
+    }
+    const operacion = existente
+      ? supabase.from('datos_fiscales_versiones').update(payload).eq('id', existente.id)
+      : supabase.from('datos_fiscales_versiones').insert(payload)
+    const { error } = await operacion
+    if (error) throw new Error(`Error Supabase: ${error.message}`)
 
     await enviarEmail(
-      `✅ Montos de monotributo actualizados automáticamente — vigencia ${datos.vigencia}`,
-      `<h2>lib/data.ts actualizado y commiteado</h2>
+      `🟡 Montos de monotributo pendientes de aprobación — vigencia ${datos.vigencia}`,
+      `<h2>Nueva versión guardada como borrador</h2>
        <p><strong>Vigencia:</strong> ${datos.vigencia}</p>
-       <p>Vercel va a redeployar el sitio con los nuevos valores en los próximos minutos.</p>
-       <p>Revisá en <a href="https://facilfiscal.com.ar/mi-categoria">facilfiscal.com.ar/mi-categoria</a> una vez que termine el deploy.</p>`
+       <p>No se publicó ni se modificó GitHub. Revisá la fuente oficial y aprobá la versión antes de usarla.</p>`
     )
 
-    return NextResponse.json({ ok: true, cambios: true, autoAplicado: true, vigencia: datos.vigencia })
+    return NextResponse.json({ ok: true, cambios: true, estado: 'borrador', version, vigencia: datos.vigencia })
 
   } catch (error: any) {
     console.error('Error actualizando montos:', error)

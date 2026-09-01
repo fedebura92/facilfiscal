@@ -4,8 +4,9 @@ import Link from 'next/link'
 import SiteHeader from '@/components/SiteHeader'
 import CapturaEmail from '@/components/CapturaEmail'
 import { SEOMonotributo } from '@/components/SEOContent/SEOContent'
+import { useFiscalData } from '@/components/FiscalDataProvider'
 import {
-  MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
+  FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,
   type VencimientoUI, type AlertaUI,
 } from '@/lib/data'
@@ -31,6 +32,7 @@ function cardCfg(d: number) {
 }
 
 export default function Home() {
+  const { categorias } = useFiscalData()
   const [venc, setVenc]           = useState<VencimientoUI[]>([])
   const [alertas, setAlertas]     = useState<AlertaUI[]>([])
   const [catIdx, setCatIdx]       = useState('')
@@ -68,8 +70,8 @@ export default function Home() {
   const cards   = useMemo(() => vencOrd.slice(0, 3), [vencOrd])
   const proximos = useMemo(() => vencOrd.filter(v => diffDias(v.fecha) <= 10).slice(0, 8), [vencOrd])
   const idx     = useMemo(() => parseInt(catIdx), [catIdx])
-  const os      = useMemo(() => conOS ? MONTOS.mono.os : 0, [conOS])
-  const total   = useMemo(() => catIdx === '' ? 0 : MONTOS[TIPO].imp[idx] + MONTOS[TIPO].prev[idx] + os, [catIdx, idx, os])
+  const os      = useMemo(() => conOS ? (categorias[idx]?.os ?? 0) : 0, [conOS, categorias, idx])
+  const total   = useMemo(() => catIdx === '' ? 0 : categorias[idx].imp + categorias[idx].prev + os, [catIdx, categorias, idx, os])
   const fechaHoy = mounted ? new Intl.DateTimeFormat('es-AR', { weekday:'long', day:'numeric', month:'long' }).format(new Date()) : ''
 
   return (
@@ -87,19 +89,38 @@ export default function Home() {
         <div className="ff-hero" style={{ background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden' }}>
           <div style={{ position:'absolute', left:'50%', top:-80, transform:'translateX(-50%)', width:500, height:300, borderRadius:'50%', background:'rgba(255,255,255,.04)' }} />
           <div style={{ maxWidth:640, margin:'0 auto', position:'relative', zIndex:1 }}>
-            <div className="ff-social-proof"><span>👥</span> Más de 500 monotributistas ya usan Fácil Fiscal</div>
-            <h1>Controlá tu monotributo<br/>sin errores ni multas</h1>
-            <p>Calculá tu categoría, aprendé a facturar y recibí<br/>recordatorios automáticos antes de cada vencimiento.</p>
-            <a href="/mi-categoria" className="ff-hero-btn">Calculá tu categoría GRATIS →</a>
+            <div className="ff-social-proof"><span>🇦🇷</span> Herramientas fiscales para negocios en Argentina</div>
+            <h1>Creá y administrá tu negocio<br/>con información fiscal clara</h1>
+            <p>Compará Monotributo, Régimen General y sociedad.<br/>Organizá facturación, impuestos y vencimientos por CUIT.</p>
+            <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+              <Link href="/crear-negocio" className="ff-hero-btn">Crear mi negocio →</Link>
+              <Link href="/mi-categoria" className="ff-hero-btn" style={{background:'white',color:V.tealDark}}>Calcular categoría</Link>
+            </div>
             <div style={{ marginTop:10, fontSize:11, color:'rgba(255,255,255,.5)', fontWeight:600 }}>Sin registro · Sin tarjeta · Gratis</div>
           </div>
         </div>
+
+        <section style={{background:V.surface,borderBottom:`1px solid ${V.border}`}} aria-labelledby="caminos-facil-fiscal">
+          <div style={{maxWidth:860,margin:'0 auto',padding:'24px 16px'}}>
+            <h2 id="caminos-facil-fiscal" style={{fontSize:20,fontWeight:900,color:V.ink,textAlign:'center',marginBottom:16}}>¿Qué necesitás hacer?</h2>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+              <Link href="/crear-negocio" style={{padding:18,border:`1.5px solid ${V.tealRing}`,borderRadius:14,background:V.tealLight,textDecoration:'none'}}>
+                <div style={{fontSize:15,fontWeight:900,color:V.tealDark,marginBottom:5}}>Quiero crear un negocio</div>
+                <div style={{fontSize:12,color:V.ink2,lineHeight:1.6,fontWeight:600}}>Evaluá actividad, socios, facturación y empleados para comparar Monotributo, Régimen General y sociedad.</div>
+              </Link>
+              <Link href="/mipanel" style={{padding:18,border:`1.5px solid ${V.goldRing}`,borderRadius:14,background:V.goldLight,textDecoration:'none'}}>
+                <div style={{fontSize:15,fontWeight:900,color:V.ink,marginBottom:5}}>Ya tengo un negocio</div>
+                <div style={{fontSize:12,color:V.ink2,lineHeight:1.6,fontWeight:600}}>Separá obligaciones, vencimientos y facturación por persona, actividad o sociedad y por el CUIT correspondiente.</div>
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* DOLOR */}
         <div style={{ background:V.surface, borderBottom:`1px solid ${V.border}` }}>
           <div style={{ maxWidth:860, margin:'0 auto', padding:'20px 16px' }}>
             <div style={{ textAlign:'center', marginBottom:14 }}>
-              <div style={{ fontSize:13, fontWeight:800, color:V.red, marginBottom:4 }}>⚠️ Evitá problemas con AFIP</div>
+              <div style={{ fontSize:13, fontWeight:800, color:V.red, marginBottom:4 }}>⚠️ Evitá problemas con ARCA</div>
               <div style={{ fontSize:16, fontWeight:900, color:V.ink, letterSpacing:'-0.2px' }}>Errores comunes que te pueden costar caro</div>
             </div>
             <div className="ff-dolor-grid">
@@ -149,7 +170,7 @@ export default function Home() {
                         <div style={{ fontSize:13, fontWeight:700, color:V.ink2 }}>{fmtLarga(v.fecha)}</div>
                         <div style={{ fontSize:13, fontWeight:900, color:c.diasColor }}>{c.diasTxt}</div>
                       </div>
-                      <button onClick={() => window.open('https://www.afip.gob.ar','_blank')} style={{ width:'100%', borderRadius:8, padding:10, fontSize:13, fontWeight:800, background:c.btnDanger?V.red:V.bg, color:c.btnDanger?'white':V.ink2, border:c.btnDanger?`1.5px solid ${V.red}`:`1.5px solid ${V.border}` }}>
+                      <button onClick={() => window.open('https://www.arca.gob.ar','_blank')} style={{ width:'100%', borderRadius:8, padding:10, fontSize:13, fontWeight:800, background:c.btnDanger?V.red:V.bg, color:c.btnDanger?'white':V.ink2, border:c.btnDanger?`1.5px solid ${V.red}`:`1.5px solid ${V.border}` }}>
                         {d===0?'Pagar ahora →':d===1?'Ver cómo pagar':'Ver detalles'}
                       </button>
                     </div>
@@ -211,7 +232,7 @@ export default function Home() {
                 <div style={{ fontSize:11, fontWeight:800, letterSpacing:'0.8px', textTransform:'uppercase', color:V.ink3, marginBottom:5 }}>Tu categoría</div>
                 <select value={catIdx} onChange={e => setCatIdx(e.target.value)} style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:8, padding:'9px 10px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', marginBottom:10 }}>
                   <option value="" disabled>— Elegí tu categoría —</option>
-                  {MONTOS[TIPO].cats.map((c, i) => <option key={i} value={i}>{c} — {MONTOS[TIPO].limites[i]}/año</option>)}
+                  {categorias.map((c, i) => <option key={c.letra} value={i}>{c.letra} — {money(c.limite_anual)}/año</option>)}
                 </select>
                 <div style={{ fontSize:11, fontWeight:800, letterSpacing:'0.8px', textTransform:'uppercase', color:V.ink3, marginBottom:5 }}>Obra social</div>
                 <select value={conOS?'si':'no'} onChange={e => setConOS(e.target.value==='si')} style={{ width:'100%', border:`1.5px solid ${V.border}`, borderRadius:8, padding:'9px 10px', fontSize:13, fontWeight:600, color:V.ink, background:V.bg, outline:'none', marginBottom:10 }}>
@@ -223,7 +244,7 @@ export default function Home() {
                     <div style={{ fontSize:28, fontWeight:900, color:'white', letterSpacing:'-0.5px', lineHeight:1, marginBottom:4 }}>{money(total)}</div>
                     <div style={{ fontSize:10, color:'rgba(255,255,255,.65)', fontWeight:600, marginBottom:8 }}>por mes · estimado 2026</div>
                     <div className="ff-calc-break" style={{ width:'100%' }}>
-                      {([['Imp.', MONTOS[TIPO].imp[idx]], ['Prev.', MONTOS[TIPO].prev[idx]], ...(os ? [['OS', os]] : [])] as [string, number][]).map(([l, val]) => (
+                      {([['Imp.', categorias[idx].imp], ['Prev.', categorias[idx].prev], ...(os ? [['OS', os]] : [])] as [string, number][]).map(([l, val]) => (
                         <div key={l} style={{ background:'rgba(255,255,255,.1)', borderRadius:6, padding:'5px 6px', textAlign:'center' }}>
                           <div style={{ fontSize:8, color:'rgba(255,255,255,.55)', fontWeight:700, textTransform:'uppercase' }}>{l}</div>
                           <div style={{ fontSize:12, fontWeight:900, color:'white', marginTop:1 }}>{money(val)}</div>

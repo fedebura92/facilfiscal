@@ -1,23 +1,22 @@
 'use client'
 import { useState, useEffect } from 'react'
 import SiteHeader from '@/components/SiteHeader'
-import { CATEGORIAS_MONO, OS_EXTRA } from '@/lib/data'
+import { useFiscalData } from '@/components/FiscalDataProvider'
 
-const CATEGORIAS = CATEGORIAS_MONO.map(c => ({
-  letra: c.letra,
-  limite: c.limite_anual,
-  imp: c.imp,
-  prev: c.prev,
-}))
+type CategoriaCalculadora = { letra:string; limite:number; imp:number; prev:number; os:number }
 
 export default function MiCategoria() {
+  const { categorias, vigencia, fuenteUrl, origen } = useFiscalData()
+  const CATEGORIAS: CategoriaCalculadora[] = categorias.map(c => ({
+    letra:c.letra, limite:c.limite_anual, imp:c.imp, prev:c.prev, os:c.os ?? 0,
+  }))
   const [facturacion, setFacturacion] = useState('')
   const [conOS, setConOS]             = useState(true)
   const [paso, setPaso]               = useState<'calc'|'email'|'result'>('calc')
   const [email, setEmail]             = useState('')
   const [emailOk, setEmailOk]         = useState(false)
   const [emailErr, setEmailErr]       = useState('')
-  const [resultado, setResultado]     = useState<typeof CATEGORIAS[0]|null>(null)
+  const [resultado, setResultado]     = useState<CategoriaCalculadora|null>(null)
   const [excede, setExcede]           = useState(false)
   const [aiQuery, setAiQuery]         = useState('')
   const [aiResp, setAiResp]           = useState('')
@@ -91,7 +90,10 @@ export default function MiCategoria() {
         <div style={{background:`linear-gradient(135deg,${V.tealDark},${V.teal})`,borderRadius:16,padding:'28px 32px',marginBottom:28,color:'white',textAlign:'center'}}>
           <div style={{fontSize:11,fontWeight:800,letterSpacing:'2px',textTransform:'uppercase',color:'rgba(255,255,255,.6)',marginBottom:8}}>Calculadora de monotributo · Argentina 2026</div>
           <div style={{fontSize:26,fontWeight:900,letterSpacing:'-0.3px',marginBottom:6}}> Calculá tu categoría en segundos</div>
-          <div style={{fontSize:14,color:'rgba(255,255,255,.75)',fontWeight:600}}>Ingresá tu facturación y evitá errores con AFIP</div>
+          <div style={{fontSize:14,color:'rgba(255,255,255,.75)',fontWeight:600}}>Ingresá tu facturación y comparala con los valores vigentes de ARCA</div>
+          <a href={fuenteUrl} target="_blank" rel="noopener noreferrer" style={{display:'inline-block',marginTop:8,fontSize:10,color:'rgba(255,255,255,.72)',fontWeight:700}}>
+            {vigencia} · {origen === 'supabase_validado' ? 'dato validado en línea' : 'respaldo verificado'} ↗
+          </a>
         </div>
 
         {/* CALCULADORA — PASO 1: INGRESAR MONTO */}
@@ -185,7 +187,7 @@ export default function MiCategoria() {
                   {([
                     ['Impositivo', resultado.imp],
                     ['Previsional', resultado.prev],
-                    ['Obra social', conOS ? OS_EXTRA : 0],
+                    ['Obra social', conOS ? resultado.os : 0],
                   ] as [string,number][]).filter(([,v])=>v>0).map(([l,v])=>(
                     <div key={l} style={{background:'rgba(255,255,255,.7)',borderRadius:8,padding:'10px 12px',textAlign:'center'}}>
                       <div style={{fontSize:10,fontWeight:800,textTransform:'uppercase',color:'#166534',letterSpacing:'0.5px'}}>{l}</div>
@@ -195,7 +197,7 @@ export default function MiCategoria() {
                 </div>
                 <div style={{background:'rgba(255,255,255,.8)',borderRadius:8,padding:'12px',textAlign:'center',marginTop:10}}>
                   <div style={{fontSize:11,color:'#166534',fontWeight:700,marginBottom:2}}>Total mensual estimado</div>
-                  <div style={{fontSize:26,fontWeight:900,color:V.green}}>{money(resultado.imp+resultado.prev+(conOS?OS_EXTRA:0))}</div>
+                  <div style={{fontSize:26,fontWeight:900,color:V.green}}>{money(resultado.imp+resultado.prev+(conOS?resultado.os:0))}</div>
                 </div>
                 <div style={{fontSize:11,color:'#166534',fontWeight:600,textAlign:'center',marginTop:10}}>
                   * Valores estimados 2026. Verificá en arca.gob.ar.
@@ -226,7 +228,7 @@ export default function MiCategoria() {
                     <td style={{padding:'10px 14px',fontWeight:600,color:V.ink2}}>{money(c.limite)}</td>
                     <td style={{padding:'10px 14px',color:V.ink2}}>{money(c.imp)}</td>
                     <td style={{padding:'10px 14px',color:V.ink2}}>{money(c.prev)}</td>
-                    <td style={{padding:'10px 14px',fontWeight:700,color:V.ink}}>{money(c.imp+c.prev+OS_EXTRA)}</td>
+                    <td style={{padding:'10px 14px',fontWeight:700,color:V.ink}}>{money(c.imp+c.prev+c.os)}</td>
                     <td style={{padding:'10px 14px',color:V.ink2}}>{money(c.imp+c.prev)}</td>
                   </tr>
                 ))}

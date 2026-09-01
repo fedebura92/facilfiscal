@@ -50,6 +50,57 @@ export type Database = {
         }
         Relationships: []
       }
+      datos_fiscales_versiones: {
+        Row: {
+          clave: string
+          contenido: Json
+          created_at: string
+          dominio: string
+          estado: string
+          fuente_nombre: string
+          fuente_url: string
+          id: string
+          publicado_at: string | null
+          updated_at: string
+          verificado_at: string | null
+          version: number
+          vigente_desde: string
+          vigente_hasta: string | null
+        }
+        Insert: {
+          clave: string
+          contenido: Json
+          created_at?: string
+          dominio: string
+          estado?: string
+          fuente_nombre: string
+          fuente_url: string
+          id?: string
+          publicado_at?: string | null
+          updated_at?: string
+          verificado_at?: string | null
+          version: number
+          vigente_desde: string
+          vigente_hasta?: string | null
+        }
+        Update: {
+          clave?: string
+          contenido?: Json
+          created_at?: string
+          dominio?: string
+          estado?: string
+          fuente_nombre?: string
+          fuente_url?: string
+          id?: string
+          publicado_at?: string | null
+          updated_at?: string
+          verificado_at?: string | null
+          version?: number
+          vigente_desde?: string
+          vigente_hasta?: string | null
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           email: string
@@ -771,7 +822,9 @@ export type Database = {
           created_at: string | null
           descripcion: string
           dia: number | null
+          estado: string
           fuente: string | null
+          fuente_nombre: string | null
           id: string
           mes: number
           pendiente: boolean | null
@@ -779,6 +832,8 @@ export type Database = {
           tipo: string
           titulo: string
           verificado: boolean | null
+          verificado_at: string | null
+          version: number
         }
         Insert: {
           anio: number
@@ -786,7 +841,9 @@ export type Database = {
           created_at?: string | null
           descripcion: string
           dia?: number | null
+          estado?: string
           fuente?: string | null
+          fuente_nombre?: string | null
           id?: string
           mes: number
           pendiente?: boolean | null
@@ -794,6 +851,8 @@ export type Database = {
           tipo: string
           titulo: string
           verificado?: boolean | null
+          verificado_at?: string | null
+          version?: number
         }
         Update: {
           anio?: number
@@ -801,7 +860,9 @@ export type Database = {
           created_at?: string | null
           descripcion?: string
           dia?: number | null
+          estado?: string
           fuente?: string | null
+          fuente_nombre?: string | null
           id?: string
           mes?: number
           pendiente?: boolean | null
@@ -809,6 +870,8 @@ export type Database = {
           tipo?: string
           titulo?: string
           verificado?: boolean | null
+          verificado_at?: string | null
+          version?: number
         }
         Relationships: []
       }
