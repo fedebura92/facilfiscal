@@ -39,8 +39,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         /* ── Sidebar ── */
         .ff-sidebar {
           position: fixed; top: 0; left: 0; bottom: 0;
-          width: 236px; background: #fff;
-          border-right: 1px solid #e2e8ed;
+          width: 236px; background: #eaf4f7;
+          border-right: 1px solid #d4e5eb;
           display: flex; flex-direction: column;
           z-index: 200; overflow-y: auto;
           transition: transform .22s cubic-bezier(.4,0,.2,1);
@@ -189,10 +189,11 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           border: none; background: none; width: calc(100% - 16px);
           text-align: left;
         }
-        .ff-nav-item:hover { background: #f4f7f9; color: #0d5c78; }
+        .ff-nav-item:hover { background: rgba(255,255,255,.62); color: #0d5c78; }
         .ff-nav-item.active {
-          background: #e8f6fb; color: #0d5c78;
+          background: #fff; color: #0d5c78;
           font-weight: 800;
+          box-shadow: 0 2px 8px rgba(13,92,120,.09);
         }
         .ff-nav-item.active::before {
           content: ''; display: block; width: 3px; height: 100%;
@@ -204,7 +205,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
         /* ── Sidebar logo zone ── */
         .ff-sidebar-logo {
-          padding: 16px 16px 12px; border-bottom: 1px solid #e2e8ed;
+          padding: 16px 16px 12px; border-bottom: 1px solid #d4e5eb;
           display: flex; align-items: center; gap: 8px;
           text-decoration: none; flex-shrink: 0;
         }
@@ -267,12 +268,12 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         ))}
 
         {/* Separador y link a AFIP */}
-        <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid #e2e8ed' }}>
-          <a href="/crear-negocio" className="ff-nav-item">
+        <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid #d4e5eb' }}>
+          <a href="/crear-negocio" className={`ff-nav-item${currentPath === '/crear-negocio' ? ' active' : ''}`}>
             <span className="ff-nav-emoji">🏗️</span>
             Crear negocio
           </a>
-          <a href="/mipanel" className="ff-nav-item" style={{ color: '#0d9488', fontWeight: 800 }}>
+          <a href="/mipanel" className={`ff-nav-item${currentPath === '/mipanel' ? ' active' : ''}`} style={currentPath === '/mipanel' ? undefined : { color: '#0d9488', fontWeight: 800 }}>
             <span className="ff-nav-emoji">📊</span>
             Mi panel
           </a>
