@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Responsable Inscripto — Vencimientos IVA y Ganancias | FacilFiscal',
-  description: 'Seguí tus vencimientos de IVA, Ganancias y Bienes Personales como Responsable Inscripto. Alertas automáticas antes de cada fecha límite.',
+  title: 'Responsable Inscripto: obligaciones, IVA y vencimientos',
+  description: 'Entendé de forma simple qué debe hacer un Responsable Inscripto: IVA, Ganancias, facturación, vencimientos y recordatorios actualizados.',
   keywords: ['responsable inscripto', 'vencimientos IVA', 'ganancias argentina', 'AFIP responsable inscripto', 'factura A factura B', 'ARCA'],
 
   alternates: {
