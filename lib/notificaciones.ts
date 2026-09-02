@@ -1,0 +1,9 @@
+export const CATEGORIA_POR_TIPO: Record<string,string>={mono:'monotributo',ri:'responsable',aut:'autonomo'}
+export interface VencimientoNotificable{id:string;anio:number;mes:number;titulo:string;descripcion:string;categoria:string[];dia:number|null;fechas_por_terminacion?:Record<string,number>|null;fuente?:string|null}
+export function fechaArgentina(ahora=new Date()):string{const p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(ahora);const v=(t:string)=>p.find(x=>x.type===t)?.value||'';return `${v('year')}-${v('month')}-${v('day')}`}
+export function sumarDias(fecha:string,dias:number):string{const[a,m,d]=fecha.split('-').map(Number);return new Date(Date.UTC(a,m-1,d+dias)).toISOString().slice(0,10)}
+export function diferenciaDias(desde:string,hasta:string):number{return Math.round((Date.parse(`${hasta}T00:00:00Z`)-Date.parse(`${desde}T00:00:00Z`))/86400000)}
+export function resolverFechaVencimiento(v:VencimientoNotificable,terminacion?:string|null):string|null{let dia=v.dia;if(dia==null&&terminacion!=null)dia=v.fechas_por_terminacion?.[terminacion]??null;if(dia==null)return null;return `${v.anio}-${String(v.mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`}
+export function etiquetaAnticipacion(dias:number):string{return dias===0?'hoy':dias===1?'mañana':`en ${dias} días`}
+export function escaparHtml(valor:unknown):string{return String(valor??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+export function preferenciaDesdeTareas(tareas:Array<{task_id:string;done?:boolean|null;updated_at?:string|null}>,fallback=3):number{const a=tareas.filter(t=>t.done&&/^recordatorio_anticipacion_(1|3|7)$/.test(t.task_id)).sort((x,y)=>String(y.updated_at||'').localeCompare(String(x.updated_at||'')))[0];return a?Number(a.task_id.split('_').pop()):fallback}
