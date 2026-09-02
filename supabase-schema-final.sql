@@ -16,7 +16,7 @@ create extension if not exists pgcrypto with schema extensions;
 
 create table if not exists public.users (
   id uuid primary key default extensions.uuid_generate_v4(),
-  email text not null unique,
+  email text not null,
   cuit text,
   tipo text not null default 'mono' check (tipo in ('mono','ri','aut')),
   nombre text,
@@ -28,6 +28,7 @@ create table if not exists public.users (
   actividad text,
   tipo_contribuyente text check (tipo_contribuyente in ('mono','ri','aut')),
   facturacion_estimada numeric,
+  dias_anticipacion integer not null default 3 check (dias_anticipacion in (1,3,7)),
   constraint unique_email_tipo unique (email, tipo)
 );
 
@@ -78,6 +79,7 @@ create table if not exists public.vencimientos_fiscales (
   tipo text not null,
   dia integer,
   rango text,
+  fechas_por_terminacion jsonb,
   pendiente boolean default false,
   verificado boolean default false,
   fuente text,
@@ -114,6 +116,9 @@ create table if not exists public.email_logs (
   email text not null,
   tipo_email text not null,
   vencimiento_id uuid references public.vencimientos(id),
+  vencimiento_fiscal_id uuid references public.vencimientos_fiscales(id) on delete set null,
+  dias_antes integer,
+  provider_id text,
   enviado_at timestamptz default now(),
   fecha_envio date,
   error text
@@ -125,6 +130,12 @@ create index if not exists email_logs_vencimiento_idx on public.email_logs(venci
 create unique index if not exists email_logs_no_dup
   on public.email_logs(email, tipo_email, vencimiento_id, fecha_envio)
   where error is null;
+create unique index if not exists email_logs_alerta_fiscal_no_dup
+  on public.email_logs(email, tipo_email, vencimiento_fiscal_id, dias_antes)
+  where error is null and vencimiento_fiscal_id is not null;
+create unique index if not exists email_logs_resumen_semanal_no_dup
+  on public.email_logs(email, tipo_email, fecha_envio)
+  where error is null and tipo_email = 'resumen_semanal';
 
 -- ---------------------------------------------------------------------------
 -- Authenticated personal profile
