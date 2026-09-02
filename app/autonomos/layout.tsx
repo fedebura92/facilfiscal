@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Autónomos 2026: categorías y aportes ARCA',
+  title: 'Autónomos 2026: categorías, aportes y vencimientos',
   description:
-    'Guía actualizada para identificar categoría y consultar el aporte mensual vigente de Autónomos 2026 en la tabla oficial de ARCA.',
+    'Guía simple para entender Autónomos, identificar tu categoría y consultar aportes y vencimientos 2026 en la información oficial de ARCA.',
 
   keywords: [
     'autonomos argentina',
