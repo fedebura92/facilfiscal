@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const dryRun = req.nextUrl.searchParams.get('dryRun') === '1'
   const db = supabaseAdmin(), hoy = fechaArgentina(), limite = sumarDias(fechaArgentina(), 7)
-  const periodos = Array.from(new Set([hoy.slice(0, 7), limite.slice(0, 7)))]
+  const periodos = Array.from(new Set([hoy.slice(0, 7), limite.slice(0, 7)]))
   const filtro = periodos.map(p => `and(anio.eq.${p.slice(0, 4)},mes.eq.${Number(p.slice(5, 7))})`).join(',')
   const [usuariosQ, vencimientosQ] = await Promise.all([
     db.from('users').select('id,email,tipo,nombre,terminacion_cuit,dias_anticipacion').eq('activo', true),
