@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculadora Ganancias 2026 Argentina",
+  title: "Calculadora de Ganancias 2026: estimá cuánto pagás",
   description:
-    "Calculá Ganancias 2026 para personas humanas con la escala anual oficial de ARCA. Estimación gratuita de la base sujeta a impuesto.",
+    "Ingresá cuánto ganás y respondé preguntas simples para estimar Ganancias 2026. Calculadora gratuita para personas en Argentina.",
 
   keywords: [
     "impuesto a las ganancias argentina",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   ],
 
   openGraph: {
-    title: "Calculá Impuesto a las Ganancias | FacilFiscal",
+    title: "Calculadora de Ganancias 2026 simple y gratis",
     description:
       "Calculá cuánto pagás de Impuesto a las Ganancias en segundos.",
     url: "/impuesto-ganancias",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Calculá Impuesto a las Ganancias | FacilFiscal",
+    title: "Calculadora de Ganancias 2026 simple y gratis",
     description:
       "Estimá tu Impuesto a las Ganancias de forma rápida y simple.",
     images: ["/og-image.png"],
