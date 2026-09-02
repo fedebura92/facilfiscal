@@ -7,7 +7,7 @@ export const dynamic='force-dynamic'
 export async function GET(req:NextRequest){
   if(req.headers.get('authorization')!==`Bearer ${process.env.CRON_SECRET}`)return NextResponse.json({error:'Unauthorized'},{status:401})
   const dryRun=req.nextUrl.searchParams.get('dryRun')==='1',db=supabaseAdmin(),hoy=fechaArgentina(),fin=sumarDias(fechaArgentina(),7)
-  const periodos=Array.from(new Set([hoy.slice(0,7),fin.slice(0,7)))],filtro=periodos.map(p=>`and(anio.eq.${p.slice(0,4)},mes.eq.${Number(p.slice(5,7))})`).join(',')
+  const periodos=Array.from(new Set([hoy.slice(0,7),fin.slice(0,7)])),filtro=periodos.map(p=>`and(anio.eq.${p.slice(0,4)},mes.eq.${Number(p.slice(5,7))})`).join(',')
   const[uq,vq]=await Promise.all([db.from('users').select('id,email,tipo,nombre,terminacion_cuit').eq('activo',true),db.from('vencimientos_fiscales').select('id,anio,mes,titulo,descripcion,categoria,dia,fechas_por_terminacion,fuente').eq('estado','validado').eq('verificado',true).or(filtro)])
   if(uq.error||vq.error)return NextResponse.json({ok:false,error:uq.error?.message||vq.error?.message},{status:500})
   const users=uq.data||[];if(!users.length)return NextResponse.json({ok:true,dryRun,sent:0})
