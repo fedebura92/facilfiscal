@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import SiteHeader from '@/components/SiteHeader'
 import { SEOComoFacturar } from '@/components/SEOContent/SEOContent'
 
@@ -7,9 +7,6 @@ export default function ComoFacturar() {
   const [aiQuery, setAiQuery] = useState('')
   const [aiResp, setAiResp]   = useState('')
   const [aiLoad, setAiLoad]   = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
 
   async function askAI(q?: string) {
     const query = q || aiQuery
@@ -39,8 +36,8 @@ export default function ComoFacturar() {
     {
       num: 1,
       titulo: 'Ingresá a ARCA con Clave Fiscal',
-      desc: 'Entrá a arca.gob.ar o afip.gob.ar → "Con Clave Fiscal" → ingresá tu CUIT y contraseña.',
-      nota: 'Necesitás Clave Fiscal nivel 3 o superior.',
+      desc: 'Entrá a arca.gob.ar → "Iniciar sesión" → ingresá tu CUIT y clave fiscal.',
+      nota: 'Usá siempre el sitio oficial de ARCA y no compartas tu clave.',
     },
     {
       num: 2,
@@ -58,13 +55,13 @@ export default function ComoFacturar() {
       num: 4,
       titulo: 'Seleccioná "Generar Comprobantes"',
       desc: 'Elegí tu punto de venta → Tipo de comprobante: Factura C (para monotributistas) → Concepto: Productos, Servicios o ambos.',
-      nota: 'Como monotributista siempre emitís Factura C.',
+      nota: 'En operaciones de exportación corresponde un comprobante tipo E.',
     },
     {
       num: 5,
       titulo: 'Completá los datos del cliente',
-      desc: 'Ingresá el CUIT/CUIL del cliente (el sistema valida automáticamente). Si es consumidor final sin CUIT, usá el CUIT genérico 00000000000.',
-      nota: null,
+      desc: 'Ingresá el CUIT, CUIL o documento cuando corresponda. Para consumidor final, seguí lo que solicite el sistema según el monto vigente.',
+      nota: 'No inventes un CUIT: la identificación exigida puede cambiar según el importe de la operación.',
     },
     {
       num: 6,
@@ -80,8 +77,6 @@ export default function ComoFacturar() {
     },
   ]
 
-  if (!mounted) return null
-
   return (
     <>
       <SiteHeader currentPath="/como-facturar" />
@@ -91,7 +86,7 @@ export default function ComoFacturar() {
           {/* HERO */}
           <div style={{background:`linear-gradient(135deg,${V.tealDark},${V.teal})`,borderRadius:16,padding:'28px 32px',marginBottom:28,color:'white'}}>
             <div style={{fontSize:11,fontWeight:800,letterSpacing:'2px',textTransform:'uppercase',color:'rgba(255,255,255,.6)',marginBottom:6}}>Guía paso a paso</div>
-            <div style={{fontSize:26,fontWeight:900,letterSpacing:'-0.3px',marginBottom:6}}>Cómo emitir tu Factura C electrónica</div>
+            <h1 style={{fontSize:26,fontWeight:900,letterSpacing:'-0.3px',margin:'0 0 6px'}}>Cómo emitir tu Factura C electrónica</h1>
             <div style={{fontSize:13,color:'rgba(255,255,255,.7)'}}>Para monotributistas · ARCA/AFIP · Actualizado 2026</div>
           </div>
 
@@ -149,9 +144,9 @@ export default function ComoFacturar() {
               <div style={{fontSize:13,fontWeight:800,color:V.ink,marginBottom:10}}>Datos que necesitás del cliente</div>
               {[
                 '📋 CUIT o CUIL del cliente',
-                '📍 Sin CUIT: usá 00000000000',
+                '📍 Documento, cuando ARCA lo solicite',
                 '💰 Descripción y monto del servicio',
-                '📅 Fecha de emisión (hasta 10 días atrás)',
+                '📅 Fecha real de la operación',
               ].map(t => <div key={t} style={{fontSize:12,color:V.ink2,fontWeight:600,marginBottom:4}}>{t}</div>)}
             </div>
           </div>
@@ -161,8 +156,8 @@ export default function ComoFacturar() {
             <div style={{fontSize:13,fontWeight:800,color:V.ink,marginBottom:12}}>🔗 Links oficiales</div>
             <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
               {[
-                {label:'Comprobantes en línea (ARCA)',href:'https://serviciosweb.afip.gob.ar/genericos/guiaspasopaso/VerGuia.aspx?id=163'},
-                {label:'Facturador móvil (Android)',href:'https://www.afip.gob.ar/facturacion/facturadorMovil.asp'},
+                {label:'Factura electrónica (ARCA)',href:'https://www.arca.gob.ar/fe/'},
+                {label:'Facturador de ARCA',href:'https://www.arca.gob.ar/facturador/'},
                 {label:'Habilitar punto de venta',href:'https://www.argentina.gob.ar/emitir-factura-electronica-para-monotributistas'},
                 {label:'Verificar CAE de una factura',href:'https://serviciosweb.arca.gob.ar/clavefiscal/qr/'},
               ].map(l => (
