@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Cómo facturar siendo monotributista | FácilFiscal",
+  title: "Cómo hacer una factura electrónica en ARCA paso a paso",
   description:
-    "Aprendé paso a paso cómo emitir factura C en AFIP/ARCA. Guía simple para monotributistas en Argentina con ejemplos claros.",
+    "Guía 2026, simple y paso a paso, para emitir una Factura C electrónica en ARCA si sos monotributista. Con enlaces oficiales.",
   keywords: [
     "como facturar monotributo",
     "factura C AFIP",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     canonical: "/como-facturar",
   },
   openGraph: {
-    title: "Cómo facturar siendo monotributista | FácilFiscal",
+    title: "Cómo hacer una factura electrónica en ARCA",
     description:
       "Guía paso a paso para emitir factura C en AFIP/ARCA.",
     url: "https://www.facilfiscal.com.ar/como-facturar",
