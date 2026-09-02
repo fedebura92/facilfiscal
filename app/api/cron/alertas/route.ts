@@ -1,188 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { generarTokenUnsub } from '@/lib/unsubscribe'
+import { CATEGORIA_POR_TIPO, diferenciaDias, escaparHtml, etiquetaAnticipacion, fechaArgentina, preferenciaDesdeTareas, resolverFechaVencimiento, sumarDias, type VencimientoNotificable } from '@/lib/notificaciones'
 
-// ── Este endpoint lo llama Vercel Cron todos los días a las 8am ──
-// Configurar en vercel.json (ver abajo)
-// Protegido con CRON_SECRET para que nadie más lo llame.
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
-  // Verificar que lo llama Vercel Cron (o el admin)
+  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const dryRun = req.nextUrl.searchParams.get('dryRun') === '1'
+  const db = supabaseAdmin(), hoy = fechaArgentina(), limite = sumarDias(fechaArgentina(), 7)
+  const periodos = [...new Set([hoy.slice(0, 7), limite.slice(0, 7)])]
+  const filtro = periodos.map(p => `and(anio.eq.${p.slice(0, 4)},mes.eq.${Number(p.slice(5, 7))})`).join(',')
+  const [usuariosQ, vencimientosQ] = await Promise.all([
+    db.from('users').select('id,email,tipo,nombre,terminacion_cuit,dias_anticipacion').eq('activo', true),
+    db.from('vencimientos_fiscales').select('id,anio,mes,titulo,descripcion,categoria,dia,fechas_por_terminacion,fuente').eq('estado', 'validado').eq('verificado', true).or(filtro),
+  ])
+  if (usuariosQ.error || vencimientosQ.error) return NextResponse.json({ ok: false, error: usuariosQ.error?.message || vencimientosQ.error?.message }, { status: 500 })
+  const users = usuariosQ.data || []
+  if (!users.length) return NextResponse.json({ ok: true, dryRun, sent: 0, planned: 0 })
 
-  const auth = req.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const supabase = supabaseAdmin()
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
-  const in3days = new Date(today); in3days.setDate(today.getDate() + 3)
-  const in3Str = in3days.toISOString().split('T')[0]
-
-  // 1. Traer todos los usuarios activos
-  const { data: users, error: usersErr } = await supabase
-    .from('users')
-    .select('id, email, tipo, nombre')
-    .eq('activo', true)
-
-  if (usersErr || !users?.length) {
-    return NextResponse.json({ ok: true, sent: 0, reason: 'no users' })
-  }
-
-  let sent = 0
+  const emails = [...new Set(users.map(u => u.email.toLowerCase()))]
+  const perfilesQ = await db.from('profiles').select('id,email,nombre,terminacion_cuit').in('email', emails)
+  if (perfilesQ.error) return NextResponse.json({ ok: false, error: perfilesQ.error.message }, { status: 500 })
+  const perfiles = perfilesQ.data || [], profileIds = perfiles.map(p => p.id)
+  const tareasQ = profileIds.length ? await db.from('user_checklist').select('user_id,task_id,done,updated_at').in('user_id', profileIds).like('task_id', 'recordatorio_anticipacion_%').eq('done', true) : { data: [], error: null }
+  if (tareasQ.error) return NextResponse.json({ ok: false, error: tareasQ.error.message }, { status: 500 })
+  const perfilPorEmail = new Map(perfiles.map(p => [p.email.toLowerCase(), p]))
+  let sent = 0, planned = 0, failed = 0, skippedMissingCuit = 0, skippedNotDue = 0, skippedDuplicate = 0
 
   for (const user of users) {
-    // 2. Traer vencimientos de hoy y en 3 días para ese tipo
-    const { data: vencHoy } = await supabase.rpc('get_vencimientos_proximos', {
-      p_tipo: user.tipo, p_dias: 0
-    })
-    const { data: venc3d } = await supabase.rpc('get_vencimientos_proximos', {
-      p_tipo: user.tipo, p_dias: 3
-    })
-
-    const toSend = [
-      ...(vencHoy || []).map((v: any) => ({ ...v, cuando: 'hoy' })),
-      ...(venc3d  || []).map((v: any) => ({ ...v, cuando: 'en 3 días' })),
-    ]
-
-    for (const venc of toSend) {
-      // 3. Verificar que no enviamos este email hoy
-      const { data: existing } = await supabase
-        .from('email_logs')
-        .select('id')
-        .eq('email', user.email)
-        .eq('tipo_email', 'alerta_vencimiento')
-        .eq('vencimiento_id', venc.id)
-        .gte('enviado_at', todayStr)
-        .maybeSingle()
-
-      if (existing) continue // ya enviado hoy
-
-      // 4. Enviar email vía Resend
+    const perfil = perfilPorEmail.get(user.email.toLowerCase())
+    const anticipacion = preferenciaDesdeTareas((tareasQ.data || []).filter(t => t.user_id === perfil?.id), user.dias_anticipacion || 3)
+    const candidatos = (vencimientosQ.data || []).filter(v => v.categoria.includes(CATEGORIA_POR_TIPO[user.tipo])) as VencimientoNotificable[]
+    for (const vencimiento of candidatos) {
+      const fecha = resolverFechaVencimiento(vencimiento, user.terminacion_cuit || perfil?.terminacion_cuit)
+      if (!fecha) { skippedMissingCuit++; continue }
+      const dias = diferenciaDias(hoy, fecha)
+      if (dias !== 0 && dias !== anticipacion) { skippedNotDue++; continue }
+      planned++
+      if (dryRun) continue
+      const existente = await db.from('email_logs').select('id').eq('email', user.email).eq('tipo_email', 'alerta_vencimiento').eq('vencimiento_fiscal_id', vencimiento.id).eq('dias_antes', dias).is('error', null).maybeSingle()
+      if (existente.error) { failed++; continue }
+      if (existente.data) { skippedDuplicate++; continue }
       try {
-        await sendAlertEmail({
-          to: user.email,
-          nombre: user.nombre || 'Contribuyente',
-          vencimiento: venc.nombre,
-          cuando: venc.cuando,
-          fecha: venc.fecha,
-          tipo: user.tipo,
-        })
-
-        // 5. Registrar el envío
-        await supabase.from('email_logs').insert({
-          user_id: user.id,
-          email: user.email,
-          tipo_email: 'alerta_vencimiento',
-          vencimiento_id: venc.id,
-        })
-
+        const providerId = await enviarAlerta({ to: user.email, nombre: user.nombre || perfil?.nombre || 'Contribuyente', titulo: vencimiento.titulo, fecha, dias, fuente: vencimiento.fuente, idempotencyKey: `alerta/${user.id}/${vencimiento.id}/${dias}` })
+        const registro = await db.from('email_logs').insert({ user_id: user.id, email: user.email, tipo_email: 'alerta_vencimiento', vencimiento_fiscal_id: vencimiento.id, dias_antes: dias, provider_id: providerId })
+        if (registro.error) throw registro.error
         sent++
-      } catch (err: any) {
-        await supabase.from('email_logs').insert({
-          user_id: user.id,
-          email: user.email,
-          tipo_email: 'alerta_vencimiento',
-          vencimiento_id: venc.id,
-          error: err.message,
-        })
+      } catch (error) {
+        failed++
+        await db.from('email_logs').insert({ user_id: user.id, email: user.email, tipo_email: 'alerta_vencimiento', vencimiento_fiscal_id: vencimiento.id, dias_antes: dias, error: error instanceof Error ? error.message : String(error) })
       }
     }
   }
-
-  return NextResponse.json({ ok: true, sent })
+  const result = { ok: failed === 0, dryRun, date: hoy, planned, sent, failed, skippedMissingCuit, skippedNotDue, skippedDuplicate }
+  return NextResponse.json(result, { status: failed ? 500 : 200 })
 }
 
-
-// ── Envío de email via Resend ────────────────────────────────
-// Instalar: npm install resend
-// Cuenta gratuita: resend.com (3000 emails/mes gratis)
-async function sendAlertEmail({
-  to, nombre, vencimiento, cuando, fecha, tipo
-}: {
-  to: string
-  nombre: string
-  vencimiento: string
-  cuando: string
-  fecha: string
-  tipo: string
-}) {
-  const tipoLabel: Record<string, string> = {
-    mono: 'Monotributista', ri: 'Responsable Inscripto', aut: 'Autónomo'
-  }
-  const urgencia = cuando === 'hoy' ? '🔴 VENCE HOY' : '🟡 Vence en 3 días'
-
-  const html = `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head><meta charset="UTF-8"></head>
-    <body style="font-family:sans-serif;background:#f4f7f9;padding:32px 16px;margin:0;">
-      <div style="max-width:520px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.1);">
-        
-        <!-- Header -->
-        <div style="background:linear-gradient(135deg,#0d5c78,#1a7fa8);padding:24px 28px;">
-          <div style="font-size:22px;font-weight:900;color:white;">Fácil Fiscal</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;">Tu solución contable y fiscal simplificada</div>
-        </div>
-        
-        <!-- Body -->
-        <div style="padding:28px;">
-          <p style="font-size:15px;color:#3d5a6b;margin-bottom:20px;">
-            Hola ${nombre},
-          </p>
-          
-          <!-- Alert box -->
-          <div style="background:${cuando === 'hoy' ? '#fff1f1' : '#fffbeb'};border:1.5px solid ${cuando === 'hoy' ? '#ffc8c8' : '#fde68a'};border-radius:12px;padding:18px 20px;margin-bottom:24px;">
-            <div style="font-size:18px;font-weight:900;color:${cuando === 'hoy' ? '#e53535' : '#d97706'};margin-bottom:4px;">
-              ${urgencia}
-            </div>
-            <div style="font-size:22px;font-weight:900;color:#0f2733;margin-bottom:6px;">
-              ${vencimiento}
-            </div>
-            <div style="font-size:13px;color:#7a9aaa;font-weight:600;">
-              Fecha: ${new Date(fecha).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </div>
-          </div>
-          
-          <!-- CTA -->
-          <a href="https://www.afip.gob.ar" style="display:block;background:#1a7fa8;color:white;text-align:center;padding:14px;border-radius:10px;font-weight:800;font-size:14px;text-decoration:none;margin-bottom:16px;">
-            Ir a AFIP a pagar →
-          </a>
-          <a href="https://facilfiscal.com.ar" style="display:block;background:#f5f7f9;color:#1a7fa8;text-align:center;padding:12px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;">
-            Ver todos mis vencimientos
-          </a>
-        </div>
-        
-        <!-- Footer -->
-        <div style="background:#f4f7f9;padding:16px 28px;text-align:center;">
-          <p style="font-size:11px;color:#7a9aaa;margin:0;">
-            Recibís este email porque te suscribiste en facilfiscal.com.ar como ${tipoLabel[tipo] || tipo}.<br>
-            <a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(to)}&token=${generarTokenUnsub(to)}" style="color:#7a9aaa;">Cancelar suscripción</a>
-          </p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
-
-  // Llamada a Resend API
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: 'Fácil Fiscal <alertas@facilfiscal.com.ar>',
-      to: [to],
-      subject: `${urgencia}: ${vencimiento}`,
-      html,
-    }),
-  })
-
-  if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`Resend error: ${err}`)
-  }
+type Alerta = { to:string; nombre:string; titulo:string; fecha:string; dias:number; fuente?:string|null; idempotencyKey:string }
+async function enviarAlerta(a: Alerta): Promise<string|null> {
+  if (!process.env.RESEND_API_KEY) throw new Error('RESEND_API_KEY no configurada')
+  const urgencia = a.dias === 0 ? '🔴 VENCE HOY' : `🟡 Vence ${etiquetaAnticipacion(a.dias)}`
+  const fecha = new Intl.DateTimeFormat('es-AR',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${a.fecha}T12:00:00Z`))
+  const fuente = a.fuente ? `<p><a href="${escaparHtml(a.fuente)}">Ver fuente oficial</a></p>` : ''
+  const html = `<!doctype html><html lang="es"><body style="font-family:Arial,sans-serif;background:#f4f7f9;padding:32px 16px"><main style="max-width:520px;margin:auto;background:white;border-radius:16px;overflow:hidden"><header style="background:#0d5c78;padding:24px 28px;color:white"><b style="font-size:22px">Fácil Fiscal</b><br><small>Recordatorio de vencimiento</small></header><section style="padding:28px"><p>Hola ${escaparHtml(a.nombre)},</p><div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:18px"><b style="color:#d97706;font-size:18px">${urgencia}</b><h2>${escaparHtml(a.titulo)}</h2><p>Fecha: ${fecha}</p></div>${fuente}<a href="https://facilfiscal.com.ar/mipanel" style="display:block;background:#1a7fa8;color:white;text-align:center;padding:14px;border-radius:10px;text-decoration:none">Ver mis vencimientos →</a></section><footer style="background:#f4f7f9;padding:16px;text-align:center;font-size:11px"><a href="https://facilfiscal.com.ar/unsubscribe?email=${encodeURIComponent(a.to)}&token=${generarTokenUnsub(a.to)}">Cancelar suscripción</a></footer></main></body></html>`
+  const response = await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json','Idempotency-Key':a.idempotencyKey},body:JSON.stringify({from:'Fácil Fiscal <alertas@facilfiscal.com.ar>',to:[a.to],subject:`${urgencia}: ${a.titulo}`,html})})
+  const body = await response.json().catch(()=>({}))
+  if(!response.ok) throw new Error(`Resend: ${body.message||response.statusText}`)
+  return body.id||null
 }
