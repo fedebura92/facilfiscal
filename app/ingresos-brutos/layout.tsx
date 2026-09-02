@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculadora Ingresos Brutos 2026",
+  title: "Calculadora de Ingresos Brutos 2026 por provincia",
   description:
-    "Estimá Ingresos Brutos 2026 con la alícuota oficial de tu actividad y jurisdicción, retenciones y saldo a favor.",
+    "Elegí tu provincia y actividad, ingresá cuánto facturaste y estimá Ingresos Brutos. Calculadora 2026 simple, gratuita y sin registro.",
 
   keywords: [
     "ingresos brutos argentina",
