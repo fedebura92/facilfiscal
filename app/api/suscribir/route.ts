@@ -8,7 +8,7 @@ const LABEL:Record<string,string>={mono:'Monotributista',ri:'Responsable Inscrip
 export async function POST(req:NextRequest){
   const body=await req.json().catch(()=>null)
   const email=String(body?.email||'').trim().toLowerCase()
-  const tipos=Array.isArray(body?.tipos)?Array.from(new Set(body.tipos.filter((t:unknown)=>typeof t==='string'&&TIPOS.has(t)))):[]
+  const tipos:string[]=Array.isArray(body?.tipos)?Array.from(new Set(body.tipos.filter((t:unknown):t is string=>typeof t==='string'&&TIPOS.has(t)))):[]
   const terminacionCuit=body?.terminacionCuit==null?'':String(body.terminacionCuit)
   const diasAnticipacion=Number(body?.diasAnticipacion??3)
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return NextResponse.json({error:'Email inválido'},{status:400})
