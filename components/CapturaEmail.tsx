@@ -24,7 +24,7 @@ const CapturaEmail=forwardRef<HTMLInputElement,{tipoDefault:'mono'|'ri'|'aut'}>(
           <label style={{fontSize:11,color:'white',fontWeight:700}}>Avisarme antes<br/><select value={dias} onChange={e=>setDias(Number(e.target.value))} style={{...inputStyle,marginTop:4}}><option value={1} style={{color:'#0f2733'}}>1 día</option><option value={3} style={{color:'#0f2733'}}>3 días</option><option value={7} style={{color:'#0f2733'}}>7 días</option></select></label>
         </div>
         {error&&<div style={{fontSize:12,color:'#fecaca',fontWeight:700}}>{error}</div>}
-        <div className="ff-cap-input-row"><input ref={ref} type="email" placeholder="tu@email.com" value={email} onChange={e=>{setEmail(e.target.value);setError('')}} onKeyDown={e=>e.key==='Enter'&&submit()} style={{...inputStyle,flex:1,minWidth:0}}/><button onClick={submit} disabled={loading} style={{background:'var(--gold)',color:'var(--ink)',border:'none',borderRadius:8,padding:'10px 16px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',cursor:loading?'not-allowed':'pointer',opacity:loading?.7:1}}>{loading?'Guardando…':'Activar →'}</button></div>
+        <div className="ff-cap-input-row"><input ref={ref} type="email" placeholder="tu@email.com" value={email} onChange={e=>{setEmail(e.target.value);setError('')}} onKeyDown={e=>e.key==='Enter'&&submit()} style={{...inputStyle,flex:1,minWidth:0}}/><button onClick={submit} disabled={loading} style={{background:'var(--gold)',color:'var(--ink)',border:'none',borderRadius:8,padding:'10px 16px',fontSize:13,fontWeight:900,whiteSpace:'nowrap',cursor:loading?'not-allowed':'pointer',opacity:loading ? .7 : 1}}>{loading?'Guardando…':'Activar →'}</button></div>
       </>}
     </div>
   </div>
