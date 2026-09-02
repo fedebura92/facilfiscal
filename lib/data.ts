@@ -151,7 +151,7 @@ export const NAV_ITEMS = [
   { href: '/ingresos-brutos',         emoji: '📈', label: 'Ingresos Brutos',    group: 'calculadoras' },
   { href: '/impuesto-ganancias',      emoji: '💼', label: 'Ganancias',          group: 'calculadoras' },
   { href: '/impuestos-importacion',   emoji: '📦', label: 'Importaciones',      group: 'calculadoras' },
-  { href: '/impuestos-por-provincia', emoji: '🗺️', label: 'Por provincia',      group: 'calculadoras' },
+  { href: '/impuestos-por-provincia', emoji: '🗺️', label: 'Provinciales',      group: 'calculadoras' },
   { href: '/mipanel/financiero',      emoji: '💼', label: 'Panel financiero',   group: 'mipanel' },
   { href: '/mipanel/facturacion',     emoji: '🧾', label: 'Facturación',        group: 'mipanel' },
 ]
