@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculadora de IVA 2026 Argentina",
+  title: "Calculadora de IVA 2026: cuánto pagar en Argentina",
   description:
-    "Calculá débito fiscal, crédito fiscal, retenciones y saldo de IVA 2026 en Argentina, por alícuota. Gratis y sin registro.",
+    "Ingresá tus ventas y compras del mes y estimá cuánto IVA tenés que pagar. Calculadora simple, gratuita y actualizada para Argentina.",
 
   keywords: [
     "calcular IVA argentina",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   ],
 
   openGraph: {
-    title: "Calculá tu IVA gratis | FacilFiscal",
+    title: "Calculadora de IVA 2026: estimá cuánto pagar",
     description:
       "Calculá el IVA de tu negocio en segundos. Rápido, simple y gratis.",
     url: "/iva",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Calculá tu IVA gratis | FacilFiscal",
+    title: "Calculadora de IVA 2026: estimá cuánto pagar",
     description:
       "Calculá el IVA de tu negocio en segundos. Rápido, simple y gratis.",
     images: ["/og-image.png"],
