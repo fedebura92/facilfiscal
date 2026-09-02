@@ -525,14 +525,21 @@ export default function MiPanel() {
   const guardarRecordatorio = async () => {
     if (!userId) return
     setRecordatorioLoading(true)
-    await supabase.from('user_checklist').upsert({
+    const ahora = new Date().toISOString()
+    const { error: limpiarError } = await supabase
+      .from('user_checklist')
+      .update({ done: false, done_at: null, updated_at: ahora })
+      .eq('user_id', userId)
+      .like('task_id', 'recordatorio_anticipacion_%')
+    const { error: guardarError } = limpiarError ? { error: limpiarError } : await supabase.from('user_checklist').upsert({
       user_id: userId,
       task_id: `recordatorio_anticipacion_${recordatorioAnticipacion}`,
       done: true,
-      done_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      done_at: ahora,
+      updated_at: ahora,
     }, { onConflict: 'user_id,task_id' })
     setRecordatorioLoading(false)
+    if (guardarError) return
     setRecordatorioGuardado(true)
     setTimeout(() => setRecordatorioGuardado(false), 2500)
   }
