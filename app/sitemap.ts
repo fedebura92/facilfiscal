@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.facilfiscal.com.ar";
-  const ultimaRevision = new Date('2026-09-01T00:00:00-03:00');
+  const ultimaRevision = new Date('2026-09-03T00:00:00-03:00');
 
   const rutas = [
     { url: "/", prioridad: 1.0, cambio: "weekly" },
@@ -12,11 +12,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/responsable-inscripto", prioridad: 0.8, cambio: "monthly" },
     { url: "/autonomos", prioridad: 0.8, cambio: "monthly" },
     { url: "/como-facturar", prioridad: 0.8, cambio: "monthly" },
+    { url: "/factura-c", prioridad: 0.75, cambio: "monthly" },
     { url: "/iva", prioridad: 0.8, cambio: "monthly" },
     { url: "/ingresos-brutos", prioridad: 0.7, cambio: "monthly" },
     { url: "/impuesto-ganancias", prioridad: 0.7, cambio: "monthly" },
     { url: "/impuestos-importacion", prioridad: 0.7, cambio: "monthly" },
     { url: "/impuestos-por-provincia", prioridad: 0.7, cambio: "monthly" },
+    { url: "/responsable-inscripto-obligaciones", prioridad: 0.75, cambio: "monthly" },
   ] as const;
 
   return rutas.map(({ url, prioridad, cambio }) => ({
