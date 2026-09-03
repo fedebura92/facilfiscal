@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import SiteHeader from '@/components/SiteHeader'
 import CapturaEmail from '@/components/CapturaEmail'
 import { SEOResponsableInscripto } from '@/components/SEOContent/SEOContent'
+import { RelatedGuide } from '@/components/SEOContent/CalculatorSEOBlocks'
 import {
   MONTOS, FALLBACK_VENC, FALLBACK_ALERTAS,
   addFecha, diffDias, fmtLarga, fmtCorta, money,
@@ -88,7 +89,7 @@ export default function ResponsableInscriptoPage() {
             </div>
             <h1>Gestioná tu IVA y Ganancias<br/>sin errores ni multas</h1>
             <p>Controlá tus vencimientos de IVA, anticipos de Ganancias<br/>y Bienes Personales. Recibí recordatorios automáticos.</p>
-            <a href="https://www.afip.gob.ar" target="_blank" rel="noopener noreferrer" className="ff-hero-btn">Ir a AFIP / ARCA →</a>
+            <a href="https://www.arca.gob.ar/landing/" target="_blank" rel="noopener noreferrer" className="ff-hero-btn">Ir a ARCA →</a>
             <div style={{ marginTop:10, fontSize:11, color:'rgba(255,255,255,.5)', fontWeight:600 }}>Sin registro · Sin tarjeta · Gratis</div>
           </div>
         </div>
@@ -259,6 +260,7 @@ export default function ResponsableInscriptoPage() {
 
           {/* SEO */}
           <SEOResponsableInscripto />
+          <RelatedGuide href="/responsable-inscripto-obligaciones" title="Checklist de obligaciones del Responsable Inscripto" text="Revisá IVA, Ganancias, facturación, impuestos provinciales y obligaciones que dependen de tu actividad." />
 
           {/* CAPTURA EMAIL */}
           <CapturaEmail ref={capturaRef} tipoDefault="ri" />

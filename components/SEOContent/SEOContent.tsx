@@ -61,7 +61,7 @@ export function SEOMonotributo() {
             {[
               { icon: '✅', title: 'Un solo pago', desc: 'IVA + Ganancias + jubilación + obra social en una cuota' },
               { icon: '📅', title: 'Pago mensual', desc: 'La cuota mensual vence, en general, el día 20' },
-              { icon: '📄', title: 'Factura C', desc: 'Como monotributista emitís siempre Factura C' },
+              { icon: '📄', title: 'Factura C', desc: 'Como monotributista emitís Factura C; para exportaciones, Factura E' },
               { icon: '🔄', title: 'Recategorización', desc: 'Se evalúa dos veces al año, en febrero y agosto' },
             ].map(item => (
               <div key={item.title} style={{ background: V.tealLight, border: `1px solid ${V.tealRing}`, borderRadius: 10, padding: '12px' }}>
@@ -149,7 +149,7 @@ export function SEOResponsableInscripto() {
         <div style={headerStyle}>🧾 ¿Qué es el Responsable Inscripto?</div>
         <div style={bodyStyle}>
           <p style={paraStyle}>
-            El Responsable Inscripto (RI) es el régimen general de impuestos de AFIP. A diferencia del Monotributo, acá no pagás un monto fijo: pagás según lo que realmente ganaste y gastaste en el mes. Tenés que liquidar IVA, Ganancias y otros impuestos por separado cada mes.
+            El Responsable Inscripto (RI) está dentro del régimen general administrado por ARCA. A diferencia del Monotributo, no paga una única cuota que reúna todos los conceptos: liquida por separado los impuestos y aportes que correspondan a su situación.
           </p>
           <p style={paraStyle}>
             Podés quedar fuera del Monotributo cuando superás alguno de sus parámetros máximos o por otras causales de exclusión. Desde agosto de 2026, el límite máximo de ingresos brutos de la categoría K es de $126.610.838,75; también podés optar por el régimen general si corresponde a tu actividad.
@@ -157,7 +157,7 @@ export function SEOResponsableInscripto() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginTop: 8 }}>
             {[
               { icon: '🧾', title: 'IVA mensual', desc: 'Declarás y pagás la diferencia entre lo que cobraste y lo que gastaste' },
-              { icon: '💼', title: 'Ganancias', desc: 'Pagás anticipos mensuales según tu ganancia estimada anual' },
+              { icon: '💼', title: 'Ganancias', desc: 'Presentás la declaración y, si corresponde, pagás saldo y anticipos' },
               { icon: '📄', title: 'Factura A y B', desc: 'Emitís factura A a otros RI y factura B a consumidores finales' },
               { icon: '📅', title: 'Vencimientos por CUIT', desc: 'El IVA vence entre los días 18 y 23 según el último dígito de tu CUIT' },
             ].map(item => (
@@ -175,7 +175,7 @@ export function SEOResponsableInscripto() {
         <div style={headerStyle}>💰 ¿Cómo funciona el IVA?</div>
         <div style={bodyStyle}>
           <p style={paraStyle}>
-            El IVA funciona en cadena. Cuando vendés, cobrás IVA a tus clientes (eso se llama <strong>débito fiscal</strong>). Cuando comprás insumos o servicios con factura A, pagás IVA a tus proveedores (eso es el <strong>crédito fiscal</strong>). Al final del mes, le pagás a AFIP solo la diferencia: débito − crédito.
+            El IVA funciona en cadena. Cuando vendés, generás débito fiscal. Cuando comprás insumos o servicios vinculados con la actividad y el crédito resulta computable, podés descontarlo. La diferencia es el punto de partida para determinar el saldo del período.
           </p>
           <p style={paraStyle}>
             Si compraste más de lo que vendiste, tenés <strong>saldo a favor</strong> que se arrastra al mes siguiente. La tasa general del IVA en Argentina es del 21%.
@@ -203,7 +203,7 @@ export function SEOResponsableInscripto() {
             </div>
           ))}
           <div style={{ background: V.redBg, border: `1px solid ${V.redRing}`, borderRadius: 10, padding: '12px 14px', fontSize: 12, fontWeight: 600, color: '#7a2020', lineHeight: 1.6, marginTop: 8 }}>
-            ⚠️ <strong>Para emitir factura A</strong> necesitás tener habilitado el CBU en ARCA. Sin eso, solo podés emitir factura B.
+            ⚠️ ARCA puede autorizar Factura A común o variantes con leyendas como “Pago en CBU informada” u “Operación sujeta a retención”. Revisá qué comprobante tenés habilitado antes de emitir.
           </div>
         </div>
       </section>
@@ -221,11 +221,11 @@ export function SEOResponsableInscripto() {
           },
           {
             q: '¿Tengo que presentar declaración de IVA aunque no facturé nada?',
-            a: 'Sí. Aunque no hayas tenido actividad, tenés que presentar la declaración jurada en cero. Si no lo hacés, AFIP te aplica una multa.',
+            a: 'La inscripción en IVA mantiene la obligación de presentar la declaración del período aun cuando no haya operaciones. Verificá la presentación en IVA Simple y tu situación ante ARCA.',
           },
           {
             q: '¿Qué es el anticipo de Ganancias?',
-            a: 'Es un pago mensual a cuenta del impuesto a las Ganancias del año. Se calcula en base al impuesto determinado el año anterior. Si tu situación cambió mucho, podés pedir reducción de anticipos.',
+            a: 'Es un pago a cuenta del impuesto anual. Para personas humanas, ARCA prevé cinco anticipos con una base de cálculo específica. Si estimás que excederán el impuesto definitivo, puede corresponder solicitar una reducción.',
           },
         ].map((item, i, arr) => (
           <div key={i} style={{ ...faqStyle, borderBottom: i === arr.length - 1 ? 'none' : `1px solid ${V.border}` }}>
@@ -348,7 +348,7 @@ export function SEOComoFacturar() {
             {
               tipo: 'Factura C',
               quien: 'Monotributistas → Cualquier cliente',
-              desc: 'La usan exclusivamente los monotributistas. No discrimina IVA porque ya está incluido en la cuota del Monotributo. Es la más simple de emitir.',
+              desc: 'La emiten monotributistas y sujetos exentos en IVA. No discrimina IVA. Para exportaciones corresponde un comprobante E.',
               color: V.bg, ring: V.border,
             },
             {
