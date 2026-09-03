@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import SiteHeader from '@/components/SiteHeader'
 import { SEOComoFacturar } from '@/components/SEOContent/SEOContent'
+import { RelatedGuide } from '@/components/SEOContent/CalculatorSEOBlocks'
 
 export default function ComoFacturar() {
   const [aiQuery, setAiQuery] = useState('')
@@ -208,6 +209,7 @@ export default function ComoFacturar() {
           {/* SEO: Contenido informativo */}
           
             <SEOComoFacturar />
+            <RelatedGuide href="/factura-c" title="Factura C: qué es y cuándo corresponde" text="Conocé quién la emite, qué datos lleva y en qué casos se usa un comprobante diferente." />
         
 
         </main>
