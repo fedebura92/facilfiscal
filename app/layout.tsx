@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 import { FiscalDataProvider } from '@/components/FiscalDataProvider'
 import StructuredData from '@/components/StructuredData'
@@ -73,6 +74,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <Script
+        id="google-adsense"
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9093787015793158"
+        crossOrigin="anonymous"
+        strategy="beforeInteractive"
+      />
       <body>
         <StructuredData data={[
           {
