@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.facilfiscal.com.ar'),
 
   title: {
-    default: 'Fácil Fiscal — Creá y administrá tu negocio en Argentina',
+    default: 'Monotributo 2026: categorías, cuotas y vencimientos | Fácil Fiscal',
     template: '%s | Fácil Fiscal',
   },
 
   description:
-    'Creá y administrá tu negocio en Argentina. Compará Monotributo, Responsable Inscripto y sociedades; organizá impuestos, facturación y vencimientos.',
+    'Calculá tu categoría y cuota de Monotributo 2026, consultá vencimientos y aprendé a facturar. Información fiscal argentina explicada fácil.',
 
   keywords: [
     'monotributo argentina',
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     url: 'https://www.facilfiscal.com.ar',
     siteName: 'Fácil Fiscal',
 
-    title: 'Fácil Fiscal — Creá y administrá tu negocio en Argentina',
+    title: 'Monotributo 2026: categorías, cuotas y vencimientos',
     description:
-      'Compará alternativas fiscales, creá tu negocio y administrá impuestos, facturación y vencimientos.',
+      'Calculá tu categoría y cuota, consultá vencimientos y entendé el Monotributo con explicaciones simples.',
 
     images: [
       {
@@ -50,9 +50,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    title: 'Fácil Fiscal — Creá y administrá tu negocio en Argentina',
+    title: 'Monotributo 2026: categorías, cuotas y vencimientos',
     description:
-      'Compará alternativas fiscales, creá tu negocio y administrá impuestos, facturación y vencimientos.',
+      'Calculá tu categoría y cuota, consultá vencimientos y entendé el Monotributo con explicaciones simples.',
     images: ['/og-image.png'],
   },
 

@@ -91,63 +91,34 @@ export default function Home() {
         <div className="ff-hero" style={{ background:`linear-gradient(135deg,${V.tealDark} 0%,${V.teal} 100%)`, position:'relative', overflow:'hidden' }}>
           <div style={{ position:'absolute', left:'50%', top:-80, transform:'translateX(-50%)', width:500, height:300, borderRadius:'50%', background:'rgba(255,255,255,.04)' }} />
           <div style={{ maxWidth:640, margin:'0 auto', position:'relative', zIndex:1 }}>
-            <div className="ff-social-proof"><span>🇦🇷</span> Herramientas fiscales para negocios en Argentina</div>
-            <h1>Creá y administrá tu negocio<br/>con información fiscal clara</h1>
-            <p>Compará Monotributo, Régimen General y sociedad.<br/>Organizá facturación, impuestos y vencimientos por CUIT.</p>
+            <div className="ff-social-proof"><span>🇦🇷</span> Monotributo 2026 · Información actualizada</div>
+            <h1>Todo sobre el Monotributo,<br/>explicado fácil</h1>
+            <p>Calculá tu categoría, consultá cuánto pagás<br/>y controlá tus próximos vencimientos.</p>
             <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-              <Link href="/crear-negocio" className="ff-hero-btn">Crear mi negocio →</Link>
-              <Link href="/mi-categoria" className="ff-hero-btn" style={{background:'white',color:V.tealDark}}>Calcular categoría</Link>
+              <Link href="/mi-categoria" className="ff-hero-btn">Calcular mi categoría →</Link>
+              <Link href="/calendario-fiscal" className="ff-hero-btn" style={{background:'white',color:V.tealDark}}>Ver vencimientos</Link>
             </div>
             <div style={{ marginTop:10, fontSize:11, color:'rgba(255,255,255,.5)', fontWeight:600 }}>Sin registro · Sin tarjeta · Gratis</div>
           </div>
         </div>
 
-        <section style={{background:V.surface,borderBottom:`1px solid ${V.border}`}} aria-labelledby="caminos-facil-fiscal">
-          <div style={{maxWidth:860,margin:'0 auto',padding:'24px 16px'}}>
-            <h2 id="caminos-facil-fiscal" style={{fontSize:20,fontWeight:900,color:V.ink,textAlign:'center',marginBottom:16}}>¿Qué necesitás hacer?</h2>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
-              <Link href="/crear-negocio" style={{padding:18,border:`1.5px solid ${V.tealRing}`,borderRadius:14,background:V.tealLight,textDecoration:'none'}}>
-                <div style={{fontSize:15,fontWeight:900,color:V.tealDark,marginBottom:5}}>Quiero crear un negocio</div>
-                <div style={{fontSize:12,color:V.ink2,lineHeight:1.6,fontWeight:600}}>Evaluá actividad, socios, facturación y empleados para comparar Monotributo, Régimen General y sociedad.</div>
-              </Link>
-              <Link href="/mipanel" style={{padding:18,border:`1.5px solid ${V.goldRing}`,borderRadius:14,background:V.goldLight,textDecoration:'none'}}>
-                <div style={{fontSize:15,fontWeight:900,color:V.ink,marginBottom:5}}>Ya tengo un negocio</div>
-                <div style={{fontSize:12,color:V.ink2,lineHeight:1.6,fontWeight:600}}>Separá obligaciones, vencimientos y facturación por persona, actividad o sociedad y por el CUIT correspondiente.</div>
-              </Link>
-            </div>
+        <section style={{background:V.surface,borderBottom:`1px solid ${V.border}`}} aria-label="Accesos rápidos de Monotributo">
+          <div style={{maxWidth:860,margin:'0 auto',padding:'18px 16px',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10}}>
+            <Link href="/mi-categoria" className="ff-card-link">📊 Conocer mi categoría</Link>
+            <a href="#cuota-monotributo" className="ff-card-link">💳 Consultar mi cuota</a>
+            <a href="#vencimientos-monotributo" className="ff-card-link">📅 Próximos vencimientos</a>
           </div>
         </section>
 
-        {/* DOLOR */}
-        <div style={{ background:V.surface, borderBottom:`1px solid ${V.border}` }}>
-          <div style={{ maxWidth:860, margin:'0 auto', padding:'20px 16px' }}>
-            <div style={{ textAlign:'center', marginBottom:14 }}>
-              <div style={{ fontSize:13, fontWeight:800, color:V.red, marginBottom:4 }}>⚠️ Evitá problemas con ARCA</div>
-              <div style={{ fontSize:16, fontWeight:900, color:V.ink, letterSpacing:'-0.2px' }}>Errores comunes que te pueden costar caro</div>
-            </div>
-            <div className="ff-dolor-grid">
-              {[
-                { icon:'❌', txt:'Pagan la categoría incorrecta' },
-                { icon:'❌', txt:'No saben cuándo recategorizarse' },
-                { icon:'❌', txt:'Emiten facturas con errores' },
-                { icon:'❌', txt:'Se enteran del vencimiento tarde' },
-              ].map(e => (
-                <div key={e.txt} style={{ display:'flex', gap:8, alignItems:'flex-start', background:V.redBg, border:`1px solid ${V.redRing}`, borderRadius:10, padding:'10px 12px' }}>
-                  <span style={{ fontSize:13, flexShrink:0 }}>{e.icon}</span>
-                  <span style={{ fontSize:12, fontWeight:700, color:'#7a2020', lineHeight:1.4 }}>{e.txt}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         <main className="ff-main">
-          {/* DATE STRIP */}
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
-            <div style={{ fontSize:13, color:V.ink3, fontWeight:600 }}>Hoy es <strong style={{ color:V.ink2 }}>{fechaHoy}</strong></div>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:V.tealLight, border:`1.5px solid ${V.tealRing}`, borderRadius:20, padding:'4px 12px 4px 8px', fontSize:12, fontWeight:800, color:V.tealDark }}>
-              <div style={{ width:7, height:7, borderRadius:'50%', background:V.teal, flexShrink:0 }} />
-              Monotributo
+          <div id="vencimientos-monotributo" style={{scrollMarginTop:90}}>
+            {/* DATE STRIP */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
+              <div style={{ fontSize:13, color:V.ink3, fontWeight:600 }}>Hoy es <strong style={{ color:V.ink2 }}>{fechaHoy}</strong></div>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:V.tealLight, border:`1.5px solid ${V.tealRing}`, borderRadius:20, padding:'4px 12px 4px 8px', fontSize:12, fontWeight:800, color:V.tealDark }}>
+                <div style={{ width:7, height:7, borderRadius:'50%', background:V.teal, flexShrink:0 }} />
+                Monotributo
+              </div>
             </div>
           </div>
 
@@ -228,7 +199,7 @@ export default function Home() {
               })}
             </div>
 
-            <div style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:14, overflow:'hidden', boxShadow:`0 1px 4px rgba(13,92,120,.07)` }}>
+            <div id="cuota-monotributo" style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:14, overflow:'hidden', boxShadow:`0 1px 4px rgba(13,92,120,.07)`, scrollMarginTop:90 }}>
               <div style={{ padding:'13px 16px', borderBottom:`1px solid ${V.border}`, fontSize:14, fontWeight:800, color:V.ink }}>🧮 ¿Cuánto tengo que pagar?</div>
               <div style={{ padding:'14px 16px' }}>
                 <div style={{ fontSize:11, fontWeight:800, letterSpacing:'0.8px', textTransform:'uppercase', color:V.ink3, marginBottom:5 }}>Tu categoría</div>
@@ -286,6 +257,29 @@ export default function Home() {
             </div>
           </div>        
 
+          {/* DOLOR */}
+          <section style={{ background:V.surface, border:`1.5px solid ${V.border}`, borderRadius:14, marginBottom:20, overflow:'hidden' }} aria-labelledby="errores-monotributo">
+            <div style={{ padding:'20px 16px' }}>
+              <div style={{ textAlign:'center', marginBottom:14 }}>
+                <div style={{ fontSize:13, fontWeight:800, color:V.red, marginBottom:4 }}>⚠️ Evitá problemas con ARCA</div>
+                <h2 id="errores-monotributo" style={{ fontSize:16, fontWeight:900, color:V.ink, letterSpacing:'-0.2px', margin:0 }}>Errores comunes que te pueden costar caro</h2>
+              </div>
+              <div className="ff-dolor-grid">
+                {[
+                  { icon:'❌', txt:'Pagan la categoría incorrecta' },
+                  { icon:'❌', txt:'No saben cuándo recategorizarse' },
+                  { icon:'❌', txt:'Emiten facturas con errores' },
+                  { icon:'❌', txt:'Se enteran del vencimiento tarde' },
+                ].map(e => (
+                  <div key={e.txt} style={{ display:'flex', gap:8, alignItems:'flex-start', background:V.redBg, border:`1px solid ${V.redRing}`, borderRadius:10, padding:'10px 12px' }}>
+                    <span style={{ fontSize:13, flexShrink:0 }}>{e.icon}</span>
+                    <span style={{ fontSize:12, fontWeight:700, color:'#7a2020', lineHeight:1.4 }}>{e.txt}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* SEO: Contenido informativo */}
           <SEOMonotributo />
 
@@ -307,6 +301,12 @@ export default function Home() {
           <div style={{ marginTop:24 }}>
             <CapturaEmail ref={capturaRef} tipoDefault="mono" />
           </div>
+
+          <section style={{marginTop:24,padding:20,border:`1.5px solid ${V.tealRing}`,borderRadius:14,background:V.tealLight}} aria-labelledby="otro-regimen">
+            <h2 id="otro-regimen" style={{fontSize:17,fontWeight:900,color:V.tealDark,margin:'0 0 6px'}}>¿Todavía no sabés qué régimen te conviene?</h2>
+            <p style={{fontSize:13,color:V.ink2,lineHeight:1.6,fontWeight:600,margin:'0 0 14px'}}>Compará Monotributo, Régimen General y sociedad según tu actividad, facturación y forma de trabajar.</p>
+            <Link href="/crear-negocio" className="ff-hero-btn" style={{display:'inline-flex',fontSize:13,padding:'10px 16px'}}>Evaluar mi negocio →</Link>
+          </section>
 
         </main>
       </div>
