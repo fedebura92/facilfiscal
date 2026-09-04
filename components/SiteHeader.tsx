@@ -266,7 +266,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           </div>
         ))}
 
-        {/* Separador y link a AFIP */}
+        {/* Acciones principales */}
         <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid #e2e8ed' }}>
           <a href="/crear-negocio" className="ff-nav-item">
             <span className="ff-nav-emoji">🏗️</span>
@@ -277,14 +277,9 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             Mi panel
           </a>
           
-          <a
-            href="https://www.afip.gob.ar"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ff-nav-item"
-          >
-            <span className="ff-nav-emoji">🏛️</span>
-            Ir a AFIP / ARCA
+          <a href="/#alertas" className="ff-nav-item" onClick={() => setSidebarOpen(false)}>
+            <span className="ff-nav-emoji">🔔</span>
+            Activar alertas
           </a>
         </div>
       </nav>

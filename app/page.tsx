@@ -298,7 +298,7 @@ export default function Home() {
 
 
           {/* CAPTURA EMAIL */}
-          <div style={{ marginTop:24 }}>
+          <div id="alertas" style={{ marginTop:24, scrollMarginTop:90 }}>
             <CapturaEmail ref={capturaRef} tipoDefault="mono" />
           </div>
 
