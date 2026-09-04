@@ -65,6 +65,10 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
+
+  other: {
+    'google-adsense-account': 'ca-pub-9093787015793158',
+  },
 }
 
 export default function RootLayout({
