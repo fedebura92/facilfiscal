@@ -1,4 +1,4 @@
-export const VERIFICACION_FISCAL = '1 de septiembre de 2026'
+export const VERIFICACION_FISCAL = '14 de septiembre de 2026'
 
 export const ESCALA_GANANCIAS_2026 = [
   { desde: 0, hasta: 2336953.69, fijo: 0, tasa: 0.05 },
