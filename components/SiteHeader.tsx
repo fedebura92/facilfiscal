@@ -13,14 +13,12 @@ const TIPO_LABELS = ['Monotributo', 'Resp. Inscripto', 'Autónomo']
 export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Cerrar sidebar al hacer resize a desktop
   useEffect(() => {
     const close = () => { if (window.innerWidth >= 1024) setSidebarOpen(false) }
     window.addEventListener('resize', close)
     return () => window.removeEventListener('resize', close)
   }, [])
 
-  // Bloquear scroll del body cuando el sidebar está abierto en mobile
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -36,7 +34,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
-        /* ── Sidebar ── */
         .ff-sidebar {
           position: fixed; top: 0; left: 0; bottom: 0;
           width: 236px; background: #fff;
@@ -51,7 +48,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           backdrop-filter: blur(2px);
         }
 
-        /* Desktop: siempre visible */
         @media (min-width: 1024px) {
           .ff-sidebar { transform: none !important; }
           .ff-sidebar-overlay { display: none !important; }
@@ -60,7 +56,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           .ff-hamburger { display: none !important; }
         }
 
-        /* Mobile/tablet: oculto por defecto, se abre */
         @media (max-width: 1023px) {
           .ff-sidebar { transform: translateX(-100%); box-shadow: 4px 0 24px rgba(13,92,120,.18); }
           .ff-sidebar.open { transform: translateX(0); }
@@ -68,7 +63,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           .ff-page-content { margin-left: 0; }
         }
 
-        /* ── Topbar ── */
         .ff-topbar {
           position: sticky; top: 0; z-index: 100;
           background: #fff; border-bottom: 1px solid #e2e8ed;
@@ -89,7 +83,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           gap: 8px; width: 100%; height: 56px;
         }
 
-        /* ── Tipo switcher en topbar (solo en páginas de régimen) ── */
         .ff-switcher {
           display: flex; background: #f4f7f9;
           border: 1.5px solid #e2e8ed; border-radius: 10px;
@@ -107,7 +100,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           box-shadow: 0 1px 4px rgba(13,92,120,.18);
         }
 
-        /* Mobile y tablet angosta: switcher baja a segunda fila, ancho completo */
         @media (max-width: 899px) {
           .ff-switcher-desktop { display: none !important; }
           .ff-switcher-mobile {
@@ -121,9 +113,20 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             padding: 7px 4px;
             flex: 1;
           }
+          .ff-topbar-create-business { display: none !important; }
+          .ff-alert-cta {
+            width: 40px;
+            height: 40px;
+            padding: 0 !important;
+            border-radius: 10px !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px !important;
+          }
+          .ff-alert-label { display: none; }
         }
 
-        /* Tablet ancha y desktop: switcher centrado respecto de toda la barra */
         @media (min-width: 900px) {
           .ff-switcher-mobile { display: none !important; }
           .ff-switcher-desktop {
@@ -147,7 +150,13 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           .ff-topbar-create-business { display: none !important; }
         }
 
-        /* ── Hamburger ── */
+        @media (max-width: 500px) {
+          .ff-topbar-inner { padding: 0 10px; }
+          .ff-topbar-row1 { gap: 6px; }
+          .ff-topbar-logo img { height: 36px !important; }
+          .ff-cta-primary { padding: 7px 11px !important; }
+        }
+
         .ff-hamburger {
           width: 36px; height: 36px; border: none;
           background: #f4f7f9; border-radius: 8px;
@@ -162,7 +171,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           box-shadow: 0 5px 0 #0f2733, 0 -5px 0 #0f2733;
         }
 
-        /* ── Alerta CTA ── */
         .ff-alert-cta {
           background: #f5a623; color: #0f2733; border: none;
           border-radius: 8px; padding: 7px 14px;
@@ -170,11 +178,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           font-weight: 800; cursor: pointer; white-space: nowrap;
           box-shadow: 0 2px 8px rgba(245,166,35,.35); flex-shrink: 0;
         }
-        @media (max-width: 400px) {
-          .ff-alert-cta { display: none; }
-        }
 
-        /* ── Sidebar nav items ── */
         .ff-nav-group-label {
           font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
           text-transform: uppercase; color: #7a9aaa;
@@ -188,6 +192,7 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           cursor: pointer; transition: background .13s, color .13s;
           border: none; background: none; width: calc(100% - 16px);
           text-align: left;
+          position: relative;
         }
         .ff-nav-item:hover { background: #f4f7f9; color: #0d5c78; }
         .ff-nav-item.active {
@@ -199,10 +204,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           position: absolute; left: 8px; border-radius: 2px;
           background: #1a7fa8;
         }
-        .ff-nav-item { position: relative; }
         .ff-nav-emoji { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
 
-        /* ── Sidebar logo zone ── */
         .ff-sidebar-logo {
           padding: 16px 16px 12px; border-bottom: 1px solid #e2e8ed;
           display: flex; align-items: center; gap: 8px;
@@ -213,10 +216,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         .ff-sidebar-logo-name { font-size: 16px; font-weight: 900; color: #0d5c78; letter-spacing: -0.2px; }
         .ff-sidebar-logo-sub { font-size: 9px; font-weight: 600; color: #7a9aaa; margin-top: 3px; letter-spacing: 0.2px; }
 
-        /* ── Page content wrapper ── */
         .ff-page-content { min-height: 100vh; transition: margin-left .22s; }
 
-        /* ── CTAs header ── */
         .ff-cta-primary {
           background: linear-gradient(135deg, #0d9488, #0f766e);
           color: #fff; border: none; border-radius: 8px;
@@ -234,21 +235,15 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           display: inline-flex; align-items: center; gap: 4px;
         }
         .ff-cta-secondary:hover { background: #e8f6fb; border-color: #a8ddf0; }
-          .ff-cta-primary:hover { opacity: .9; }
-          @media (max-width: 500px) { .ff-cta-label { display: none; } 
-        }
-
+        .ff-cta-primary:hover { opacity: .9; }
       ` }} />
 
-      {/* ── SIDEBAR ── */}
       <div className={`ff-sidebar-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
       <nav className={`ff-sidebar${sidebarOpen ? ' open' : ''}`} aria-label="Navegación principal">
-        {/* Logo en sidebar */}
         <a href="/" className="ff-sidebar-logo" onClick={() => setSidebarOpen(false)}>
           <img src="/logo.svg" alt="Fácil Fiscal" />
         </a>
 
-        {/* Nav groups */}
         {NAV_GROUPS.map(group => (
           <div key={group.key}>
             <div className="ff-nav-group-label">{group.label}</div>
@@ -266,7 +261,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           </div>
         ))}
 
-        {/* Acciones principales */}
         <div style={{ marginTop: 'auto', padding: '12px 8px 16px', borderTop: '1px solid #e2e8ed' }}>
           <a href="/crear-negocio" className="ff-nav-item">
             <span className="ff-nav-emoji">🏗️</span>
@@ -276,7 +270,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             <span className="ff-nav-emoji">📊</span>
             Mi panel
           </a>
-          
           <a href="/#alertas" className="ff-nav-item" onClick={() => setSidebarOpen(false)}>
             <span className="ff-nav-emoji">🔔</span>
             Activar alertas
@@ -284,11 +277,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         </div>
       </nav>
 
-      {/* ── TOPBAR ── */}
       <header className="ff-topbar">
         <div className="ff-topbar-inner">
-
-          {/* Fila 1: hamburguesa + logo + switcher (tablet/desktop) + alertas */}
           <div className="ff-topbar-row1">
             <button
               className="ff-hamburger"
@@ -308,7 +298,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
             <div style={{ flex: 1 }} />
 
-            {/* Switcher inline en tablet/desktop — centrado — oculto en mobile (va en fila 2) */}
             {TIPO_PATHS.includes(currentPath) && (
               <div className="ff-switcher ff-switcher-desktop">
                 {TIPO_PATHS.map((path, i) => (
@@ -325,10 +314,9 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
 
             <div style={{ flex: 1 }} />
 
-            {/* CTAs principales */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
               <a href="/crear-negocio" className="ff-cta-secondary ff-topbar-create-business">
-                🏗️ <span className="ff-cta-label">Crear negocio</span>
+                🏗️ <span>Crear negocio</span>
               </a>
               <a href="/mipanel" className="ff-cta-primary">
                 Mi panel →
@@ -336,13 +324,12 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             </div>
 
             {onAlertasClick && (
-              <button className="ff-alert-cta" onClick={onAlertasClick}>
-                🔔 Alertas
+              <button className="ff-alert-cta" onClick={onAlertasClick} aria-label="Alertas">
+                <span aria-hidden="true">🔔</span><span className="ff-alert-label"> Alertas</span>
               </button>
             )}
           </div>
 
-          {/* Fila 2: switcher solo en mobile */}
           {TIPO_PATHS.includes(currentPath) && (
             <div className="ff-switcher ff-switcher-mobile">
               {TIPO_PATHS.map((path, i) => (
@@ -356,7 +343,6 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
               ))}
             </div>
           )}
-
         </div>
       </header>
     </>
