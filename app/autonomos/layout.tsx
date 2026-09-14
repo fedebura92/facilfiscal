@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Autonomos2026 from '@/components/SEOContent/Autonomos2026'
 
 export const metadata: Metadata = {
   title: 'Autónomos 2026: aportes, categorías y vencimientos | Fácil Fiscal',
@@ -48,5 +47,5 @@ export default function AutonomosLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}<Autonomos2026 /></>
+  return children
 }
