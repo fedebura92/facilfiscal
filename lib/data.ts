@@ -30,6 +30,13 @@ export const CATEGORIAS_MONO: CategoriaMonotributo[] = [
 
 export const OS_EXTRA = 25694.55 // Categorías A-C; categorías superiores varían según ARCA
 
+// ── Autónomos 2026 ───────────────────────────────────────
+// Aportes mensuales de categorías mínimas generales.
+// Fuente oficial: ARCA — valores vigentes desde el 15/08/2026.
+// https://www.arca.gob.ar/autonomos/categorias-y-aportes/2026.asp
+export const VIGENCIA_AUTONOMOS = 'Vigente desde el 15/08/2026 — Fuente: ARCA — verificado el 13/09/2026'
+export const APORTES_AUTONOMOS_2026 = [75402.48, 105561.86, 150803.64, 241285.70, 331766.54]
+
 // ── Tabla de montos (FUENTE ÚNICA) ──────────────────────
 export const MONTOS = {
   mono: {
@@ -40,7 +47,13 @@ export const MONTOS = {
     os:      OS_EXTRA,
   },
   ri: { cats:[], limites:[], imp:[], prev:[], os:0 },
-  aut:{ cats:[], limites:[], imp:[], prev:[], os:0 },
+  aut:{
+    cats:['I','II','III','IV','V'],
+    limites:['Categoría I','Categoría II','Categoría III','Categoría IV','Categoría V'],
+    imp:APORTES_AUTONOMOS_2026,
+    prev:[0,0,0,0,0],
+    os:0,
+  },
 }
 
 // ── Tipo UI de vencimiento (con dia_mes) ─────────────────
@@ -78,10 +91,9 @@ export const FALLBACK_VENC: Record<TipoContribuyente, VencimientoUI[]> = {
     { id:'11', nombre:'SUSS / Contribuciones',       emoji:'👥', detalle:'Contribuciones patronales si tenés empleados',  dia_mes:12, tipo:'ri', fecha:'' },
   ],
   aut: [
-    { id:'12', nombre:'Autónomos — Aporte mensual',  emoji:'⚡', detalle:'Aporte mensual según categoría (I a V)',        dia_mes:8,  tipo:'aut', fecha:'' },
-    { id:'13', nombre:'IVA — Si estás inscripto',    emoji:'🧾', detalle:'Presentación y pago mensual de IVA',            dia_mes:19, tipo:'aut', fecha:'' },
-    { id:'14', nombre:'Ganancias — Anticipo',         emoji:'💼', detalle:'Anticipo mensual personas humanas',             dia_mes:25, tipo:'aut', fecha:'' },
-    { id:'15', nombre:'Bienes Personales — Anticipo', emoji:'🏠', detalle:'Anticipo mensual si corresponde',              dia_mes:22, tipo:'aut', fecha:'' },
+    { id:'12a', nombre:'Autónomos — aporte (CUIT 0-3)', emoji:'⚡', detalle:'Aporte mensual; verificá feriados y prórrogas en ARCA', dia_mes:3, tipo:'aut', fecha:'' },
+    { id:'12b', nombre:'Autónomos — aporte (CUIT 4-6)', emoji:'⚡', detalle:'Aporte mensual; verificá feriados y prórrogas en ARCA', dia_mes:4, tipo:'aut', fecha:'' },
+    { id:'12c', nombre:'Autónomos — aporte (CUIT 7-9)', emoji:'⚡', detalle:'Aporte mensual; verificá feriados y prórrogas en ARCA', dia_mes:5, tipo:'aut', fecha:'' },
   ],
 }
 
@@ -90,19 +102,19 @@ export const FALLBACK_ALERTAS: Record<TipoContribuyente, AlertaUI[]> = {
   mono: [
     { id:'a1', icon:'🔄', tipo:'warn',   title:'Recategorización abierta', description:'Período enero-febrero. Revisá si tus ingresos cambiaron.' },
     { id:'a2', icon:'💰', tipo:'warn',   title:'Nuevos valores de cuota',  description:'Los montos del monotributo se actualizaron. Verificá en ARCA.' },
-    { id:'a3', icon:'📢', tipo:'info',   title:'ARCA reemplaza a AFIP',    description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.' },
+    { id:'a3', icon:'📢', tipo:'info',   title:'ARCA reemplaza a AFIP',    description:'Consultá trámites y valores vigentes en los canales oficiales de ARCA.' },
   ],
   ri: [
     { id:'a4', icon:'📅', tipo:'warn',   title:'IVA según terminación de CUIT', description:'El vencimiento del IVA varía según el último dígito de tu CUIT. Revisá tu fecha exacta.' },
-    { id:'a5', icon:'💼', tipo:'danger', title:'Retenciones y percepciones',    description:'Si sufriste retenciones o percepciones, descontálas de tu IVA. Verificá el F.2002.' },
-    { id:'a6', icon:'📑', tipo:'warn',   title:'Factura A con CBU',             description:'Para emitir factura A necesitás validar el CBU en ARCA. Sin esto, solo podés emitir B.' },
-    { id:'a7', icon:'📢', tipo:'info',   title:'ARCA reemplaza a AFIP',         description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.' },
+    { id:'a5', icon:'💼', tipo:'danger', title:'Retenciones y percepciones',    description:'Si sufriste retenciones o percepciones, revisá cómo se computan en tu liquidación de IVA.' },
+    { id:'a6', icon:'📑', tipo:'warn',   title:'Comprobantes habilitados',      description:'Antes de facturar, verificá en ARCA qué clase de comprobante tenés autorizada.' },
+    { id:'a7', icon:'📢', tipo:'info',   title:'Información oficial',           description:'Consultá trámites y valores vigentes en los canales oficiales de ARCA.' },
   ],
   aut: [
-    { id:'a8',  icon:'⚡', tipo:'warn', title:'Ajuste de categorías autónomos', description:'Las categorías de autónomos se actualizan por inflación. Verificá la tuya.' },
-    { id:'a9',  icon:'💰', tipo:'warn', title:'Aportes jubilatorios',            description:'El importe varía según tu categoría (I a V). Confirmá el monto en ARCA.' },
-    { id:'a10', icon:'📑', tipo:'info', title:'Podés estar inscripto en IVA',   description:'Si además de autónomo estás inscripto en IVA, tenés vencimientos mensuales adicionales.' },
-    { id:'a11', icon:'📢', tipo:'info', title:'ARCA reemplaza a AFIP',          description:'Todos los trámites siguen en afip.gob.ar y arca.gob.ar.' },
+    { id:'a8',  icon:'⚡', tipo:'warn', title:'Aportes actualizados', description:'Desde el 15/08/2026 rigen nuevos importes para las categorías I a V.' },
+    { id:'a9',  icon:'🔄', tipo:'warn', title:'Recategorización anual', description:'ARCA indica que la recategorización de Autónomos se realiza en mayo considerando los ingresos del año anterior.' },
+    { id:'a10', icon:'📑', tipo:'info', title:'IVA y Ganancias van por separado', description:'Autónomos es previsional. En el régimen general también corresponden IVA, Ganancias y otros tributos según tu situación.' },
+    { id:'a11', icon:'📢', tipo:'info', title:'Información oficial', description:'Verificá categoría, importe y vencimiento en ARCA ante cualquier cambio o situación especial.' },
   ],
 }
 
