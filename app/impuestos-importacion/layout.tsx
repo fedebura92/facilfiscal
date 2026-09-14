@@ -1,40 +1,34 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculadora importación Argentina 2026",
+  title: "Importaciones 2026: Courier, Puerta a Puerta e impuestos",
   description:
-    "Calculá CIF, derechos, tasa estadística, IVA y percepciones de una importación en Argentina con tasas oficiales por NCM.",
+    "Entendé de forma simple qué impuestos pueden corresponder al importar en Argentina por Courier, Correo Argentino o Régimen General. Reglas 2026 verificadas con ARCA.",
 
   keywords: [
+    "importaciones argentina 2026",
+    "courier argentina impuestos",
+    "puerta a puerta argentina 2026",
+    "franquicia 400 dolares argentina",
     "impuestos importacion argentina",
-    "calcular impuestos importacion",
-    "arancel importacion argentina",
-    "cuanto pago al importar argentina",
-    "aduana argentina impuestos"
+    "ARCA importaciones"
   ],
 
   openGraph: {
-    title: "Calculá impuestos de importación | FacilFiscal",
+    title: "Importaciones 2026 — Courier, Puerta a Puerta e impuestos | FácilFiscal",
     description:
-      "Calculá el costo total de importar productos en Argentina en segundos.",
-    url: "/impuestos-importacion",
-    siteName: "FacilFiscal",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
+      "Descubrí qué régimen corresponde, qué impuestos pueden aparecer y cuándo necesitás consultar el arancel exacto del producto.",
+    url: "https://www.facilfiscal.com.ar/impuestos-importacion",
+    siteName: "FácilFiscal",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
     locale: "es_AR",
     type: "website",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Calculá impuestos de importación | FacilFiscal",
-    description:
-      "Calculá cuánto pagás al importar productos en Argentina.",
+    title: "Importaciones 2026 | FácilFiscal",
+    description: "Courier, Puerta a Puerta, franquicia de USD 400 y tributos explicados fácil.",
     images: ["/og-image.png"],
   },
 
