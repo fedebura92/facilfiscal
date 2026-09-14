@@ -1,55 +1,28 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "Ingresos Brutos por provincia 2026",
-  description:
-    "Cómo encontrar la alícuota de Ingresos Brutos 2026 según actividad, padrón, provincia y Convenio Multilateral, con accesos oficiales.",
-
+  title: 'Impuestos por provincia 2026: qué pagar y cómo | Fácil Fiscal',
+  description: 'Elegí tu provincia y situación fiscal. Entendé Ingresos Brutos, Monotributo Unificado, Convenio Multilateral, otros impuestos y vencimientos sin porcentajes genéricos.',
   keywords: [
-    "impuestos provinciales argentina",
-    "ingresos brutos por provincia",
-    "alicuota IIBB argentina 2026",
-    "impuesto de sellos provincia",
-    "cuanto se paga de ingresos brutos",
-    "impuestos municipales argentina",
-    "provincia con mas impuestos argentina",
-    "IIBB ARBA AGIP DGR",
-    "cuantos impuestos se pagan en argentina",
-    "impuesto ingresos brutos todas las provincias",
+    'impuestos provinciales argentina 2026',
+    'ingresos brutos por provincia',
+    'monotributo unificado',
+    'regimen simplificado ingresos brutos',
+    'convenio multilateral',
+    'vencimientos ingresos brutos',
   ],
-
+  alternates: { canonical: '/impuestos-por-provincia' },
   openGraph: {
-    title: "Impuestos por provincia en Argentina | FácilFiscal",
-    description:
-      "IIBB, Sellos, Inmobiliario y tasas municipales de las 24 jurisdicciones argentinas. Guía 2026.",
-    url: "/impuestos-por-provincia",
-    siteName: "FácilFiscal",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
-    locale: "es_AR",
-    type: "website",
+    title: 'Impuestos por provincia 2026 | Fácil Fiscal',
+    description: 'Descubrí qué obligaciones provinciales pueden corresponderte según dónde y cómo trabajás.',
+    url: '/impuestos-por-provincia',
+    siteName: 'Fácil Fiscal',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    locale: 'es_AR',
+    type: 'website',
   },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Impuestos por provincia en Argentina | FácilFiscal",
-    description: "IIBB, Sellos e Inmobiliario de las 24 jurisdicciones. Guía orientativa 2026.",
-    images: ["/og-image.png"],
-  },
-
-  alternates: {
-    canonical: "/impuestos-por-provincia",
-  },
-
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
-
-export default function ImpuestosPorProvinciaLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return children;
+  twitter: { card:'summary_large_image', title:'Impuestos por provincia 2026 | Fácil Fiscal', description:'Ingresos Brutos y obligaciones provinciales explicados fácil.', images:['/og-image.png'] },
+  robots: { index:true, follow:true },
 }
+
+export default function ImpuestosPorProvinciaLayout({children}:{children:React.ReactNode}){ return children }
