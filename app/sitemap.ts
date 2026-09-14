@@ -1,30 +1,8 @@
-import { MetadataRoute } from "next";
-
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://www.facilfiscal.com.ar";
-  const ultimaRevision = new Date('2026-09-03T00:00:00-03:00');
-
-  const rutas = [
-    { url: "/", prioridad: 1.0, cambio: "weekly" },
-    { url: "/crear-negocio", prioridad: 0.95, cambio: "monthly" },
-    { url: "/calendario-fiscal", prioridad: 0.9, cambio: "monthly" },
-    { url: "/mi-categoria", prioridad: 0.9, cambio: "monthly" },
-    { url: "/responsable-inscripto", prioridad: 0.8, cambio: "monthly" },
-    { url: "/autonomos", prioridad: 0.8, cambio: "monthly" },
-    { url: "/como-facturar", prioridad: 0.8, cambio: "monthly" },
-    { url: "/factura-c", prioridad: 0.75, cambio: "monthly" },
-    { url: "/iva", prioridad: 0.8, cambio: "monthly" },
-    { url: "/ingresos-brutos", prioridad: 0.7, cambio: "monthly" },
-    { url: "/impuesto-ganancias", prioridad: 0.7, cambio: "monthly" },
-    { url: "/impuestos-importacion", prioridad: 0.7, cambio: "monthly" },
-    { url: "/impuestos-por-provincia", prioridad: 0.7, cambio: "monthly" },
-    { url: "/responsable-inscripto-obligaciones", prioridad: 0.75, cambio: "monthly" },
-  ] as const;
-
-  return rutas.map(({ url, prioridad, cambio }) => ({
-    url: `${baseUrl}${url}`,
-    lastModified: ultimaRevision,
-    changeFrequency: cambio,
-    priority: prioridad,
-  }));
+import { MetadataRoute } from 'next'
+export default function sitemap():MetadataRoute.Sitemap{
+ const baseUrl='https://www.facilfiscal.com.ar'; const ultimaRevision=new Date('2026-09-14T00:00:00-03:00')
+ const rutas=[
+  ['/',1,'weekly'],['/crear-negocio',.95,'monthly'],['/calendario-fiscal',.9,'weekly'],['/mi-categoria',.9,'monthly'],['/responsable-inscripto',.8,'monthly'],['/autonomos',.8,'monthly'],['/como-facturar',.8,'monthly'],['/factura-c',.75,'monthly'],['/iva',.8,'monthly'],['/ingresos-brutos',.8,'monthly'],['/impuesto-ganancias',.8,'monthly'],['/impuestos-importacion',.7,'monthly'],['/impuestos-por-provincia',.8,'monthly'],['/responsable-inscripto-obligaciones',.75,'monthly'],['/acerca-de',.5,'yearly'],['/metodologia',.7,'monthly'],['/contacto',.4,'yearly'],['/privacidad',.3,'yearly'],['/terminos',.3,'yearly']
+ ] as const
+ return rutas.map(([url,priority,changeFrequency])=>({url:`${baseUrl}${url}`,lastModified:ultimaRevision,changeFrequency,priority}))
 }
