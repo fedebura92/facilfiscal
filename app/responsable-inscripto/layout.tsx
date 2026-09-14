@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Responsable Inscripto: obligaciones, IVA y vencimientos',
-  description: 'Entendé de forma simple qué debe hacer un Responsable Inscripto: IVA, Ganancias, facturación, vencimientos y recordatorios actualizados.',
-  keywords: ['responsable inscripto', 'vencimientos IVA', 'ganancias argentina', 'AFIP responsable inscripto', 'factura A factura B', 'ARCA'],
+  title: 'Responsable Inscripto 2026: IVA, Ganancias y vencimientos',
+  description: 'Entendé de forma simple qué debe hacer un Responsable Inscripto en 2026: IVA Simple, Ganancias, facturación, vencimientos y recordatorios actualizados.',
+  keywords: ['responsable inscripto', 'vencimientos IVA', 'ganancias argentina', 'ARCA responsable inscripto', 'factura A factura B', 'IVA Simple'],
 
   alternates: {
     canonical: '/responsable-inscripto',
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     locale: 'es_AR',
     url: 'https://www.facilfiscal.com.ar/responsable-inscripto',
     siteName: 'FacilFiscal',
-    title: 'Responsable Inscripto — Vencimientos y Alertas | FacilFiscal',
-    description: 'Controlá tus vencimientos de IVA, Ganancias y más. Recordatorios automáticos para Responsables Inscriptos.',
+    title: 'Responsable Inscripto 2026 — IVA, Ganancias y vencimientos | FacilFiscal',
+    description: 'Controlá IVA, Ganancias, facturación y próximos vencimientos. Fácil Fiscal te ayuda a entender qué hacer y cuándo hacerlo.',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 
