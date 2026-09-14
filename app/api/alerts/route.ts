@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { fechaArgentina } from '@/lib/notificaciones'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
-  const tipo = req.nextUrl.searchParams.get('tipo') || 'mono'
+  const solicitado = req.nextUrl.searchParams.get('tipo') || 'mono'
+  const tipo = ['mono','ri','aut'].includes(solicitado) ? solicitado : 'mono'
   const today = fechaArgentina()
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin()
     .from('alerts')
     .select('*')
     .in('tipo_contribuyente', [tipo, 'todos'])
@@ -15,6 +18,6 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(4)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ alerts: data })
+  if (error) return NextResponse.json({ error: 'No pudimos cargar las alertas.' }, { status: 500 })
+  return NextResponse.json({ alerts: data || [] }, { headers: { 'Cache-Control': 'no-store' } })
 }
