@@ -98,15 +98,15 @@ export default function ResponsableInscriptoPage() {
         <div style={{ background:V.surface, borderBottom:`1px solid ${V.border}` }}>
           <div style={{ maxWidth:860, margin:'0 auto', padding:'20px 16px' }}>
             <div style={{ textAlign:'center', marginBottom:14 }}>
-              <div style={{ fontSize:13, fontWeight:800, color:V.red, marginBottom:4 }}>⚠️ Evitá problemas con AFIP</div>
+              <div style={{ fontSize:13, fontWeight:800, color:V.red, marginBottom:4 }}>⚠️ Evitá errores ante ARCA</div>
               <div style={{ fontSize:16, fontWeight:900, color:V.ink }}>Errores comunes del Responsable Inscripto</div>
             </div>
             <div className="ff-dolor-grid">
               {[
                 { icon:'❌', txt:'Olvidan presentar el IVA a tiempo' },
-                { icon:'❌', txt:'No compensan retenciones sufridas' },
-                { icon:'❌', txt:'Emiten facturas A sin habilitar CBU' },
-                { icon:'❌', txt:'Pagan anticipos de más sin calcularlos' },
+                { icon:'❌', txt:'No computan correctamente retenciones y percepciones' },
+                { icon:'❌', txt:'Emiten comprobantes sin revisar la clase autorizada por ARCA' },
+                { icon:'❌', txt:'Pagan anticipos sin verificar el importe que corresponde' },
               ].map(e => (
                 <div key={e.txt} style={{ display:'flex', gap:8, alignItems:'flex-start', background:V.redBg, border:`1px solid ${V.redRing}`, borderRadius:10, padding:'10px 12px' }}>
                   <span style={{ fontSize:13, flexShrink:0 }}>{e.icon}</span>
@@ -148,7 +148,7 @@ export default function ResponsableInscriptoPage() {
                         <div style={{ fontSize:13, fontWeight:700, color:V.ink2 }}>{fmtLarga(v.fecha)}</div>
                         <div style={{ fontSize:13, fontWeight:900, color:c.diasColor }}>{c.diasTxt}</div>
                       </div>
-                      <button onClick={() => window.open('https://www.afip.gob.ar','_blank')} style={{ width:'100%', borderRadius:8, padding:10, fontSize:13, fontWeight:800, background:c.btnDanger?V.red:V.bg, color:c.btnDanger?'white':V.ink2, border:c.btnDanger?`1.5px solid ${V.red}`:`1.5px solid ${V.border}` }}>
+                      <button onClick={() => window.open('https://www.arca.gob.ar/landing/','_blank')} style={{ width:'100%', borderRadius:8, padding:10, fontSize:13, fontWeight:800, background:c.btnDanger?V.red:V.bg, color:c.btnDanger?'white':V.ink2, border:c.btnDanger?`1.5px solid ${V.red}`:`1.5px solid ${V.border}` }}>
                         {d===0?'Pagar ahora →':d===1?'Ver cómo pagar':'Ver detalles'}
                       </button>
                     </div>
@@ -253,7 +253,7 @@ export default function ResponsableInscriptoPage() {
                 ))}
               </div>
               {(aiLoading||aiResp) && <div style={{ marginTop:10, padding:'10px 12px', background:V.bg, borderRadius:8, borderLeft:`3px solid ${V.teal}`, fontSize:13, color:V.ink2, fontWeight:600, lineHeight:1.75, whiteSpace:'pre-wrap' }}>
-                {aiLoading ? <span style={{ color:V.ink3 }}>Consultando ARCA/AFIP…</span> : aiResp}
+                {aiLoading ? <span style={{ color:V.ink3 }}>Consultando ARCA…</span> : aiResp}
               </div>}
             </div>
           </div>
