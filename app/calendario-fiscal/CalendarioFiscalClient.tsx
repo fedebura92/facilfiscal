@@ -25,12 +25,11 @@ interface MesData {
   vencimientos: Vencimiento[];
 }
 
-// ── Paleta ── igual al resto del sitio (azul oscuro)
 const C = {
-  teal:        "#1a7fa8",   // azul principal del sitio
-  tealDark:    "#0d5c78",   // azul oscuro
-  tealLight:   "#e8f6fb",   // azul muy claro
-  gold:        "#f5a623",   // gold del sitio
+  teal:        "#1a7fa8",
+  tealDark:    "#0d5c78",
+  tealLight:   "#e8f6fb",
+  gold:        "#f5a623",
   goldLight:   "#fff8ec",
   white:       "#ffffff",
   gray50:      "#f4f7f9",
@@ -67,25 +66,7 @@ const CAT_CONFIG: Record<Categoria, { label: string; bg: string; color: string }
   empleador:   { label: "Empleador",       bg: C.amberLight,  color: C.amber   },
 };
 
-// ── Datos verificados ─────────────────────────────────────────────────────────
-//
-// FUENTES:
-//   - Estudio Contable del Amo: estudiodelamo.com/vencimientos-autonomos
-//   - MyContador Blog: blog.mycontador.com.ar/arca-publico-el-calendario-de-vencimientos-de-abril-de-2026
-//   - El Cronista: cronista.com (calendario ARCA 2026)
-//
-// VERIFICADOS con fechas exactas: Enero, Febrero, Marzo, Abril, Mayo, Junio 2026
-// PENDIENTES de publicación oficial ARCA: Julio a Diciembre 2026
-//
-// Autónomos: vence los primeros días hábiles de cada mes según terminación CUIT
-//   CUIT 0-1-2-3 / CUIT 4-5-6 / CUIT 7-8-9
-// Empleadores F.931: vence entre días 9 y 11 del mes siguiente según CUIT
-// Monotributo: día 20 de cada mes (o siguiente hábil si cae finde/feriado)
-// IVA: segunda quincena del mes siguiente, escalonado por terminación de CUIT
-// Recategorización Monotributo: dos veces por año, en febrero y agosto.
-
 const CALENDARIO_2026: MesData[] = [
-  // ── ENERO (verificado) ──────────────────────────────────────────────────
   {
     mes: 1, nombre: "Enero", verificado: true,
     vencimientos: [
@@ -115,8 +96,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── FEBRERO (verificado) ────────────────────────────────────────────────
   {
     mes: 2, nombre: "Febrero", verificado: true,
     vencimientos: [
@@ -152,8 +131,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── MARZO (verificado) ──────────────────────────────────────────────────
   {
     mes: 3, nombre: "Marzo", verificado: true,
     vencimientos: [
@@ -183,8 +160,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── ABRIL (verificado) ──────────────────────────────────────────────────
   {
     mes: 4, nombre: "Abril", verificado: true,
     vencimientos: [
@@ -220,8 +195,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── MAYO (verificado) ───────────────────────────────────────────────────
   {
     mes: 5, nombre: "Mayo", verificado: true,
     vencimientos: [
@@ -257,8 +230,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── JUNIO (verificado) ───────────────────────────────────────────────────
   {
     mes: 6, nombre: "Junio", verificado: true,
     vencimientos: [
@@ -288,8 +259,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── JULIO (pendiente) ───────────────────────────────────────────────────
   {
     mes: 7, nombre: "Julio", verificado: false,
     vencimientos: [
@@ -325,8 +294,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── AGOSTO (pendiente) ──────────────────────────────────────────────────
   {
     mes: 8, nombre: "Agosto", verificado: false,
     vencimientos: [
@@ -368,8 +335,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── SEPTIEMBRE (verificado en ARCA) ─────────────────────────────────────
   {
     mes: 9, nombre: "Septiembre", verificado: true,
     vencimientos: [
@@ -412,13 +377,17 @@ const CALENDARIO_2026: MesData[] = [
       {
         dia: 22,
         titulo: "Ganancias 2025 — presentación de declaración jurada",
-        descripcion: "Plazo especial para personas humanas y sucesiones indivisas. No modifica el vencimiento del saldo de pago.",
+        descripcion: "Plazo especial para personas humanas y sucesiones indivisas. No modifica el vencimiento del saldo de pago, que permaneció el 27/07/2026.",
         categoria: ["autonomo", "responsable"], tipo: "presentacion",
+      },
+      {
+        dia: 24,
+        titulo: "Ganancias 2026 — 1° anticipo",
+        descripcion: "Vencimiento excepcional del primer anticipo de Ganancias 2026 para personas humanas y sucesiones indivisas. ARCA lo trasladó al 24/09/2026 para todas las terminaciones de CUIT mediante la RG 5890/2026.",
+        categoria: ["autonomo", "responsable"], tipo: "pago",
       },
     ],
   },
-
-  // ── OCTUBRE (pendiente) ─────────────────────────────────────────────────
   {
     mes: 10, nombre: "Octubre", verificado: false,
     vencimientos: [
@@ -454,8 +423,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── NOVIEMBRE (pendiente) ───────────────────────────────────────────────
   {
     mes: 11, nombre: "Noviembre", verificado: false,
     vencimientos: [
@@ -485,8 +452,6 @@ const CALENDARIO_2026: MesData[] = [
       },
     ],
   },
-
-  // ── DICIEMBRE (pendiente) ───────────────────────────────────────────────
   {
     mes: 12, nombre: "Diciembre", verificado: false,
     vencimientos: [
@@ -542,11 +507,9 @@ export default function CalendarioFiscalClient() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // ── Datos de Supabase para el mes seleccionado ──────────────────────────
   const { vencimientos: vencimientosDB, verificado: verificadoDB, loading } =
     useVencimientosFiscales(mesSeleccionado, anioActual);
 
-  // ── Fallback al array local si Supabase no tiene datos para ese mes ─────
   const mesDataLocal = useMemo(
     () => CALENDARIO_2026.find((m) => m.mes === mesSeleccionado),
     [mesSeleccionado]
@@ -571,7 +534,6 @@ export default function CalendarioFiscalClient() {
     return mesData.vencimientos.filter((v) => v.categoria.includes(categoriaFiltro as Categoria));
   }, [mesData, categoriaFiltro]);
 
-  // Próximos 30 días — solo para vencimientos con día exacto
   const proximosGlobales = useMemo(() => {
     if (!mounted) return [];
     const todos: Array<Vencimiento & { mesNombre: string; diasRestantes: number }> = [];
@@ -594,7 +556,6 @@ export default function CalendarioFiscalClient() {
       <div className="ff-page-content">
       <div style={{ minHeight: "100vh", background: C.gray50, fontFamily: "'Nunito', sans-serif" }}>
 
-      {/* HERO */}
       <section style={{ background: `linear-gradient(135deg, ${C.teal} 0%, ${C.tealDark} 100%)`, padding: "52px 24px 44px", color: C.white }}>
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>Argentina · 2026</p>
@@ -605,7 +566,6 @@ export default function CalendarioFiscalClient() {
         </div>
       </section>
 
-      {/* FILTROS */}
       <section style={{ background: C.tealDark, padding: "12px 24px", borderBottom: `1px solid rgba(255,255,255,0.1)` }}>
         <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
           {(Object.keys(CAT_CONFIG) as Categoria[]).map((cat) => {
@@ -624,10 +584,7 @@ export default function CalendarioFiscalClient() {
         </div>
       </section>
 
-      {/* BODY */}
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px", display: "grid", gridTemplateColumns: "220px 1fr", gap: 32 }}>
-
-        {/* SIDEBAR */}
         <aside>
           <p style={{ fontSize: 11, fontWeight: 700, color: C.gray400, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Meses</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -661,7 +618,6 @@ export default function CalendarioFiscalClient() {
             })}
           </div>
 
-          {/* Leyenda */}
           <div style={{ marginTop: 20, padding: "10px 12px", background: C.gray50, borderRadius: 10, border: `1px solid ${C.gray200}` }}>
             <p style={{ fontSize: 11, color: C.gray500, margin: 0, lineHeight: 1.6 }}>
               <strong style={{ color: C.gray700 }}>✓</strong> Fechas verificadas<br />
@@ -670,7 +626,6 @@ export default function CalendarioFiscalClient() {
             </p>
           </div>
 
-          {/* Próximos 30 días */}
           {proximosGlobales.length > 0 && (
             <div style={{ marginTop: 24 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: C.gray400, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Próximos 30 días</p>
@@ -695,9 +650,7 @@ export default function CalendarioFiscalClient() {
           )}
         </aside>
 
-        {/* MAIN */}
         <main>
-          {/* Header del mes */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <h2 style={{ fontSize: 26, fontWeight: 800, color: C.gray900, margin: 0, display: "flex", alignItems: "center", gap: 12 }}>
               {mesData.nombre}
@@ -710,7 +663,6 @@ export default function CalendarioFiscalClient() {
             </span>
           </div>
 
-          {/* Badge verificado / pendiente */}
           {loading ? (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: C.gray100, border: `1px solid ${C.gray200}`, borderRadius: 8, padding: "6px 12px", marginBottom: 20 }}>
               <span style={{ fontSize: 13, color: C.gray400 }}>Cargando fechas…</span>
@@ -726,12 +678,11 @@ export default function CalendarioFiscalClient() {
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: C.amberLight, border: `1px solid #fcd34d`, borderRadius: 8, padding: "6px 12px", marginBottom: 20 }}>
               <span style={{ fontSize: 14 }}>⏳</span>
               <span style={{ fontSize: 13, fontWeight: 600, color: C.amber }}>Fechas orientativas — Confirmá en{" "}
-                <a href="https://www.afip.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ color: C.amber }}>arca.gob.ar</a>
+                <a href="https://www.arca.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ color: C.amber }}>arca.gob.ar</a>
               </span>
             </div>
           )}
 
-          {/* Lista */}
           {vencimientosFiltrados.length === 0 ? (
             <div style={{ textAlign: "center", padding: "64px 0", color: C.gray400 }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
@@ -758,7 +709,6 @@ export default function CalendarioFiscalClient() {
                       padding: "16px 18px", background: "none", border: "none", cursor: "pointer",
                       fontFamily: "'Nunito', sans-serif", textAlign: "left",
                     }}>
-                      {/* Día o rango */}
                       <div style={{
                         minWidth: 56, textAlign: "center",
                         background: esCritico ? C.redLight : v.pendiente ? C.amberLight : yaVencio ? C.gray100 : C.tealLight,
@@ -774,7 +724,6 @@ export default function CalendarioFiscalClient() {
                         )}
                       </div>
 
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
                           <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: TIPO_CONFIG[v.tipo].bg, color: TIPO_CONFIG[v.tipo].color }}>
@@ -811,7 +760,7 @@ export default function CalendarioFiscalClient() {
                           </a>
                         )}
                         {v.pendiente && (
-                          <a href="https://www.afip.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 12, fontSize: 14, fontWeight: 700, color: C.amber, textDecoration: "none" }}>
+                          <a href="https://www.arca.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 12, fontSize: 14, fontWeight: 700, color: C.amber, textDecoration: "none" }}>
                             Ver fecha exacta en ARCA →
                           </a>
                         )}
@@ -825,7 +774,6 @@ export default function CalendarioFiscalClient() {
         </main>
       </div>
 
-      {/* CTA */}
       <section style={{ borderTop: `1px solid ${C.gray200}`, background: C.gray50, padding: "52px 24px" }}>
         <div style={{ maxWidth: 540, margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontSize: 24, fontWeight: 800, color: C.gray900, margin: "0 0 12px" }}>Recibí alertas antes de cada vencimiento</h2>
