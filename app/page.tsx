@@ -247,12 +247,12 @@ export default function Home() {
                 </button>
               </div>
               <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-                {['Vencimientos esta semana','Cuánto pago','Novedades ARCA','Ver deuda AFIP'].map(c => (
+                {['Vencimientos esta semana','Cuánto pago','Novedades ARCA','Ver deuda en ARCA'].map(c => (
                   <button key={c} onClick={() => askAI(c)} style={{ background:V.bg, border:`1px solid ${V.border}`, borderRadius:20, padding:'4px 10px', fontSize:11, fontWeight:700, color:V.ink3 }}>{c}</button>
                 ))}
               </div>
               {(aiLoading||aiResp) && <div style={{ marginTop:10, padding:'10px 12px', background:V.bg, borderRadius:8, borderLeft:`3px solid ${V.teal}`, fontSize:13, color:V.ink2, fontWeight:600, lineHeight:1.75, whiteSpace:'pre-wrap' }}>
-                {aiLoading ? <span style={{ color:V.ink3 }}>Consultando ARCA/AFIP…</span> : aiResp}
+                {aiLoading ? <span style={{ color:V.ink3 }}>Consultando ARCA…</span> : aiResp}
               </div>}
             </div>
           </div>        
