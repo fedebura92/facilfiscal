@@ -33,23 +33,70 @@ export function IVASEOBlock() {
     <section style={section} aria-labelledby="como-calcular-iva">
       <div style={card}>
         <h2 id="como-calcular-iva" style={{ margin: '0 0 10px', fontSize: 24 }}>
-          Cómo calcular el IVA a pagar, explicado fácil
+          IVA: qué mirar cada mes, explicado fácil
         </h2>
         <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
-          El IVA de tus ventas se llama <strong>débito fiscal</strong>. El IVA de las compras válidas de tu negocio se llama <strong>crédito fiscal</strong>. La cuenta básica es: IVA de ventas menos IVA de compras. Después pueden descontarse retenciones, percepciones o saldos a favor admitidos.
+          Si sos Responsable Inscripto, todos los meses comparás el IVA que generaste con tus ventas con el IVA computable de las compras y gastos de tu actividad. Esa diferencia es el punto de partida para saber si tenés saldo a pagar o saldo a favor.
         </p>
+
         <div style={grid}>
-          <div style={item}><strong>1. Sumá tus ventas</strong><br />Usá el total facturado durante el mes.</div>
-          <div style={item}><strong>2. Sumá tus compras</strong><br />Incluí solo comprobantes relacionados con tu actividad.</div>
-          <div style={item}><strong>3. Compará ambos IVA</strong><br />La calculadora hace la separación automáticamente.</div>
+          <div style={item}><strong>1. IVA de tus ventas</strong><br />Es el débito fiscal generado por las operaciones gravadas del mes.</div>
+          <div style={item}><strong>2. IVA de tus compras</strong><br />Es el crédito fiscal computable de comprobantes vinculados con tu actividad.</div>
+          <div style={item}><strong>3. Restá pagos a cuenta</strong><br />Retenciones, percepciones y saldos anteriores pueden modificar el importe final.</div>
         </div>
+
         <div style={{ marginTop: 16, padding: 16, borderRadius: 10, background: '#e8f6fb', lineHeight: 1.65 }}>
-          <strong>Ejemplo simple:</strong> si el IVA generado por tus ventas es $210.000 y tenés $84.000 de crédito fiscal válido, la diferencia inicial es $126.000. El resultado final puede cambiar por retenciones, percepciones y saldos anteriores.
+          <strong>Ejemplo simple:</strong> si el IVA de tus ventas es $210.000 y tenés $84.000 de crédito fiscal computable, la diferencia inicial es $126.000. Si además te retuvieron o percibieron IVA, o tenés saldo a favor de períodos anteriores, el importe a ingresar puede ser menor.
         </div>
-        <p style={{ margin: '16px 0 0', color: '#64748b', lineHeight: 1.65 }}>
-          Desde noviembre de 2025, las declaraciones juradas originales y rectificativas de IVA se presentan mediante <strong>IVA Simple</strong>. Esta calculadora orienta el monto, pero no reemplaza la declaración ante ARCA.
+
+        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>¿Qué compras puedo usar como crédito fiscal?</h3>
+        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
+          Como regla práctica, mirá los comprobantes de compras, servicios e insumos relacionados con tu actividad. No todo gasto personal genera crédito fiscal y existen operaciones con tratamientos especiales. IVA Simple muestra los comprobantes disponibles y permite revisar, ajustar o rechazar datos antes de presentar.
+        </p>
+
+        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>Retenciones, percepciones y saldo a favor</h3>
+        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
+          Si un cliente, banco, plataforma u otro agente te retuvo o percibió IVA, esos importes pueden computarse según las reglas del período correspondiente. IVA Simple también muestra retenciones, percepciones, pagos a cuenta y saldos registrados para que los valides antes de presentar.
+        </p>
+        <div style={{ marginTop: 12, padding: 14, borderRadius: 10, background: '#fff7ed', lineHeight: 1.65, color: '#7c4a03' }}>
+          <strong>Importante:</strong> tener saldo a favor no significa necesariamente que ARCA te lo devuelva automáticamente. Puede trasladarse o tener un tratamiento distinto según cómo se originó.
+        </div>
+
+        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>¿Y si ese mes no tuve movimientos?</h3>
+        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
+          La registración mensual sigue siendo obligatoria. Si no hubo operaciones, IVA Simple permite informar el período como <strong>“SIN MOVIMIENTO”</strong> en la Registración Electrónica de Operaciones.
+        </p>
+
+        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>¿Cómo se presenta?</h3>
+        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
+          Desde el período noviembre de 2025, los Responsables Inscriptos presentan obligatoriamente mediante <strong>IVA Simple</strong> desde Portal IVA. El sistema reúne registración de operaciones, determinación del impuesto y datos como retenciones, percepciones y saldos.
+        </p>
+
+        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>📅 ¿Cuándo vence?</h3>
+        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
+          El vencimiento mensual depende de la terminación de tu CUIT y puede cambiar por feriados o disposiciones especiales. Para no mostrarte una fecha vieja, Fácil Fiscal usa el calendario fiscal para consultar el período correspondiente.
         </p>
         <p style={{ margin: '14px 0 0' }}>
+          <Link href="/calendario-fiscal" style={{ color: '#0d5c78', fontWeight: 800 }}>
+            Ver mi próximo vencimiento de IVA →
+          </Link>
+        </p>
+
+        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>Errores comunes que cambian el resultado</h3>
+        <div style={{ ...grid, marginTop: 10 }}>
+          <div style={item}><strong>Usar cualquier compra</strong><br />El crédito debe estar respaldado y vinculado con la actividad.</div>
+          <div style={item}><strong>Olvidar retenciones</strong><br />Podés terminar pagando de más si no revisás lo que ya te retuvieron o percibieron.</div>
+          <div style={item}><strong>Confundir saldo con impuesto</strong><br />El impuesto determinado y el saldo final a pagar no siempre son lo mismo.</div>
+        </div>
+
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #e2e8ed', color: '#64748b', fontSize: 13, lineHeight: 1.65 }}>
+          <strong>Fuentes oficiales:</strong> ARCA — IVA Simple, Responsables Inscriptos y Registración Electrónica de Operaciones. Información revisada en septiembre de 2026.
+          <div style={{ marginTop: 8 }}>
+            <a href="https://www.arca.gob.ar/iva/responsables-inscriptos/" target="_blank" rel="noopener noreferrer" style={{ color: '#0d5c78', fontWeight: 700 }}>Ver IVA en ARCA →</a>
+          </div>
+        </div>
+
+        <p style={{ margin: '16px 0 0' }}>
           <Link href="/responsable-inscripto-obligaciones" style={{ color: '#0d5c78', fontWeight: 800 }}>
             Ver todas las obligaciones de un Responsable Inscripto →
           </Link>
