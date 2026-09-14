@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Autónomos 2026: aportes, categorías y vencimientos | Fácil Fiscal',
+  title: 'Autónomos 2026: aportes, categorías y vencimientos',
   description:
     'Entendé fácil si te corresponde Autónomos, cuánto se paga según categoría, cuándo vence y qué otras obligaciones como IVA y Ganancias pueden aplicar.',
 
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_AR',
     url: 'https://www.facilfiscal.com.ar/autonomos',
-    siteName: 'FacilFiscal',
+    siteName: 'Fácil Fiscal',
     title: 'Autónomos 2026 — Aportes y Vencimientos | Fácil Fiscal',
     description:
       'Consultá aportes, categorías y vencimientos de Autónomos 2026 explicados de forma simple.',
