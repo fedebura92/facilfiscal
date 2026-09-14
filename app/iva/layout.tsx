@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculadora de IVA 2026: cuánto pagar en Argentina",
+  title: "IVA 2026: calculadora, saldo y vencimientos",
   description:
-    "Ingresá tus ventas y compras del mes y estimá cuánto IVA tenés que pagar. Calculadora simple, gratuita y actualizada para Argentina.",
+    "Calculá el IVA del mes y entendé de forma simple débito fiscal, crédito fiscal, retenciones, saldo a favor, IVA Simple y vencimientos por CUIT.",
 
   keywords: [
     "calcular IVA argentina",
     "cuánto IVA tengo que pagar",
-    "IVA AFIP argentina",
-    "calculadora IVA online",
-    "IVA débito crédito fiscal"
+    "IVA ARCA 2026",
+    "IVA Simple",
+    "débito fiscal crédito fiscal",
+    "saldo a favor IVA",
+    "vencimiento IVA CUIT"
   ],
 
   openGraph: {
-    title: "Calculadora de IVA 2026: estimá cuánto pagar",
+    title: "IVA 2026: calculá cuánto pagar | Fácil Fiscal",
     description:
-      "Calculá el IVA de tu negocio en segundos. Rápido, simple y gratis.",
-    url: "/iva",
-    siteName: "FacilFiscal",
+      "Ingresá tus ventas y compras, estimá el IVA y entendé qué cambia el resultado y cuándo vence.",
+    url: "https://www.facilfiscal.com.ar/iva",
+    siteName: "Fácil Fiscal",
     images: [
       {
         url: "/og-image.png",
@@ -32,9 +34,9 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Calculadora de IVA 2026: estimá cuánto pagar",
+    title: "IVA 2026: calculadora y vencimientos | Fácil Fiscal",
     description:
-      "Calculá el IVA de tu negocio en segundos. Rápido, simple y gratis.",
+      "Calculá el IVA del mes y entendé retenciones, saldo a favor e IVA Simple.",
     images: ["/og-image.png"],
   },
 
@@ -51,7 +53,7 @@ export const metadata: Metadata = {
 export default function IVALayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return children;
+  return children
 }
