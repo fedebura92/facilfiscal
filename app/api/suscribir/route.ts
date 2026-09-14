@@ -5,6 +5,7 @@ import { generarTokenUnsub } from '@/lib/unsubscribe'
 const TIPOS = new Set(['mono','ri','aut'])
 const LABEL:Record<string,string>={mono:'Monotributista',ri:'Responsable Inscripto',aut:'Autónomo'}
 const BASE_URL='https://www.facilfiscal.com.ar'
+const LOGO_URL=`${BASE_URL}/logo_apaisado_Facil_Fiscal.png`
 
 export async function POST(req:NextRequest){
   const body=await req.json().catch(()=>null)
@@ -33,7 +34,7 @@ export async function POST(req:NextRequest){
 async function bienvenida(email:string,tipos:string[],dias:number){
   if(!process.env.RESEND_API_KEY)throw new Error('RESEND_API_KEY no configurada')
   const labels=tipos.map(t=>LABEL[t]||t).join(' y ')
-  const html=`<!doctype html><html lang="es"><body style="font-family:Arial,sans-serif;background:#f4f7f9;padding:32px 16px"><main style="max-width:520px;margin:auto;background:white;border-radius:16px;overflow:hidden"><header style="background:#0d5c78;padding:24px;color:white"><b style="font-size:22px">Fácil Fiscal</b></header><section style="padding:28px"><h2>✅ Suscripción activada</h2><p>Vas a recibir alertas como <b>${labels}</b>.</p><ul><li>${dias===1?'Un día':`${dias} días`} antes de cada vencimiento</li><li>El mismo día del vencimiento</li><li>Resumen semanal cuando tengas vencimientos próximos</li></ul><p><a href="${BASE_URL}/mipanel">Ver Mi Panel →</a></p></section><footer style="background:#f4f7f9;padding:16px;text-align:center;font-size:11px"><a href="${BASE_URL}/unsubscribe?email=${encodeURIComponent(email)}&token=${generarTokenUnsub(email)}">Cancelar suscripción</a></footer></main></body></html>`
+  const html=`<!doctype html><html lang="es"><body style="font-family:Arial,sans-serif;background:#f4f7f9;padding:32px 16px"><main style="max-width:520px;margin:auto;background:white;border-radius:16px;overflow:hidden"><header style="background:#0d5c78;padding:20px 24px 22px;color:white;text-align:center"><div style="display:inline-block;background:white;border-radius:10px;padding:8px 14px"><img src="${LOGO_URL}" alt="Fácil Fiscal" width="180" style="display:block;width:180px;max-width:100%;height:auto;border:0"/></div></header><section style="padding:28px"><h2>✅ Suscripción activada</h2><p>Vas a recibir alertas como <b>${labels}</b>.</p><ul><li>${dias===1?'Un día':`${dias} días`} antes de cada vencimiento</li><li>El mismo día del vencimiento</li><li>Resumen semanal cuando tengas vencimientos próximos</li></ul><p><a href="${BASE_URL}/mipanel">Ver Mi Panel →</a></p></section><footer style="background:#f4f7f9;padding:16px;text-align:center;font-size:11px"><a href="${BASE_URL}/unsubscribe?email=${encodeURIComponent(email)}&token=${generarTokenUnsub(email)}">Cancelar suscripción</a></footer></main></body></html>`
   const res=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json','Idempotency-Key':`bienvenida/${email}/${[...tipos].sort().join('-')}/${dias}`},body:JSON.stringify({from:'Fácil Fiscal <alertas@facilfiscal.com.ar>',to:[email],subject:'✅ Suscripción activada — Fácil Fiscal',html})})
   if(!res.ok)throw new Error(await res.text())
 }
