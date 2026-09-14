@@ -32,7 +32,7 @@ export async function GET(req:NextRequest){
   }
 
   let sent=0,failed=0,skippedMissingCuit=0
-  for(const [email,filas] of grupos){
+  for(const [email,filas] of Array.from(grupos.entries())){
     const perfil=perfiles.get(email)
     const terminacion=filas.find(u=>u.terminacion_cuit)?.terminacion_cuit||perfil?.terminacion_cuit
     const categorias=new Set(filas.map(u=>CATEGORIA_POR_TIPO[u.tipo]).filter(Boolean))
