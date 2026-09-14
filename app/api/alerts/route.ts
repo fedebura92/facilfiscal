@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { fechaArgentina } from '@/lib/notificaciones'
 
 export async function GET(req: NextRequest) {
   const tipo = req.nextUrl.searchParams.get('tipo') || 'mono'
-  const today = new Date().toISOString().split('T')[0]
+  const today = fechaArgentina()
 
   const { data, error } = await supabase
     .from('alerts')
