@@ -1,6 +1,6 @@
 import SiteHeader from '@/components/SiteHeader'
 import StructuredData, { breadcrumbJsonLd, calculatorJsonLd, faqJsonLd } from '@/components/StructuredData'
-import { IIBBCalculator } from '@/components/calculadoras/Calculadoras2026'
+import IIBBCalculator2026 from '@/components/calculadoras/IIBBCalculator2026'
 import IIBB2026 from '@/components/SEOContent/IIBB2026'
 
 export default function Page(){
@@ -13,12 +13,12 @@ export default function Page(){
   return <>
     <StructuredData data={[
       breadcrumbJsonLd([{name:'Inicio',url:'https://www.facilfiscal.com.ar'},{name:'Ingresos Brutos',url:'https://www.facilfiscal.com.ar/ingresos-brutos'}]),
-      calculatorJsonLd('Calculadora de Ingresos Brutos 2026','Estima Ingresos Brutos según actividad y jurisdicción.','/ingresos-brutos'),
+      calculatorJsonLd('Calculadora de Ingresos Brutos 2026','Calcula Ingresos Brutos cuando contás con la alícuota aplicable y te orienta según régimen y jurisdicción.','/ingresos-brutos'),
       faqJsonLd(faq)
     ]}/>
     <SiteHeader currentPath="/ingresos-brutos"/>
     <div className="ff-page-content">
-      <IIBBCalculator/>
+      <IIBBCalculator2026/>
       <IIBB2026/>
     </div>
   </>
