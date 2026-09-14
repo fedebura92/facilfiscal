@@ -1,16 +1,18 @@
 import type { Metadata } from 'next'
+import Autonomos2026 from '@/components/SEOContent/Autonomos2026'
 
 export const metadata: Metadata = {
-  title: 'Autónomos 2026: categorías, aportes y vencimientos',
+  title: 'Autónomos 2026: aportes, categorías y vencimientos | Fácil Fiscal',
   description:
-    'Guía simple para entender Autónomos, identificar tu categoría y consultar aportes y vencimientos 2026 en la información oficial de ARCA.',
+    'Entendé fácil si te corresponde Autónomos, cuánto se paga según categoría, cuándo vence y qué otras obligaciones como IVA y Ganancias pueden aplicar.',
 
   keywords: [
-    'autonomos argentina',
-    'aportes autonomos',
-    'vencimientos autonomos AFIP',
+    'autonomos argentina 2026',
+    'aportes autonomos 2026',
+    'vencimientos autonomos',
     'categorias autonomos',
     'ARCA autonomos',
+    'cuanto paga un autonomo',
   ],
 
   alternates: {
@@ -22,13 +24,17 @@ export const metadata: Metadata = {
     locale: 'es_AR',
     url: 'https://www.facilfiscal.com.ar/autonomos',
     siteName: 'FacilFiscal',
-    title: 'Autónomos — Aportes y Vencimientos | FacilFiscal',
+    title: 'Autónomos 2026 — Aportes y Vencimientos | Fácil Fiscal',
     description:
-      'Seguí tus aportes y vencimientos como autónomo. Sin multas, sin sorpresas.',
+      'Consultá aportes, categorías y vencimientos de Autónomos 2026 explicados de forma simple.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 
   twitter: {
     card: 'summary_large_image',
+    title: 'Autónomos 2026 — Aportes y Vencimientos | Fácil Fiscal',
+    description: 'Cuánto paga un autónomo, cómo se determina la categoría y cuándo vence.',
+    images: ['/og-image.png'],
   },
 
   robots: {
@@ -42,5 +48,5 @@ export default function AutonomosLayout({
 }: {
   children: React.ReactNode
 }) {
-  return children
+  return <>{children}<Autonomos2026 /></>
 }
