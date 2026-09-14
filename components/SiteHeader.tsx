@@ -115,16 +115,17 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
           }
           .ff-topbar-create-business { display: none !important; }
           .ff-alert-cta {
-            width: 40px;
             height: 40px;
-            padding: 0 !important;
+            padding: 0 8px !important;
             border-radius: 10px !important;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px !important;
+            gap: 3px;
+            font-size: 10px !important;
+            line-height: 1.05;
           }
-          .ff-alert-label { display: none; }
+          .ff-alert-label { display: inline !important; }
         }
 
         @media (min-width: 900px) {
@@ -151,10 +152,11 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
         }
 
         @media (max-width: 500px) {
-          .ff-topbar-inner { padding: 0 10px; }
-          .ff-topbar-row1 { gap: 6px; }
-          .ff-topbar-logo img { height: 36px !important; }
-          .ff-cta-primary { padding: 7px 11px !important; }
+          .ff-topbar-inner { padding: 0 8px; }
+          .ff-topbar-row1 { gap: 5px; }
+          .ff-topbar-logo img { height: 31px !important; }
+          .ff-cta-primary { padding: 7px 9px !important; font-size: 11px !important; }
+          .ff-alert-cta { padding: 0 7px !important; font-size: 9.5px !important; }
         }
 
         .ff-hamburger {
@@ -324,8 +326,8 @@ export default function SiteHeader({ currentPath, onAlertasClick }: SiteHeaderPr
             </div>
 
             {onAlertasClick && (
-              <button className="ff-alert-cta" onClick={onAlertasClick} aria-label="Alertas">
-                <span aria-hidden="true">🔔</span><span className="ff-alert-label"> Alertas</span>
+              <button className="ff-alert-cta" onClick={onAlertasClick} aria-label="Activar alertas">
+                <span aria-hidden="true">🔔</span><span className="ff-alert-label">Activar alertas</span>
               </button>
             )}
           </div>
