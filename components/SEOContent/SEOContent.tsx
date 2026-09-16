@@ -24,7 +24,7 @@ export function SEOAutonomos(){
   return <>
     <section style={sectionStyle}><div style={headerStyle}>⚡ ¿Qué significa estar en Autónomos?</div><div style={bodyStyle}>
       <p style={paraStyle}>El régimen de <strong>Autónomos</strong> es el régimen previsional para personas que realizan una actividad económica por cuenta propia dentro del régimen general. El aporte jubilatorio se paga por separado de los impuestos.</p>
-      <p style={paraStyle}>ARCA publicó nuevos valores de aportes personales vigentes desde el <strong>15 de agosto de 2026</strong>. La categoría no se elige solamente por “tamaño”: depende de la actividad y, cuando corresponde, de los ingresos brutos del año anterior.</p>
+      <p style={paraStyle}>ARCA publicó nuevos valores de aportes personales vigentes desde el <strong>15 de septiembre de 2026</strong>. La categoría no se elige solamente por “tamaño”: depende de la actividad y, cuando corresponde, de los ingresos brutos del año anterior.</p>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:10}}>{cards.map(i=><div key={i.title} style={{background:V.tealLight,border:`1px solid ${V.tealRing}`,borderRadius:10,padding:12}}><div style={{fontSize:18}}>{i.icon}</div><div style={{fontSize:12,fontWeight:800,color:V.tealDark,margin:'4px 0 3px'}}>{i.title}</div><div style={{fontSize:11,color:V.ink3,fontWeight:600,lineHeight:1.5}}>{i.desc}</div></div>)}</div>
     </div></section>
     <section style={sectionStyle}><div style={headerStyle}>📊 Categorías I a V</div><div style={bodyStyle}>
@@ -32,7 +32,7 @@ export function SEOAutonomos(){
       <div style={{background:V.goldLight,border:`1px solid ${V.goldRing}`,borderRadius:10,padding:'12px 14px',fontSize:12,fontWeight:700,color:'#7a4f00',lineHeight:1.6}}>💡 <strong>No conviene elegir la categoría por intuición.</strong> Si no sabés cuál te corresponde, verificá tu actividad y tu categoría de revista en ARCA antes de pagar.</div>
     </div></section>
     <section style={sectionStyle}><div style={headerStyle}>❓ Preguntas frecuentes</div>{faqs.map((i,n)=><div key={i.q} style={{padding:'12px 16px',borderBottom:n===faqs.length-1?'none':`1px solid ${V.border}`}}><div style={{fontSize:13,fontWeight:800,color:V.ink,marginBottom:6}}>▸ {i.q}</div><div style={{fontSize:12,color:V.ink2,fontWeight:600,lineHeight:1.7}}>{i.a}</div></div>)}</section>
-    <section style={sectionStyle}><div style={headerStyle}>🔎 Fuente y revisión</div><div style={bodyStyle}><p style={{...paraStyle,marginBottom:0}}>Revisado con información oficial de ARCA sobre definición del régimen, categorización, recategorización anual y valores de aportes vigentes desde agosto de 2026.</p></div></section>
+    <section style={sectionStyle}><div style={headerStyle}>🔎 Fuente y revisión</div><div style={bodyStyle}><p style={{...paraStyle,marginBottom:0}}>Revisado el 16/09/2026 con información oficial de ARCA sobre definición del régimen, categorización, recategorización anual y aportes vigentes desde el 15/09/2026.</p></div></section>
   </>
 }
 
