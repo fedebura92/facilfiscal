@@ -1,85 +1,18 @@
 import Link from 'next/link'
 
-const card = {
-  maxWidth: 820,
-  margin: '0 auto 42px',
-  padding: 'clamp(20px, 4vw, 28px)',
-  background: '#fff',
-  border: '1px solid #e2e8ed',
-  borderRadius: 14,
-  boxShadow: '0 2px 12px rgba(13,92,120,.06)',
-} as const
+const card={maxWidth:820,margin:'0 auto 42px',padding:'clamp(20px, 4vw, 28px)',background:'#fff',border:'1px solid #e2e8ed',borderRadius:14,boxShadow:'0 2px 12px rgba(13,92,120,.06)'} as const
+const grid={display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(210px, 1fr))',gap:12,marginTop:18} as const
+const item={background:'#f4f7f9',borderRadius:10,padding:16,lineHeight:1.6} as const
 
-const grid = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-  gap: 12,
-  marginTop: 18,
-} as const
-
-const item = {
-  background: '#f4f7f9',
-  borderRadius: 10,
-  padding: 16,
-  lineHeight: 1.6,
-} as const
-
-export default function IIBB2026() {
-  return (
-    <section style={{ padding: '0 18px' }} aria-labelledby="iibb-explicado-facil">
-      <div style={card}>
-        <h2 id="iibb-explicado-facil" style={{ margin: '0 0 10px', fontSize: 24 }}>
-          Ingresos Brutos, explicado fácil
-        </h2>
-        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
-          Si realizás una actividad económica, Ingresos Brutos suele ser el principal impuesto provincial que tenés que revisar. No se calcula igual en todo el país: depende de la jurisdicción, tu actividad y el régimen en el que estés inscripto.
-        </p>
-
-        <div style={grid}>
-          <div style={item}><strong>¿Me corresponde?</strong><br />Depende de dónde desarrollás la actividad, tu inscripción y posibles exenciones.</div>
-          <div style={item}><strong>💰 ¿Cuánto pago?</strong><br />Puede ser un importe fijo en un régimen simplificado o surgir de aplicar la alícuota correspondiente sobre la base imponible.</div>
-          <div style={item}><strong>🔄 ¿Cada cuánto?</strong><br />En general, la obligación es mensual. Según la jurisdicción y el régimen puede existir además una declaración anual u otras presentaciones.</div>
-        </div>
-
-        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>📅 ¿Cuándo vence?</h3>
-        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
-          No hay una única fecha para todo el país. El vencimiento depende de la jurisdicción, del régimen y, en muchos casos, de la terminación del CUIT. Por eso conviene consultar el calendario correspondiente en lugar de memorizar un día fijo.
-        </p>
-        <p style={{ margin: '14px 0 0' }}>
-          <Link href="/calendario-fiscal" style={{ color: '#0d5c78', fontWeight: 800 }}>Ver calendario fiscal →</Link>
-        </p>
-
-        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>💳 ¿Cómo se paga?</h3>
-        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
-          El procedimiento cambia según el régimen. En un Monotributo Unificado, el componente provincial puede pagarse junto con el Monotributo nacional. En el régimen general, normalmente primero se determina o presenta el período en el sistema del organismo provincial y luego se genera el medio de pago habilitado.
-        </p>
-        <div style={{ marginTop: 14, padding: 16, borderRadius: 10, background: '#e8f6fb', lineHeight: 1.65 }}>
-          <strong>Ejemplo — Provincia de Buenos Aires:</strong> para quienes están adheridos a Ingresos Brutos Simplificado, ARBA informa que el componente provincial se paga mensualmente junto con el Monotributo desde <strong>Mi Monotributo</strong> de ARCA. El importe es fijo según la categoría y el tipo de actividad.
-        </div>
-
-        <h3 style={{ margin: '24px 0 8px', fontSize: 19 }}>¿Y si trabajo en más de una provincia?</h3>
-        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>
-          Puede corresponder <strong>Convenio Multilateral</strong>. En ese caso no alcanza con tomar toda la facturación y asignarla a una sola provincia: los ingresos pueden tener que distribuirse entre jurisdicciones según las reglas aplicables.
-        </p>
-
-        <div style={{ marginTop: 20, padding: 16, borderRadius: 10, background: '#fff7ed', lineHeight: 1.65 }}>
-          <strong>Importante:</strong> Fácil Fiscal no usa una alícuota provincial genérica como si fuera válida para todos. Si el porcentaje depende de tu actividad, padrón, nivel de ingresos o exenciones, necesitamos esos datos antes de mostrar un importe confiable.
-        </div>
-
-        <div style={{ marginTop: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Link href="/impuestos-por-provincia" style={{ background: '#0d5c78', color: '#fff', padding: '11px 15px', borderRadius: 9, textDecoration: 'none', fontWeight: 800 }}>Analizar mi provincia →</Link>
-          <Link href="/" style={{ background: '#eef7fb', color: '#0d5c78', padding: '11px 15px', borderRadius: 9, textDecoration: 'none', fontWeight: 800, border: '1px solid #b9dce9' }}>🔔 Activar recordatorios →</Link>
-        </div>
-
-        <div style={{ marginTop: 22, paddingTop: 16, borderTop: '1px solid #e2e8ed', color: '#64748b', fontSize: 13, lineHeight: 1.65 }}>
-          <strong>Fuentes:</strong> organismos tributarios provinciales, ARCA y COMARB. Información revisada el 14/09/2026. Los importes, medios de pago y vencimientos pueden cambiar según la jurisdicción.
-          <div style={{ marginTop: 8 }}>
-            <a href="https://www.arca.gob.ar/monotributo/ayuda/monotributo-unificado.asp" target="_blank" rel="noopener noreferrer" style={{ color: '#0d5c78', fontWeight: 700 }}>ARCA — Monotributo Unificado</a>
-            {' · '}
-            <a href="https://www.comarb.gob.ar/convenio-multilateral" target="_blank" rel="noopener noreferrer" style={{ color: '#0d5c78', fontWeight: 700 }}>COMARB — Convenio Multilateral</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
+export default function IIBB2026(){return <section style={{padding:'0 18px'}} aria-labelledby="iibb-explicado-facil"><div style={card}>
+<h2 id="iibb-explicado-facil" style={{margin:'0 0 10px',fontSize:24}}>Ingresos Brutos, explicado fácil</h2>
+<p style={{margin:0,color:'#3d5a6b',lineHeight:1.7}}>Si realizás una actividad económica, Ingresos Brutos suele ser el principal impuesto provincial que tenés que revisar. No se calcula igual en todo el país: depende de la jurisdicción, tu actividad y el régimen en el que estés inscripto.</p>
+<div style={grid}><div style={item}><strong>¿Me corresponde?</strong><br/>Depende de dónde desarrollás la actividad, tu inscripción y posibles exenciones.</div><div style={item}><strong>💰 ¿Cuánto pago?</strong><br/>Puede ser un importe fijo en un régimen simplificado o surgir de aplicar la alícuota correspondiente sobre la base imponible.</div><div style={item}><strong>🔄 ¿Cada cuánto?</strong><br/>En general, la obligación es mensual. Según la jurisdicción y el régimen puede existir además una declaración anual u otras presentaciones.</div></div>
+<h3 style={{margin:'24px 0 8px',fontSize:19}}>¿Si soy monotributista también pago Ingresos Brutos?</h3><p style={{margin:0,color:'#3d5a6b',lineHeight:1.7}}>Puede corresponderte. El Monotributo es nacional e Ingresos Brutos es provincial. En varias jurisdicciones existe Monotributo Unificado, que permite pagar el componente provincial junto con la cuota del Monotributo. También puede haber actividades exentas, por eso hay que mirar tu provincia y actividad.</p>
+<h3 style={{margin:'24px 0 8px',fontSize:19}}>📅 ¿Cuándo vence?</h3><p style={{margin:0,color:'#3d5a6b',lineHeight:1.7}}>No hay una única fecha para todo el país. El vencimiento depende de la jurisdicción, del régimen y, en muchos casos, de la terminación del CUIT. Por eso conviene consultar el calendario correspondiente en lugar de memorizar un día fijo.</p><p style={{margin:'14px 0 0'}}><Link href="/calendario-fiscal" style={{color:'#0d5c78',fontWeight:800}}>Ver calendario fiscal →</Link></p>
+<h3 style={{margin:'24px 0 8px',fontSize:19}}>💳 ¿Cómo se paga?</h3><p style={{margin:0,color:'#3d5a6b',lineHeight:1.7}}>El procedimiento cambia según el régimen. En un Monotributo Unificado, el componente provincial puede pagarse junto con el Monotributo nacional. En el régimen general, normalmente primero se determina o presenta el período en el sistema del organismo provincial y luego se genera el medio de pago habilitado.</p><div style={{marginTop:14,padding:16,borderRadius:10,background:'#e8f6fb',lineHeight:1.65}}><strong>Ejemplo — Provincia de Buenos Aires:</strong> para quienes están adheridos a Ingresos Brutos Simplificado, ARBA informa que el componente provincial se paga mensualmente junto con el Monotributo desde <strong>Mi Monotributo</strong> de ARCA. El importe es fijo según la categoría y el tipo de actividad.</div>
+<h3 style={{margin:'24px 0 8px',fontSize:19}}>¿Y si trabajo en más de una provincia?</h3><p style={{margin:0,color:'#3d5a6b',lineHeight:1.7}}>Puede corresponder <strong>Convenio Multilateral</strong>. En ese caso no alcanza con tomar toda la facturación y asignarla a una sola provincia: los ingresos pueden tener que distribuirse entre jurisdicciones según las reglas aplicables.</p>
+<div style={{marginTop:20,padding:16,borderRadius:10,background:'#fff7ed',lineHeight:1.65}}><strong>Importante:</strong> Fácil Fiscal no usa una alícuota provincial genérica como si fuera válida para todos. Si el porcentaje depende de tu actividad, padrón, nivel de ingresos o exenciones, necesitamos esos datos antes de mostrar un importe confiable.</div>
+<div style={{marginTop:20,display:'flex',gap:10,flexWrap:'wrap'}}><Link href="/impuestos-por-provincia" style={{background:'#0d5c78',color:'#fff',padding:'11px 15px',borderRadius:9,textDecoration:'none',fontWeight:800}}>Analizar mi provincia →</Link><Link href="/" style={{background:'#eef7fb',color:'#0d5c78',padding:'11px 15px',borderRadius:9,textDecoration:'none',fontWeight:800,border:'1px solid #b9dce9'}}>🔔 Activar recordatorios →</Link></div>
+<div style={{marginTop:22,paddingTop:16,borderTop:'1px solid #e2e8ed',color:'#64748b',fontSize:13,lineHeight:1.65}}><strong>Fuentes:</strong> organismos tributarios provinciales, ARCA y COMARB. Información revisada en septiembre de 2026. Los importes, medios de pago y vencimientos pueden cambiar según la jurisdicción.<div style={{marginTop:8}}><a href="https://www.arca.gob.ar/monotributo/ayuda/monotributo-unificado.asp" target="_blank" rel="noopener noreferrer" style={{color:'#0d5c78',fontWeight:700}}>ARCA — Monotributo Unificado</a>{' · '}<a href="https://www.comarb.gob.ar/convenio-multilateral" target="_blank" rel="noopener noreferrer" style={{color:'#0d5c78',fontWeight:700}}>COMARB — Convenio Multilateral</a></div></div>
+</div></section>}
