@@ -52,8 +52,8 @@ const PROVINCIAS: Provincia[] = [
 ]
 
 const box = { border:'1px solid #dbe4ea', borderRadius:14, padding:20, background:'#fff' } as const
-const primaryButton = { background:'#0d5c78', color:'#fff', padding:'11px 15px', borderRadius:9, textDecoration:'none', fontWeight:800 } as const
-const secondaryButton = { background:'#eef7fb', color:'#0d5c78', padding:'11px 15px', borderRadius:9, textDecoration:'none', fontWeight:800, border:'1px solid #b9dce9' } as const
+const primaryButton = { display:'inline-flex', alignItems:'center', justifyContent:'center', boxSizing:'border-box', maxWidth:'100%', whiteSpace:'normal', textAlign:'center', lineHeight:1.35, background:'#0d5c78', color:'#fff', padding:'11px 15px', borderRadius:9, textDecoration:'none', fontWeight:800 } as const
+const secondaryButton = { display:'inline-flex', alignItems:'center', justifyContent:'center', boxSizing:'border-box', maxWidth:'100%', whiteSpace:'normal', textAlign:'center', lineHeight:1.35, background:'#eef7fb', color:'#0d5c78', padding:'11px 15px', borderRadius:9, textDecoration:'none', fontWeight:800, border:'1px solid #b9dce9' } as const
 
 export default function ProvincialGuide(){
   const [provincia,setProvincia] = useState('Buenos Aires')
