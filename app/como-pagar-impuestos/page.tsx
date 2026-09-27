@@ -76,6 +76,37 @@ export default function ComoPagarImpuestosPage() {
           <p>Una persona revisa las operaciones del mes en IVA Simple, presenta la declaración jurada y obtiene un saldo a pagar. Luego genera el medio de pago indicado por ARCA, lo cancela desde un canal habilitado y guarda dos comprobantes: el acuse de presentación y el pago. Finalmente vuelve a consultar su cuenta tributaria para comprobar la imputación. El importe y las fechas reales dependen de su situación.</p>
         </section>
         <section style={card}>
+          <h2 style={{ marginTop: 0 }}>¿Qué obligaciones pueden corresponderte?</h2>
+          <ul style={{ paddingLeft: 22 }}>
+            <li><strong>Monotributista:</strong> cuota mensual del régimen; Ingresos Brutos puede estar integrado en un régimen unificado o tramitarse por separado, según jurisdicción y adhesión.</li>
+            <li><strong>Trabajador independiente en régimen general:</strong> pueden corresponder IVA, Ganancias, Autónomos e Ingresos Brutos, además de obligaciones específicas de actividad.</li>
+            <li><strong>Responsable Inscripto:</strong> revisá por separado IVA, Ganancias, facturación, aportes previsionales si corresponden e impuestos provinciales.</li>
+            <li><strong>Empleador o sociedad:</strong> pueden sumarse obligaciones laborales, informativas y societarias. Confirmá el detalle con los organismos y un profesional según tu caso.</li>
+          </ul>
+          <p style={{ marginBottom: 0 }}>Este resumen orienta, pero no determina tu situación individual. Para revisar vencimientos, usá el <Link href="/calendario-fiscal" style={linkStyle}>calendario fiscal</Link> y los servicios oficiales.</p>
+        </section>
+        <section style={card}>
+          <h2 style={{ marginTop: 0 }}>Glosario rápido</h2>
+          <dl style={{ margin: 0 }}>
+            <dt style={{ fontWeight: 900 }}>DDJJ (declaración jurada)</dt><dd>Información que presentás al organismo para determinar o informar una obligación.</dd>
+            <dt style={{ fontWeight: 900 }}>VEP (volante electrónico de pago)</dt><dd>Orden electrónica que permite pagar una obligación por los medios habilitados.</dd>
+            <dt style={{ fontWeight: 900 }}>Período fiscal</dt><dd>Mes, año u otro período al que corresponde la obligación.</dd>
+            <dt style={{ fontWeight: 900 }}>Anticipo</dt><dd>Pago a cuenta de un impuesto que se determinará más adelante; no es necesariamente el saldo final.</dd>
+            <dt style={{ fontWeight: 900 }}>Imputación</dt><dd>Asignación del pago al impuesto, concepto y período que corresponde.</dd>
+            <dt style={{ fontWeight: 900 }}>Intereses</dt><dd>Importes adicionales que pueden generarse por obligaciones pagadas fuera de término, según las reglas vigentes.</dd>
+          </dl>
+        </section>
+        <section style={card}>
+          <h2 style={{ marginTop: 0 }}>Calculadoras: qué revisar antes de usar el resultado</h2>
+          <p>Las calculadoras de Fácil Fiscal sirven para estimar y entender conceptos, no para reemplazar la determinación oficial. Confirmá que el período, los montos, la actividad, la jurisdicción y los datos ingresados sean correctos.</p>
+          <ul style={{ paddingLeft: 22 }}>
+            <li><Link href="/mi-categoria" style={linkStyle}>Monotributo:</Link> la categoría depende de los parámetros y condiciones aplicables, no solo de una factura aislada.</li>
+            <li><Link href="/iva" style={linkStyle}>IVA:</Link> el saldo puede depender de créditos fiscales, retenciones, percepciones y saldos previos.</li>
+            <li><Link href="/impuesto-ganancias" style={linkStyle}>Ganancias:</Link> deducciones, pagos a cuenta y situación personal pueden modificar el resultado.</li>
+            <li><Link href="/ingresos-brutos" style={linkStyle}>Ingresos Brutos:</Link> alícuotas, exenciones y regímenes dependen de actividad y jurisdicción.</li>
+          </ul>
+        </section>
+        <section style={card}>
           <h2 style={{ marginTop: 0 }}>Preguntas frecuentes</h2>
           {faqs.map(f => <details key={f.question} style={{ borderTop: '1px solid #e2e8ed', padding: '12px 0' }}><summary style={{ cursor: 'pointer', fontWeight: 800 }}>{f.question}</summary><p style={{ marginBottom: 0 }}>{f.answer}</p></details>)}
         </section>
