@@ -54,6 +54,7 @@ export default function ResponsableObligacionesPage() {
             <Link href="/iva" style={guideCTAStyle}>Calcular IVA →</Link>
             <Link href="/impuesto-ganancias" style={{ ...guideCTAStyle, background: '#e8f6fb' }}>Estimar Ganancias →</Link>
             <Link href="/calendario-fiscal" style={{ ...guideCTAStyle, background: '#e8f6fb' }}>Ver vencimientos →</Link>
+            <Link href="/como-pagar-impuestos" style={{ ...guideCTAStyle, background: '#e8f6fb' }}>Cómo pagar impuestos →</Link>
           </div>
         </GuideSection>
 

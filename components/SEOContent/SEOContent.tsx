@@ -7,6 +7,22 @@ const headerStyle={padding:'13px 16px',borderBottom:`1px solid ${V.border}`,font
 const bodyStyle={padding:'16px'}
 const paraStyle={fontSize:13,color:V.ink2,fontWeight:600 as const,lineHeight:1.75,marginBottom:12}
 
+export function SEOResponsableInscripto(){
+  return <section style={sectionStyle}>
+    <div style={headerStyle}>🧾 Responsable Inscripto: obligaciones y pagos</div>
+    <div style={bodyStyle}>
+      <p style={paraStyle}>Ser Responsable Inscripto implica cumplir las obligaciones del régimen general que correspondan a tu actividad. No existe una única cuota mensual que cubra todo: IVA, Ganancias, Autónomos e Ingresos Brutos pueden tener períodos, presentaciones y vencimientos distintos.</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(190px,1fr))',gap:10}}>
+        <div style={{background:V.tealLight,border:`1px solid ${V.tealRing}`,borderRadius:10,padding:12}}><strong>IVA</strong><p style={{...paraStyle,margin:'5px 0 0'}}>Revisá operaciones, presentá la DDJJ mensual en IVA Simple y pagá el saldo si corresponde.</p></div>
+        <div style={{background:V.tealLight,border:`1px solid ${V.tealRing}`,borderRadius:10,padding:12}}><strong>Ganancias</strong><p style={{...paraStyle,margin:'5px 0 0'}}>Distingí la declaración anual, el saldo resultante y los anticipos a cuenta.</p></div>
+        <div style={{background:V.tealLight,border:`1px solid ${V.tealRing}`,borderRadius:10,padding:12}}><strong>Autónomos</strong><p style={{...paraStyle,margin:'5px 0 0'}}>Si corresponde, pagá el aporte previsional por separado y verificá su imputación.</p></div>
+        <div style={{background:V.tealLight,border:`1px solid ${V.tealRing}`,borderRadius:10,padding:12}}><strong>Ingresos Brutos</strong><p style={{...paraStyle,margin:'5px 0 0'}}>Confirmá el régimen y portal de tu jurisdicción o Convenio Multilateral.</p></div>
+      </div>
+      <p style={{...paraStyle,marginTop:14,marginBottom:0}}>Para seguir un procedimiento completo, consultá la <a href="/como-pagar-impuestos" style={{color:V.tealDark,fontWeight:800}}>guía práctica para pagar impuestos y verificar los pagos →</a></p>
+    </div>
+  </section>
+}
+
 export function SEOAutonomos(){
   const cards=[
     {icon:'⚡',title:'Aporte mensual',desc:'Pagás el aporte previsional correspondiente a tu categoría de revista.'},
@@ -30,6 +46,22 @@ export function SEOAutonomos(){
     <section style={sectionStyle}><div style={headerStyle}>📊 Categorías I a V</div><div style={bodyStyle}>
       <p style={paraStyle}>Las categorías I a V representan distintas situaciones previstas por la tabla de Autónomos. Para actividades de servicios y para el resto de las actividades existen reglas de categorización propias; quienes ejercen dirección o administración de sociedades tienen otra escala.</p>
       <div style={{background:V.goldLight,border:`1px solid ${V.goldRing}`,borderRadius:10,padding:'12px 14px',fontSize:12,fontWeight:700,color:'#7a4f00',lineHeight:1.6}}>💡 <strong>No conviene elegir la categoría por intuición.</strong> Si no sabés cuál te corresponde, verificá tu actividad y tu categoría de revista en ARCA antes de pagar.</div>
+    </div></section>
+    <section style={sectionStyle}><div style={headerStyle}>💳 Cómo y cuándo pagar Autónomos</div><div style={bodyStyle}>
+      <p style={paraStyle}>El aporte previsional de Autónomos se paga <strong>todos los meses</strong>. La fecha exacta se establece en el calendario de ARCA y puede variar según la terminación de tu CUIT. Consultá el vencimiento del período antes de generar el pago; no uses una fecha fija de meses anteriores.</p>
+      <ol style={{...paraStyle,paddingLeft:20}}>
+        <li style={{marginBottom:8}}>Ingresá a ARCA con tu CUIT y clave fiscal y revisá tu categoría de revista y la credencial de pago (CRA).</li>
+        <li style={{marginBottom:8}}>Consultá la obligación del período en el servicio <strong>Cuenta Corriente de Monotributistas y Autónomos (CCMA)</strong>. Verificá período, categoría e importe; desde allí podés consultar deuda y generar volantes cuando corresponda.</li>
+        <li style={{marginBottom:8}}>Generá el VEP si vas a pagar electrónicamente y abonalo desde un banco, homebanking o billetera habilitada. También podés utilizar los medios electrónicos disponibles en ARCA.</li>
+        <li>Volvé a consultar CCMA para comprobar que el pago se haya imputado al período correcto. La acreditación puede demorar según el medio utilizado.</li>
+      </ol>
+      <div style={{background:V.goldLight,border:`1px solid ${V.goldRing}`,borderRadius:10,padding:'12px 14px',fontSize:12,fontWeight:700,color:'#7a4f00',lineHeight:1.6}}>Importante: Autónomos cubre el aporte previsional; no reemplaza IVA, Ganancias ni Ingresos Brutos. Si además estás alcanzado por esos impuestos, se presentan y pagan por separado, cada uno con su propio vencimiento.</div>
+      <p style={{...paraStyle,marginTop:14,marginBottom:0}}>Si recién empezás, primero necesitás CUIT y clave fiscal. La inscripción se realiza en Sistema Registral → Registro Tributario → Empadronamiento Autónomos. ARCA genera la credencial con tu categoría inicial.</p>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:14}}>
+        <a href="https://www.arca.gob.ar/autonomos/inscripcion/" target="_blank" rel="noopener noreferrer" style={{color:V.tealDark,fontWeight:800}}>ARCA: inscripción y obligaciones →</a>
+        <a href="https://www.arca.gob.ar/autonomos/categorias-y-aportes/2026.asp" target="_blank" rel="noopener noreferrer" style={{color:V.tealDark,fontWeight:800}}>Consultar categorías y aportes vigentes →</a>
+        <a href="https://www.arca.gob.ar/autonomos/ayuda/guias.asp" target="_blank" rel="noopener noreferrer" style={{color:V.tealDark,fontWeight:800}}>Guías oficiales de pago y recategorización →</a>
+      </div>
     </div></section>
     <section style={sectionStyle}><div style={headerStyle}>❓ Preguntas frecuentes</div>{faqs.map((i,n)=><div key={i.q} style={{padding:'12px 16px',borderBottom:n===faqs.length-1?'none':`1px solid ${V.border}`}}><div style={{fontSize:13,fontWeight:800,color:V.ink,marginBottom:6}}>▸ {i.q}</div><div style={{fontSize:12,color:V.ink2,fontWeight:600,lineHeight:1.7}}>{i.a}</div></div>)}</section>
     <section style={sectionStyle}><div style={headerStyle}>🔎 Fuente y revisión</div><div style={bodyStyle}><p style={{...paraStyle,marginBottom:0}}>Revisado el 16/09/2026 con información oficial de ARCA sobre definición del régimen, categorización, recategorización anual y aportes vigentes desde el 15/09/2026.</p></div></section>
