@@ -42,7 +42,7 @@ export default function ResponsableObligacionesPage() {
         <GuideSection title="Qué facturas suele emitir">
           <ul style={guideListStyle}>
             <li><strong>Factura A:</strong> generalmente, cuando el cliente también es Responsable Inscripto.</li>
-            <li><strong>Factura B:</strong> generalmente, para consumidores finales, monotributistas o exentos.</li>
+            <li><strong>Factura B:</strong> generalmente, para consumidores finales y sujetos exentos o no alcanzados. A monotributistas corresponde Factura A cuando el emisor es Responsable Inscripto.</li>
             <li><strong>Factura E:</strong> para operaciones de exportación.</li>
           </ul>
           <p style={{ marginBottom: 0 }}>ARCA puede habilitar variantes de Factura A con leyendas especiales según sus controles. Conviene verificar la autorización disponible antes de emitir.</p>
