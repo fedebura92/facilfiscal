@@ -27,20 +27,20 @@ export default function CalendarioFiscalGuide() {
 
       <div style={{ ...card, marginTop: 18 }}>
         <h2 style={{ margin: '0 0 10px', fontSize: 23, color: '#0f2733' }}>Un ejemplo rápido</h2>
-        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>En septiembre de 2026, el IVA del período agosto vence entre el <strong>18 y el 24 de septiembre</strong> según la terminación de CUIT. El Monotributo, cuyo vencimiento habitual es el día 20, vence el <strong>21 de septiembre</strong> porque el 20 cae domingo. Es justamente por estas diferencias que no alcanza con memorizar “IVA vence cerca del 20”.</p>
+        <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>Como ejemplo histórico, en septiembre de 2026 el IVA del período agosto tuvo vencimientos escalonados según la terminación de CUIT, mientras que el Monotributo venció el 21 de septiembre porque el día 20 fue domingo. Este ejemplo ilustra por qué hay que consultar el calendario del período correspondiente y no tomar una fecha habitual como universal.</p>
       </div>
 
       <div style={{ ...card, marginTop: 18 }}>
         <h2 style={{ margin: '0 0 10px', fontSize: 23, color: '#0f2733' }}>¿Qué pasa si ARCA cambia una fecha?</h2>
         <p style={{ margin: 0, color: '#3d5a6b', lineHeight: 1.7 }}>Las prórrogas existen y pueden publicarse después del calendario original. Por eso las fechas se revisan y el calendario distingue lo confirmado de lo orientativo. Para una obligación crítica, también podés comprobarla directamente en ARCA.</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 18 }}>
-          <a href="https://www.arca.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ background: '#0d5c78', color: '#fff', padding: '11px 16px', borderRadius: 9, fontWeight: 800, textDecoration: 'none' }}>Ver vencimientos oficiales en ARCA ↗</a>
-          <Link href="/" style={{ border: '1px solid #1a7fa8', color: '#0d5c78', padding: '11px 16px', borderRadius: 9, fontWeight: 800, textDecoration: 'none' }}>🔔 Activar recordatorios</Link>
+          <a href="https://www.arca.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'center', lineHeight: 1.35, background: '#0d5c78', color: '#fff', padding: '11px 16px', borderRadius: 9, fontWeight: 800, textDecoration: 'none' }}>Ver vencimientos oficiales en ARCA ↗</a>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'center', lineHeight: 1.35, border: '1px solid #1a7fa8', color: '#0d5c78', padding: '11px 16px', borderRadius: 9, fontWeight: 800, textDecoration: 'none' }}>🔔 Activar recordatorios</Link>
         </div>
       </div>
 
       <div style={{ marginTop: 16, fontSize: 13, color: '#64748b', lineHeight: 1.65 }}>
-        <strong>Fuentes:</strong> agenda y micrositios oficiales de ARCA y normativa vigente cuando corresponde. Última revisión editorial: 13/09/2026. Fácil Fiscal es una herramienta independiente y no reemplaza las notificaciones ni constancias del organismo recaudador.
+        <strong>Fuentes:</strong> agenda y micrositios oficiales de ARCA y normativa vigente cuando corresponde. Última revisión editorial: 28/09/2026. Fácil Fiscal es una herramienta independiente y no reemplaza las notificaciones ni constancias del organismo recaudador.
       </div>
     </div>
   </section>
