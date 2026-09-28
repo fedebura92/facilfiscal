@@ -4,7 +4,7 @@ import type { CSSProperties,ReactNode } from 'react'
 import { calcularIVA,estimarGananciasSimple,VERIFICACION_FISCAL } from '@/lib/calculadoras-fiscales'
 
 const money=(n:number)=>n.toLocaleString('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0})
-const n=(v:string)=>Number(v)||0
+const n=(v:string)=>{const value=Number(v);return Number.isFinite(value)?Math.max(0,value):0}
 const input:CSSProperties={width:'100%',minHeight:48,padding:'11px 13px',border:'2px solid #e2e8f0',borderRadius:9,fontFamily:'inherit',fontSize:16,lineHeight:1.4,boxSizing:'border-box',marginTop:7}
 const grid:CSSProperties={display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(210px,1fr))',gap:16}
 const formSection:CSSProperties={marginTop:26}
