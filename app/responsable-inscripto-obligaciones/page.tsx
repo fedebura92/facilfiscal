@@ -57,7 +57,7 @@ export default function ResponsableObligacionesPage() {
           </div>
         </GuideSection>
 
-        <p style={{ color: '#64748b', lineHeight: 1.6 }}>Revisado el 3 de septiembre de 2026. Fuentes: <a href="https://www.arca.gob.ar/iva/responsables-inscriptos/" target="_blank" rel="noopener noreferrer">IVA para responsables inscriptos</a> y <a href="https://www.arca.gob.ar/regimenGeneral/" target="_blank" rel="noopener noreferrer">Régimen General de ARCA</a>.</p>
+        <p style={{ color: '#64748b', lineHeight: 1.6 }}>Revisado el 28 de septiembre de 2026. Fuentes: <a href="https://www.arca.gob.ar/iva/responsables-inscriptos/" target="_blank" rel="noopener noreferrer">IVA para responsables inscriptos</a> y <a href="https://www.arca.gob.ar/regimenGeneral/" target="_blank" rel="noopener noreferrer">Régimen General de ARCA</a>.</p>
       </FiscalGuidePage>
     </div>
   </>
