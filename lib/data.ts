@@ -50,7 +50,7 @@ export const formatMoney=money; export const formatFechaLarga=fmtLarga; export c
 
 export const NAV_ITEMS=[
  {href:'/',emoji:'📋',label:'Monotributo',group:'regimen'}, {href:'/responsable-inscripto',emoji:'🧾',label:'Resp. Inscripto',group:'regimen'}, {href:'/autonomos',emoji:'⚡',label:'Autónomos',group:'regimen'},
- {href:'/mi-categoria',emoji:'📊',label:'Mi categoría',group:'herramientas'}, {href:'/como-facturar',emoji:'📄',label:'Cómo facturar',group:'herramientas'}, {href:'/calendario-fiscal',emoji:'📅',label:'Calendario Fiscal',group:'herramientas'},
+ {href:'/mi-categoria',emoji:'📊',label:'Mi categoría',group:'herramientas'}, {href:'/como-facturar',emoji:'📄',label:'Cómo facturar',group:'herramientas'}, {href:'/como-pagar-impuestos',emoji:'💳',label:'Cómo pagar impuestos',group:'herramientas'}, {href:'/calendario-fiscal',emoji:'📅',label:'Calendario Fiscal',group:'herramientas'},
  {href:'/iva',emoji:'💰',label:'IVA',group:'calculadoras'}, {href:'/ingresos-brutos',emoji:'📈',label:'Ingresos Brutos',group:'calculadoras'}, {href:'/impuesto-ganancias',emoji:'💼',label:'Ganancias',group:'calculadoras'}, {href:'/impuestos-importacion',emoji:'📦',label:'Importaciones',group:'calculadoras'}, {href:'/impuestos-por-provincia',emoji:'🗺️',label:'Provinciales',group:'calculadoras'},
  {href:'/mipanel/financiero',emoji:'💼',label:'Panel financiero',group:'mipanel'}, {href:'/mipanel/facturacion',emoji:'🧾',label:'Facturación',group:'mipanel'}
 ]
