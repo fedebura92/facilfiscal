@@ -14,7 +14,25 @@ export default function AutonomosPage(){
  const[venc,setVenc]=useState<VencimientoUI[]>([]),[alertas,setAlertas]=useState<AlertaUI[]>([]),[catIdx,setCatIdx]=useState(''),[aiQuery,setAiQuery]=useState(''),[aiResp,setAiResp]=useState(''),[aiLoading,setAiLoading]=useState(false),[mounted,setMounted]=useState(false)
  const capturaRef=useRef<HTMLInputElement>(null)
  useEffect(()=>setMounted(true),[])
- useEffect(()=>{fetch(`/api/vencimientos?tipo=${TIPO}`).then(r=>r.json()).then(d=>setVenc((d.vencimientos||[]).map(addFecha))).catch(()=>setVenc(FALLBACK_VENC[TIPO].map(addFecha)));fetch(`/api/alerts?tipo=${TIPO}`).then(r=>r.json()).then(d=>setAlertas(d.alerts||FALLBACK_ALERTAS[TIPO])).catch(()=>setAlertas(FALLBACK_ALERTAS[TIPO]))},[])
+ useEffect(()=>{
+  let activo=true
+  async function cargar(){
+   try{
+    const r=await fetch(`/api/vencimientos?tipo=${TIPO}`)
+    if(!r.ok) throw new Error('No se pudieron cargar los vencimientos')
+    const d=await r.json()
+    if(activo) setVenc(Array.isArray(d.vencimientos)&&d.vencimientos.length?d.vencimientos.map(addFecha):FALLBACK_VENC[TIPO].map(addFecha))
+   }catch{if(activo)setVenc(FALLBACK_VENC[TIPO].map(addFecha))}
+   try{
+    const r=await fetch(`/api/alerts?tipo=${TIPO}`)
+    if(!r.ok) throw new Error('No se pudieron cargar las alertas')
+    const d=await r.json()
+    if(activo)setAlertas(Array.isArray(d.alerts)&&d.alerts.length?d.alerts:FALLBACK_ALERTAS[TIPO])
+   }catch{if(activo)setAlertas(FALLBACK_ALERTAS[TIPO])}
+  }
+  cargar()
+  return ()=>{activo=false}
+ },[])
  async function askAI(q?:string){const query=q||aiQuery;if(!query.trim())return;if(q)setAiQuery(q);setAiLoading(true);setAiResp('');try{const r=await fetch('/api/fiscal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query})});const d=await r.json();setAiResp(d.response||'Sin respuesta.')}catch{setAiResp('Error de conexión.')}finally{setAiLoading(false)}}
  const vencOrd=useMemo(()=>[...venc].filter(v=>diffDias(v.fecha)>=0).sort((a,b)=>diffDias(a.fecha)-diffDias(b.fecha)),[venc]),cards=useMemo(()=>vencOrd.slice(0,3),[vencOrd]),proximos=useMemo(()=>vencOrd.filter(v=>diffDias(v.fecha)<=10).slice(0,8),[vencOrd])
  const idx=catIdx===''?-1:Number(catIdx),aporte=idx>=0?MONTOS[TIPO].imp[idx]:0
