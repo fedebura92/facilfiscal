@@ -54,7 +54,7 @@ export default function FacturaCPage() {
           </ul>
         </GuideSection>
 
-        <p style={{ color: '#64748b', lineHeight: 1.6 }}>Revisado el 3 de septiembre de 2026. Fuente: <a href="https://www.arca.gob.ar/monotributo/ayuda/facturacion.asp" target="_blank" rel="noopener noreferrer">facturación para monotributistas de ARCA</a>.</p>
+        <p style={{ color: '#64748b', lineHeight: 1.6 }}>Revisado el 28 de septiembre de 2026. Fuentes: <a href="https://www.arca.gob.ar/monotributo/ayuda/facturacion.asp" target="_blank" rel="noopener noreferrer">facturación para monotributistas de ARCA</a> y <a href="https://www.arca.gob.ar/facturacion/regimen-general/comprobantes.asp" target="_blank" rel="noopener noreferrer">clases de comprobantes del régimen general</a>.</p>
       </FiscalGuidePage>
     </div>
   </>
