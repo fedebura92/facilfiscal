@@ -39,6 +39,8 @@ export default function CalendarioFiscalPage() {
   return <>
     <StructuredData data={[breadcrumbJsonLd([{name:'Inicio',url:'https://www.facilfiscal.com.ar'},{name:'Calendario Fiscal',url:'https://www.facilfiscal.com.ar/calendario-fiscal'}]),faqJsonLd(faq)]}/>
     <CalendarioFiscalClient />
-    <CalendarioFiscalGuide />
+    <div className="ff-page-content">
+      <CalendarioFiscalGuide />
+    </div>
   </>;
 }
