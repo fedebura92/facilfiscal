@@ -4,9 +4,11 @@ import SiteHeader from '@/components/SiteHeader'
 import StructuredData, { breadcrumbJsonLd, faqJsonLd } from '@/components/StructuredData'
 
 export const metadata: Metadata = {
-  title: 'Cómo pagar impuestos en Argentina: guía práctica 2026 | Fácil Fiscal',
+  title: 'Cómo pagar impuestos en Argentina: guía práctica 2026',
   description: 'Guía para revisar obligaciones, generar pagos y comprobar pagos de Monotributo, Autónomos, IVA, Ganancias e Ingresos Brutos.',
   alternates: { canonical: 'https://www.facilfiscal.com.ar/como-pagar-impuestos' },
+  openGraph: { type: 'article', locale: 'es_AR', url: 'https://www.facilfiscal.com.ar/como-pagar-impuestos', siteName: 'Fácil Fiscal', title: 'Cómo pagar impuestos en Argentina: guía práctica 2026', description: 'Pasos para pagar Monotributo, Autónomos, IVA, Ganancias e Ingresos Brutos y comprobar que el pago quedó registrado.', images: [{ url: '/og-image.png', width: 1200, height: 630 }] },
+  twitter: { card: 'summary_large_image', title: 'Cómo pagar impuestos en Argentina: guía práctica 2026', description: 'Guía para pagar tus impuestos y verificar su acreditación en los organismos oficiales.', images: ['/og-image.png'] },
 }
 
 const style = { maxWidth: 860, margin: '0 auto', padding: '34px 22px 72px', color: '#183744', lineHeight: 1.75 } as const
