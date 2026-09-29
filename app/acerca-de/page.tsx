@@ -1,7 +1,7 @@
 import type {Metadata} from 'next'
 import SiteHeader from '@/components/SiteHeader'
 
-export const metadata:Metadata={title:'Acerca de Fácil Fiscal',description:'Conocé qué es Fácil Fiscal, cómo prepara y actualiza sus guías tributarias y cuáles son sus límites.',alternates:{canonical:'/acerca-de'}}
+export const metadata:Metadata={title:'Acerca de Fácil Fiscal',description:'Conocé qué es Fácil Fiscal, cómo prepara y actualiza sus guías tributarias y cuáles son sus límites.',alternates:{canonical:'/acerca-de'},openGraph:{title:'Acerca de Fácil Fiscal',description:'Conocé el enfoque editorial, las fuentes y los límites de las guías y herramientas de Fácil Fiscal.',url:'https://www.facilfiscal.com.ar/acerca-de',siteName:'Fácil Fiscal',locale:'es_AR',type:'website',images:[{url:'/og-image.png',width:1200,height:630}]},twitter:{card:'summary_large_image',title:'Acerca de Fácil Fiscal',description:'Conocé el enfoque editorial, las fuentes y los límites de las guías y herramientas de Fácil Fiscal.',images:['/og-image.png']}}
 
 export default function Page(){return <>
 <SiteHeader currentPath="/acerca-de"/>
