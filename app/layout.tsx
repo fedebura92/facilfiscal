@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
 import './globals.css'
 import { FiscalDataProvider } from '@/components/FiscalDataProvider'
 import StructuredData from '@/components/StructuredData'
 import SiteFooter from '@/components/SiteFooter'
+import AdSenseLoader from '@/components/AdSenseLoader'
 
 export const metadata: Metadata = {
   metadataBase:new URL('https://www.facilfiscal.com.ar'),
@@ -17,4 +17,4 @@ export const metadata: Metadata = {
   robots:{index:true,follow:true},icons:{icon:'/favicon.ico'},other:{'google-adsense-account':'ca-pub-9093787015793158'},
 }
 
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="es"><Script id="google-adsense" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9093787015793158" crossOrigin="anonymous" strategy="beforeInteractive"/><body><StructuredData data={[{'@context':'https://schema.org','@type':'Organization',name:'Fácil Fiscal',url:'https://www.facilfiscal.com.ar',logo:'https://www.facilfiscal.com.ar/icon.png'},{'@context':'https://schema.org','@type':'WebSite',name:'Fácil Fiscal',url:'https://www.facilfiscal.com.ar',inLanguage:'es-AR'}]}/><FiscalDataProvider>{children}<SiteFooter/></FiscalDataProvider></body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="es"><body><AdSenseLoader/><StructuredData data={[{'@context':'https://schema.org','@type':'Organization',name:'Fácil Fiscal',url:'https://www.facilfiscal.com.ar',logo:'https://www.facilfiscal.com.ar/icon.png'},{'@context':'https://schema.org','@type':'WebSite',name:'Fácil Fiscal',url:'https://www.facilfiscal.com.ar',inLanguage:'es-AR'}]}/><FiscalDataProvider>{children}<SiteFooter/></FiscalDataProvider></body></html>}
