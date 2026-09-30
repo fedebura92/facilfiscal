@@ -28,7 +28,7 @@ export default function ComoPagarImpuestosPage() {
    faqJsonLd(faq),
   ]} />
   <SiteHeader currentPath="/como-pagar-impuestos" />
-  <main className="ff-page-content" style={style}>
+  <main className="ff-page-content ff-tax-payment-guide" style={style}>
    <p style={{ color: '#0d6687', fontWeight: 800, fontSize: 13 }}>GUÍA PRÁCTICA · ARGENTINA · 2026</p>
    <h1 style={{ fontSize: 32, lineHeight: 1.2, marginBottom: 12 }}>Cómo pagar tus impuestos y comprobar que quedaron cancelados</h1>
    <p>El trámite cambia según el impuesto, tu régimen y la jurisdicción. Esta guía te ayuda a identificar el camino y a evitar confundir una declaración presentada con un pago realizado. No reemplaza el detalle de deuda ni los servicios oficiales.</p>
@@ -92,7 +92,7 @@ export default function ComoPagarImpuestosPage() {
     {faq.map((item) => <div key={item.question} style={{ marginBottom: 12 }}><h3 style={{ fontSize: 16, marginBottom: 4 }}>{item.question}</h3><p style={{ margin: 0 }}>{item.answer}</p></div>)}
    </section>
    <p style={{ fontSize: 13, color: '#64748b' }}>Guía general revisada el 28/09/2026. Los servicios, medios de pago y procedimientos pueden cambiar; confirmá siempre la instrucción vigente en el organismo oficial antes de operar.</p>
-   <p><Link href="/metodologia" style={linkStyle}>Cómo verificamos la información</Link> · <Link href="/contacto" style={linkStyle}>Informar un dato para revisar</Link></p>
+   <p className="ff-tax-guide-footer-links"><Link href="/metodologia" style={linkStyle}>Cómo verificamos la información</Link><span aria-hidden="true">·</span><Link href="/contacto" style={linkStyle}>Informar un dato para revisar</Link></p>
   </main>
  </>
 }
