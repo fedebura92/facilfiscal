@@ -389,37 +389,43 @@ const CALENDARIO_2026: MesData[] = [
     ],
   },
   {
-    mes: 10, nombre: "Octubre", verificado: false,
+    mes: 10, nombre: "Octubre", verificado: true,
     vencimientos: [
       {
         rango: "5, 6 y 7",
         titulo: "Autónomos — cuota septiembre 2026",
-        descripcion: "Pago de aportes previsionales (período septiembre 2026). Fechas aproximadas según terminación de CUIT. Confirmá en arca.gob.ar.",
-        categoria: ["autonomo"], tipo: "pago", pendiente: true,
+        descripcion: "Pago de aportes previsionales correspondientes a septiembre 2026: CUIT 0-1-2-3 → 5/oct · CUIT 4-5-6 → 6/oct · CUIT 7-8-9 → 7/oct. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["autonomo"], tipo: "pago",
       },
       {
-        rango: "9, 10 y 11",
-        titulo: "Cargas sociales — F.931 (período septiembre 2026)",
-        descripcion: "Presentación del F.931 y pago de cargas sociales. Fecha aproximada: entre el 9 y 11 de octubre. Confirmá en arca.gob.ar.",
-        categoria: ["empleador"], tipo: "pago", pendiente: true,
+        rango: "9, 13 y 14",
+        titulo: "Empleadores — F.931 (período septiembre 2026)",
+        descripcion: "Presentación y pago de cargas sociales: CUIT 0-1-2-3 → 9/oct · CUIT 4-5-6 → 13/oct · CUIT 7-8-9 → 14/oct. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["empleador"], tipo: "declaracion",
+      },
+      {
+        dia: 13,
+        titulo: "Ganancias 2025 — presentación de declaración jurada",
+        descripcion: "Plazo especial para personas humanas y sucesiones indivisas. ARCA prorrogó hasta el 13/10/2026 la presentación de la declaración jurada de Ganancias correspondiente al período fiscal 2025. El saldo de pago había vencido el 27/07/2026.",
+        categoria: ["autonomo", "responsable"], tipo: "presentacion",
       },
       {
         rango: "13, 14 y 15",
         titulo: "Ganancias — 2° anticipo 2026",
-        descripcion: "Segundo anticipo del Impuesto a las Ganancias período fiscal 2026. Fechas aproximadas entre el 13 y 15 de octubre. Confirmá en arca.gob.ar.",
-        categoria: ["autonomo", "responsable"], tipo: "pago", pendiente: true,
+        descripcion: "Segundo anticipo del Impuesto a las Ganancias del período fiscal 2026 para personas humanas y sucesiones indivisas: CUIT 0-1-2-3 → 13/oct · CUIT 4-5-6 → 14/oct · CUIT 7-8-9 → 15/oct. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["autonomo", "responsable"], tipo: "pago",
       },
       {
         dia: 20,
         titulo: "Monotributo — cuota octubre 2026",
-        descripcion: "Pago de la cuota mensual de monotributo.",
+        descripcion: "Pago de la cuota mensual de monotributo. Fecha única para todas las terminaciones de CUIT. Fuente: ARCA.",
         categoria: ["monotributo"], tipo: "pago",
       },
       {
-        rango: "18 al 24",
-        titulo: "IVA — DJ mensual (período septiembre 2026)",
-        descripcion: "Presentación y pago del IVA. Fechas aproximadas en la segunda quincena de octubre. Confirmá en arca.gob.ar.",
-        categoria: ["responsable"], tipo: "declaracion", pendiente: true,
+        rango: "19 al 23",
+        titulo: "IVA y Libro de IVA Digital — septiembre 2026",
+        descripcion: "IVA: CUIT 0-1 → 19/oct · 2-3 → 20/oct · 4-5 → 21/oct · 6-7 → 22/oct · 8-9 → 23/oct. El Libro de IVA Digital correspondiente a septiembre tiene presentación desde el 15/oct y vencimientos escalonados según CUIT. Fuente: agenda de vencimientos ARCA.",
+        categoria: ["responsable"], tipo: "declaracion",
       },
     ],
   },
@@ -697,3 +703,105 @@ export default function CalendarioFiscalClient() {
                 const diasRestantes = mounted && v.dia ? getDiasRestantes(mesSeleccionado, v.dia) : null;
                 const esCritico = diasRestantes !== null && diasRestantes >= 0 && diasRestantes <= 5;
                 const yaVencio = diasRestantes !== null && diasRestantes < 0;
+
+                return (
+                  <article key={key} style={{
+                    border: `1.5px solid ${esCritico ? "#fca5a5" : v.pendiente ? "#fde68a" : C.gray200}`,
+                    borderRadius: 14, overflow: "hidden", background: C.white,
+                    opacity: yaVencio ? 0.55 : 1,
+                  }}>
+                    <button onClick={() => setExpandido(abierto ? null : key)} style={{
+                      width: "100%", display: "flex", alignItems: "flex-start", gap: 16,
+                      padding: "16px 18px", background: "none", border: "none", cursor: "pointer",
+                      fontFamily: "'Nunito', sans-serif", textAlign: "left",
+                    }}>
+                      <div style={{
+                        minWidth: 56, textAlign: "center",
+                        background: esCritico ? C.redLight : v.pendiente ? C.amberLight : yaVencio ? C.gray100 : C.tealLight,
+                        borderRadius: 10, padding: "8px 4px", flexShrink: 0,
+                      }}>
+                        {v.dia ? (
+                          <>
+                            <p style={{ fontSize: 24, fontWeight: 800, color: esCritico ? C.red : yaVencio ? C.gray400 : C.teal, margin: 0, lineHeight: 1 }}>{v.dia}</p>
+                            <p style={{ fontSize: 11, color: C.gray400, margin: "2px 0 0", fontWeight: 600 }}>{mesData.nombre.slice(0, 3).toUpperCase()}</p>
+                          </>
+                        ) : (
+                          <p style={{ fontSize: 11, fontWeight: 700, color: v.pendiente ? C.amber : C.teal, margin: 0, lineHeight: 1.3 }}>{v.rango}</p>
+                        )}
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: TIPO_CONFIG[v.tipo].bg, color: TIPO_CONFIG[v.tipo].color }}>
+                            {TIPO_CONFIG[v.tipo].label}
+                          </span>
+                          {v.categoria.map((cat) => (
+                            <span key={cat} style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: CAT_CONFIG[cat].bg, color: CAT_CONFIG[cat].color }}>
+                              {CAT_CONFIG[cat].label}
+                            </span>
+                          ))}
+                          {v.pendiente && (
+                            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: C.amberLight, color: C.amber }}>
+                              A confirmar
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: C.gray900, margin: 0, lineHeight: 1.4 }}>{v.titulo}</p>
+                        {esCritico && !yaVencio && (
+                          <p style={{ fontSize: 12, fontWeight: 700, color: C.red, margin: "4px 0 0" }}>
+                            ⚠ {diasRestantes === 0 ? "¡Vence hoy!" : `Vence en ${diasRestantes} día${diasRestantes !== 1 ? "s" : ""}`}
+                          </p>
+                        )}
+                        {yaVencio && <p style={{ fontSize: 12, color: C.gray400, margin: "4px 0 0" }}>Ya venció</p>}
+                      </div>
+                      <span style={{ color: C.gray400, fontSize: 20, fontWeight: 300, marginTop: 4 }}>{abierto ? "−" : "+"}</span>
+                    </button>
+
+                    {abierto && (
+                      <div style={{ padding: "0 18px 18px", borderTop: `1px solid ${C.gray100}` }}>
+                        <p style={{ fontSize: 14, color: C.gray500, lineHeight: 1.7, margin: "14px 0 0" }}>{v.descripcion}</p>
+                        {v.tipo === "recategorizacion" && (
+                          <a href="/mi-categoria" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 12, fontSize: 14, fontWeight: 700, color: C.teal, textDecoration: "none" }}>
+                            Verificar mi categoría →
+                          </a>
+                        )}
+                        {v.pendiente && (
+                          <a href="https://www.arca.gob.ar/vencimientos/" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 12, fontSize: 14, fontWeight: 700, color: C.amber, textDecoration: "none" }}>
+                            Ver fecha exacta en ARCA →
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </main>
+      </div>
+
+      <section style={{ borderTop: `1px solid ${C.gray200}`, background: C.gray50, padding: "52px 24px" }}>
+        <div style={{ maxWidth: 540, margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: C.gray900, margin: "0 0 12px" }}>Recibí alertas antes de cada vencimiento</h2>
+          <p style={{ fontSize: 15, color: C.gray500, margin: "0 0 24px", lineHeight: 1.6 }}>Activá las notificaciones por email y nunca más te lleguen multas por olvido.</p>
+          <a href="/" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: C.teal, color: C.white, padding: "14px 28px",
+            borderRadius: 12, fontWeight: 700, fontSize: 15, textDecoration: "none",
+            fontFamily: "'Nunito', sans-serif",
+          }}>Activar alertas gratis</a>
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 720px) {
+          div[style*="grid-template-columns: 220px"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+    </div>
+    </div>
+    </>
+  );
+}
